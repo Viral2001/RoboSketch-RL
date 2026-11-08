@@ -1,0 +1,4 @@
+{"shape": "square", "arm": "short50", "seed": 0, "mode": "truth", "iou": 0.4317, "peak_iou": 0.4321, "overshoot": 0.0004, "steps_used": 50.0, "coverage": 0.6526, "path_ratio": 1.396, "timesteps": 200000, "max_steps": 50}
+{"shape": "triangle", "arm": "short50", "seed": 0, "mode": "truth", "iou": 0.4114, "peak_iou": 0.4469, "overshoot": 0.0356, "steps_used": 50.0, "coverage": 0.6541, "path_ratio": 1.104, "timesteps": 200000, "max_steps": 50}
+{"shape": "square", "arm": "short50", "seed": 1, "mode": "truth", "iou": 0.4969, "peak_iou": 0.4971, "overshoot": 0.0002, "steps_used": 50.0, "coverage": 0.7342, "path_ratio": 1.23, "timesteps": 200000, "max_steps": 50}
+{"shape": "triangle", "arm": "short50", "seed": 1, "mode": "truth", "iou": 0.3775, "peak_iou": 0.3806, "overshoot": 0.003, "steps_used": 50.0, "coverage": 0.491, "path_ratio": 0.916, "timesteps": 200000, "max_steps": 50}

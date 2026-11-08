@@ -1,0 +1,21 @@
+# RoboSketch-RL - the paper sheet.
+#
+# A flat unit quad in the XY plane (-1..+1) with explicit UV coordinates
+# covering the full 0..1 texture range, scaled at load time via meshScale.
+#
+# Why a mesh and not p.GEOM_BOX: a PyBullet box does NOT map a full texture
+# across each face - its top face samples only a small uniform patch of the
+# image (measured: an entire quadrant-coloured texture rendered as one flat
+# colour). Drawings painted onto a box are therefore mostly invisible.
+# This quad maps the whole canvas onto the sheet, 1:1.
+v -1.0 -1.0 0.0
+v  1.0 -1.0 0.0
+v  1.0  1.0 0.0
+v -1.0  1.0 0.0
+vt 0.0 0.0
+vt 1.0 0.0
+vt 1.0 1.0
+vt 0.0 1.0
+vn 0.0 0.0 1.0
+f 1/1/1 2/2/1 3/3/1
+f 1/1/1 3/3/1 4/4/1

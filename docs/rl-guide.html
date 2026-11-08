@@ -1,0 +1,1787 @@
+<title>RoboSketch RL Notebook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+:root{
+  --paper:#EDEFF2; --surface:#FAFBFC; --sunken:#E1E5EA; --hair:#C7CED7;
+  --ink:#14171C; --graphite:#555D69;
+  --plot:#17539E; --plot-tint:#DCE6F4;
+  --target:#BC3B2E; --target-tint:#F6E2DF;
+  --good:#17694A; --good-tint:#DCEDE5;
+  --amber:#8F6206; --amber-tint:#F5E9D2;
+  --violet:#5F41A8; --violet-tint:#E6E0F5;
+  --shadow:0 1px 2px rgba(20,23,28,.06),0 8px 24px -12px rgba(20,23,28,.18);
+  --f-disp:'Archivo',system-ui,sans-serif;
+  --f-body:'Source Serif 4',Georgia,serif;
+  --f-mono:'JetBrains Mono',ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F1216; --surface:#171B21; --sunken:#1E242C; --hair:#2B323C;
+    --ink:#E3E8EE; --graphite:#96A0AD;
+    --plot:#6FA6EC; --plot-tint:#152742;
+    --target:#EA8071; --target-tint:#3A211D;
+    --good:#54C79A; --good-tint:#143026;
+    --amber:#D6A951; --amber-tint:#332813;
+    --violet:#AE96EE; --violet-tint:#241E3B;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F1216; --surface:#171B21; --sunken:#1E242C; --hair:#2B323C;
+  --ink:#E3E8EE; --graphite:#96A0AD;
+  --plot:#6FA6EC; --plot-tint:#152742;
+  --target:#EA8071; --target-tint:#3A211D;
+  --good:#54C79A; --good-tint:#143026;
+  --amber:#D6A951; --amber-tint:#332813;
+  --violet:#AE96EE; --violet-tint:#241E3B;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);
+  font-size:17px;line-height:1.68;-webkit-font-smoothing:antialiased}
+::selection{background:var(--plot-tint);color:var(--ink)}
+a{color:var(--plot);text-underline-offset:3px;text-decoration-thickness:1px}
+:focus-visible{outline:2px solid var(--plot);outline-offset:3px;border-radius:3px}
+
+.shell{display:grid;grid-template-columns:266px minmax(0,1fr);
+  max-width:1360px;margin:0 auto}
+.rail{position:sticky;top:0;height:100dvh;overflow-y:auto;padding:34px 22px 60px 28px;
+  border-right:1px solid var(--hair);background:var(--paper)}
+.main{padding:0 clamp(18px,4vw,64px) 140px;min-width:0}
+.col{max-width:68ch}
+@media (max-width:940px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:static;height:auto;border-right:0;border-bottom:1px solid var(--hair);padding:18px}
+}
+
+.brand{font-family:var(--f-disp);font-weight:700;font-size:15px;letter-spacing:-.01em;
+  display:flex;align-items:center;gap:9px;margin-bottom:4px}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--target);flex:none}
+.brand-sub{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--graphite);margin:0 0 22px 18px}
+.toc{list-style:none;margin:0;padding:0;font-family:var(--f-disp);font-size:13.5px}
+.toc li{margin:0}
+.toc a{display:flex;gap:10px;padding:5px 8px 5px 6px;border-radius:5px;
+  color:var(--graphite);text-decoration:none;border-left:2px solid transparent;line-height:1.35}
+.toc a:hover{color:var(--ink);background:var(--sunken)}
+.toc a.on{color:var(--plot);border-left-color:var(--plot);background:var(--plot-tint);font-weight:600}
+.toc .n{font-family:var(--f-mono);font-size:10.5px;opacity:.75;padding-top:2px;flex:none}
+.rail-note{margin-top:26px;padding-top:16px;border-top:1px solid var(--hair);
+  font-family:var(--f-mono);font-size:11px;line-height:1.6;color:var(--graphite)}
+
+h1,h2,h3,h4{font-family:var(--f-disp);text-wrap:balance;letter-spacing:-.02em;margin:0}
+h1{font-size:clamp(34px,5.2vw,54px);font-weight:700;line-height:1.04}
+h2{font-size:clamp(25px,3.4vw,33px);font-weight:700;line-height:1.12}
+h3{font-size:20px;font-weight:600;line-height:1.25;margin-top:38px}
+h4{font-size:16px;font-weight:600;margin-top:28px;letter-spacing:-.005em}
+p{margin:15px 0}
+.col>p:first-child{margin-top:0}
+strong{font-weight:600}
+em{color:var(--graphite)}
+.lede{font-size:19.5px;line-height:1.6;color:var(--graphite)}
+.eyebrow{font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--plot);margin-bottom:12px}
+ul,ol{padding-left:22px;margin:15px 0}
+li{margin:7px 0}
+li::marker{color:var(--plot)}
+hr{border:0;border-top:1px solid var(--hair);margin:34px 0}
+code{font-family:var(--f-mono);font-size:.85em;background:var(--sunken);
+  padding:1px 5px;border-radius:4px}
+
+section{scroll-margin-top:20px;padding-top:56px}
+.sec-head{display:flex;gap:18px;align-items:baseline;
+  border-top:2px solid var(--ink);padding-top:14px;margin-bottom:26px}
+.sec-num{font-family:var(--f-mono);font-size:13px;font-weight:700;color:var(--target);flex:none}
+
+.hero{padding:76px 0 10px}
+.hero h1{margin-bottom:20px}
+.hero .lede{max-width:60ch}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+.chip{font-family:var(--f-mono);font-size:11px;letter-spacing:.04em;
+  border:1px solid var(--hair);background:var(--surface);color:var(--graphite);
+  padding:4px 10px;border-radius:100px}
+.chip b{color:var(--ink);font-weight:500}
+
+.note{border-left:3px solid var(--plot);background:var(--plot-tint);
+  padding:14px 18px;margin:22px 0;border-radius:0 7px 7px 0;font-size:16px}
+.note.warn{border-color:var(--target);background:var(--target-tint)}
+.note.ok{border-color:var(--good);background:var(--good-tint)}
+.note.us{border-color:var(--amber);background:var(--amber-tint)}
+.note .tag{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.13em;
+  text-transform:uppercase;display:block;margin-bottom:5px;font-weight:700;color:var(--plot)}
+.note.warn .tag{color:var(--target)} .note.ok .tag{color:var(--good)} .note.us .tag{color:var(--amber)}
+.note p{margin:8px 0} .note p:last-child{margin-bottom:0} .note p:first-of-type{margin-top:0}
+
+.fx{background:var(--surface);border:1px solid var(--hair);border-radius:9px;
+  margin:24px 0;box-shadow:var(--shadow);overflow:hidden}
+.fx-name{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--graphite);padding:9px 18px;border-bottom:1px solid var(--hair);background:var(--sunken)}
+.fx-eq{font-family:var(--f-mono);font-size:16px;line-height:2.1;padding:20px 18px;
+  overflow-x:auto;white-space:nowrap}
+.fx-legend{list-style:none;margin:0;padding:2px 18px 16px;
+  display:grid;gap:7px;font-size:14.5px;line-height:1.5}
+.fx-legend li{margin:0;display:flex;gap:10px;align-items:flex-start}
+.fx-legend .k{font-family:var(--f-mono);font-size:13px;font-weight:700;flex:none;
+  min-width:78px;padding-top:1px}
+.t-plot{color:var(--plot)} .t-target{color:var(--target)} .t-good{color:var(--good)}
+.t-amber{color:var(--amber)} .t-violet{color:var(--violet)} .t-mute{color:var(--graphite)}
+.op{font-family:var(--f-body);font-style:italic;font-weight:600}
+
+.code{background:var(--surface);border:1px solid var(--hair);border-radius:9px;
+  margin:24px 0;overflow:hidden;box-shadow:var(--shadow)}
+.code-top{display:flex;justify-content:space-between;align-items:center;gap:12px;
+  font-family:var(--f-mono);font-size:11px;color:var(--graphite);
+  padding:8px 16px;border-bottom:1px solid var(--hair);background:var(--sunken)}
+.code-top .file{color:var(--ink);font-weight:500}
+.code pre{margin:0;padding:16px;overflow-x:auto;font-family:var(--f-mono);
+  font-size:12.8px;line-height:1.72;tab-size:4}
+.tok-c{color:var(--graphite);font-style:italic}
+.tok-k{color:var(--violet);font-weight:500}
+.tok-s{color:var(--good)}
+.tok-n{color:var(--target)}
+
+.tw{overflow-x:auto;margin:24px 0;border:1px solid var(--hair);border-radius:9px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;font-family:var(--f-disp);font-weight:500}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--hair);vertical-align:top}
+th{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--graphite);
+  background:var(--sunken);font-weight:600;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.yes{color:var(--good);font-weight:700} .no{color:var(--target);font-weight:700}
+.mid{color:var(--amber);font-weight:700}
+
+figure{margin:30px 0;background:var(--surface);border:1px solid var(--hair);
+  border-radius:11px;padding:22px 20px 0;box-shadow:var(--shadow)}
+figure svg{display:block;width:100%;height:auto;max-width:100%}
+figcaption{font-size:13.5px;color:var(--graphite);line-height:1.55;
+  padding:14px 2px 18px;border-top:1px solid var(--hair);margin-top:18px}
+figcaption b{color:var(--ink);font-weight:600}
+.svg-l{font-family:'JetBrains Mono',monospace;font-size:11px;fill:var(--graphite)}
+.svg-t{font-family:'Archivo',sans-serif;font-size:13px;font-weight:600;fill:var(--ink)}
+.svg-s{font-family:'Archivo',sans-serif;font-size:11.5px;fill:var(--graphite)}
+
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin:24px 0}
+.card{background:var(--surface);border:1px solid var(--hair);border-radius:9px;padding:16px 18px;
+  box-shadow:var(--shadow)}
+.card h4{margin-top:0;font-size:15px}
+.card p{font-size:15px;margin:8px 0 0}
+.card .k{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--plot);display:block;margin-bottom:6px}
+.stepgrid{counter-reset:s;display:grid;gap:2px;margin:24px 0}
+.step{display:grid;grid-template-columns:34px 1fr;gap:14px;padding:13px 0;
+  border-bottom:1px solid var(--hair)}
+.step:last-child{border-bottom:0}
+.step::before{counter-increment:s;content:counter(s,decimal-leading-zero);
+  font-family:var(--f-mono);font-size:12px;font-weight:700;color:var(--target);padding-top:3px}
+.step b{font-family:var(--f-disp);font-size:15px;display:block;margin-bottom:2px}
+.step span{font-size:15px;color:var(--graphite)}
+.foot{margin-top:80px;padding-top:24px;border-top:2px solid var(--ink);
+  font-family:var(--f-mono);font-size:12px;color:var(--graphite);line-height:1.8}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="shell">
+<nav class="rail">
+  <div class="brand"><span class="dot"></span>RoboSketch&#8209;RL</div>
+  <p class="brand-sub">RL Notebook &middot; Hinglish</p>
+  <ul class="toc" id="toc">
+    <li><a href="#s0"><span class="n">00</span><span>Shuruaat &mdash; ye page kaise padhein</span></a></li>
+    <li><a href="#s1"><span class="n">01</span><span>RL ki bunyaad</span></a></li>
+    <li><a href="#s2"><span class="n">02</span><span>Model-based vs Model-free</span></a></li>
+    <li><a href="#s3"><span class="n">03</span><span>Exploration vs Exploitation</span></a></li>
+    <li><a href="#s4"><span class="n">04</span><span>Monte Carlo methods</span></a></li>
+    <li><a href="#s5"><span class="n">05</span><span>Monte Carlo ke problems</span></a></li>
+    <li><a href="#s6"><span class="n">06</span><span>TD methods</span></a></li>
+    <li><a href="#s7"><span class="n">07</span><span>On-policy vs Off-policy</span></a></li>
+    <li><a href="#s8"><span class="n">08</span><span>SARSA aur Q-Learning</span></a></li>
+    <li><a href="#s9"><span class="n">09</span><span>DQN</span></a></li>
+    <li><a href="#s10"><span class="n">10</span><span>Policy Gradient &amp; Actor-Critic</span></a></li>
+    <li><a href="#s11"><span class="n">11</span><span>PPO &mdash; poora algorithm</span></a></li>
+    <li><a href="#s12"><span class="n">12</span><span>PPO ka code</span></a></li>
+    <li><a href="#s13"><span class="n">13</span><span>Humne PPO kyu chuna</span></a></li>
+    <li><a href="#s14"><span class="n">14</span><span>Hamara environment</span></a></li>
+    <li><a href="#s15"><span class="n">15</span><span>Reward design</span></a></li>
+    <li><a href="#s16"><span class="n">16</span><span>Poori pipeline</span></a></li>
+    <li><a href="#s17"><span class="n">17</span><span>Results &amp; RL sabak</span></a></li>
+    <li><a href="#s18"><span class="n">18</span><span>Formula cheat sheet</span></a></li>
+  </ul>
+  <p class="rail-note">Har formula ke neeche uske<br>har term ka rang-wise matlab<br>diya hai. Formula pehle,<br>legend baad me &mdash; dono<br>saath padhein.</p>
+</nav>
+
+<main class="main">
+<div class="hero col">
+  <p class="eyebrow">Reinforcement Learning &middot; Zero se PPO tak</p>
+  <h1>Ek robotic arm ko drawing sikhane wali RL ki poori kahani</h1>
+  <p class="lede">Monte Carlo se shuru, TD &rarr; SARSA &rarr; Q-Learning &rarr; DQN &rarr; PPO tak &mdash; sabse aasan bhaasha me, har formula ka term-by-term matlab, aur har jagah ye jawab ki <em>RoboSketch-RL me humne yahi kyu chuna</em>.</p>
+  <div class="meta">
+    <span class="chip"><b>Algorithm:</b> PPO (CnnPolicy)</span>
+    <span class="chip"><b>Env:</b> Gymnasium DrawEnv</span>
+    <span class="chip"><b>Reward:</b> &Delta;IoU + shaping</span>
+    <span class="chip"><b>Sim:</b> PyBullet + KUKA iiwa</span>
+    <span class="chip"><b>Code:</b> rl/draw_env.py, rl/train.py</span>
+  </div>
+</div>
+
+<section id="s0" class="col">
+  <div class="sec-head"><span class="sec-num">00</span><h2>Shuruaat &mdash; ye page kaise padhein</h2></div>
+
+  <p>Ye page RoboSketch-RL ke liye likha gaya hai, lekin ye pehle <strong>RL ki textbook</strong> hai aur baad me project ka documentation. Isliye har concept do hisso me aata hai:</p>
+
+  <div class="grid2">
+    <div class="card">
+      <span class="k">Theory block</span>
+      <h4>Concept khud</h4>
+      <p>Aam bhaasha me idea, ek chhota example, phir formula &mdash; aur formula ke neeche har symbol ka rang-coded matlab.</p>
+    </div>
+    <div class="card">
+      <span class="k">Amber box</span>
+      <h4>Hamare project me</h4>
+      <p>Wahi concept RoboSketch-RL ke asli code me kahan baitha hai &mdash; file ka naam aur line ka matlab.</p>
+    </div>
+  </div>
+
+  <p>Poore page me ek hi chalne wala udaharan hai, jo hamara asli project hai:</p>
+
+  <div class="note">
+    <span class="tag">Chalne wala udaharan</span>
+    <p>Ek robotic arm ke haath me pen hai. Uske saamne kaagaz hai. Use ek <strong>target shape</strong> (line / circle / square / triangle) diya gaya hai. Arm ko koi bhi trajectory pre-program karke nahi di gayi &mdash; use sirf pen hilana aata hai, aur ek camera batata hai ki abhi tak kya bana. Isi feedback se use <em>khud</em> shape banana seekhna hai.</p>
+  </div>
+
+  <p>Agar aapke paas time kam hai: section <strong>11 (PPO)</strong>, <strong>13 (PPO kyu)</strong> aur <strong>15 (reward design)</strong> project ka dil hain. Baaki sab unke liye zameen taiyaar karta hai.</p>
+</section>
+
+<section id="s1" class="col">
+  <div class="sec-head"><span class="sec-num">01</span><h2>RL ki bunyaad &mdash; agent, environment, reward</h2></div>
+
+  <p>Machine learning ke teen bade khaane hain. <strong>Supervised learning</strong> me har input ka sahi jawab pehle se diya hota hai ("is photo me billi hai"). <strong>Unsupervised</strong> me jawab hota hi nahi, sirf data me pattern dhoondhna hota hai. <strong>Reinforcement learning</strong> teesra hai: sahi jawab koi nahi batata, lekin har koshish ke baad ek <em>number</em> milta hai &mdash; reward &mdash; jo kehta hai "ye chaal kitni achhi thi".</p>
+
+  <p>Yahi hamare project ke liye zaroori tha. Kisi ne kabhi nahi bataya ki "circle banane ke liye 240 steps me kaunse (dx, dy) sahi hain". Agar hum wo bata dete, to wo RL nahi, sirf ek pre-programmed trajectory hoti &mdash; aur project ki novelty hi khatam.</p>
+
+  <h3>Paanch shabd jo sab kuch hain</h3>
+
+  <div class="tw">
+  <table>
+    <tr><th>Shabd</th><th>Aam matlab</th><th>RoboSketch-RL me</th></tr>
+    <tr><td><b>Agent</b></td><td>Jo seekh raha hai, jo decide karta hai</td><td>PPO neural network (policy)</td></tr>
+    <tr><td><b>Environment</b></td><td>Duniya jo agent ki chaal ka jawab deti hai</td><td><code>DrawEnv</code> &mdash; kaagaz, pen, camera</td></tr>
+    <tr><td><b>State <span class="t-plot">s</span></b></td><td>Abhi duniya kaisi dikh rahi hai</td><td>64&times;64&times;3 image: target, ab tak ka drawing, pen ki position</td></tr>
+    <tr><td><b>Action <span class="t-target">a</span></b></td><td>Agent ne kya kiya</td><td><code>[dx, dy, pen_down]</code> &mdash; pen ko thoda sarkao</td></tr>
+    <tr><td><b>Reward <span class="t-good">r</span></b></td><td>Us chaal ka score</td><td>IoU kitna badha &minus; bhatakne ki saza</td></tr>
+  </table>
+  </div>
+
+  <figure>
+    <svg viewBox="0 0 760 300" role="img" aria-label="Agent aur environment ka loop, RoboSketch ke sandarbh me">
+      <rect x="18" y="86" width="200" height="128" rx="10" fill="var(--plot-tint)" stroke="var(--plot)" stroke-width="1.5"/>
+      <text class="svg-t" x="118" y="130" text-anchor="middle" fill="var(--plot)">AGENT</text>
+      <text class="svg-s" x="118" y="150" text-anchor="middle">PPO policy &pi;(a|s)</text>
+      <text class="svg-l" x="118" y="172" text-anchor="middle">CNN &rarr; mean, std</text>
+
+      <rect x="452" y="46" width="290" height="208" rx="10" fill="var(--surface)" stroke="var(--hair)" stroke-width="1.5"/>
+      <text class="svg-t" x="597" y="72" text-anchor="middle">ENVIRONMENT &mdash; DrawEnv</text>
+      <rect x="472" y="88" width="76" height="46" rx="7" fill="var(--sunken)" stroke="var(--hair)"/>
+      <text class="svg-l" x="510" y="110" text-anchor="middle" fill="var(--ink)">IK + arm</text>
+      <text class="svg-l" x="510" y="124" text-anchor="middle">KUKA</text>
+      <rect x="559" y="88" width="76" height="46" rx="7" fill="var(--sunken)" stroke="var(--hair)"/>
+      <text class="svg-l" x="597" y="110" text-anchor="middle" fill="var(--ink)">pen inks</text>
+      <text class="svg-l" x="597" y="124" text-anchor="middle">canvas</text>
+      <rect x="646" y="88" width="76" height="46" rx="7" fill="var(--sunken)" stroke="var(--hair)"/>
+      <text class="svg-l" x="684" y="110" text-anchor="middle" fill="var(--ink)">camera</text>
+      <text class="svg-l" x="684" y="124" text-anchor="middle">+ OpenCV</text>
+      <path d="M548 111 L557 111" stroke="var(--graphite)" stroke-width="1.4" marker-end="url(#ah)"/>
+      <path d="M635 111 L644 111" stroke="var(--graphite)" stroke-width="1.4" marker-end="url(#ah)"/>
+      <rect x="472" y="152" width="250" height="82" rx="7" fill="var(--target-tint)" stroke="var(--target)" stroke-dasharray="3 3"/>
+      <text class="svg-l" x="597" y="176" text-anchor="middle" fill="var(--target)">reward = IoU(dekha hua, target) ka badhna</text>
+      <text class="svg-l" x="597" y="196" text-anchor="middle" fill="var(--target)">state = [target | drawn | pen]</text>
+      <text class="svg-l" x="597" y="218" text-anchor="middle">yahi loop 240 baar chalta hai = 1 episode</text>
+
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0 0 L10 5 L0 10 z" fill="var(--graphite)"/>
+        </marker>
+        <marker id="ah-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0 0 L10 5 L0 10 z" fill="var(--plot)"/>
+        </marker>
+        <marker id="ah-t" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0 0 L10 5 L0 10 z" fill="var(--target)"/>
+        </marker>
+      </defs>
+
+      <path d="M218 118 L330 118 L330 70 L450 70" fill="none" stroke="var(--plot)" stroke-width="1.8" marker-end="url(#ah-p)"/>
+      <text class="svg-l" x="334" y="60" fill="var(--plot)">action a&#8340; = [dx, dy]</text>
+      <path d="M450 236 L330 236 L330 182 L220 182" fill="none" stroke="var(--target)" stroke-width="1.8" marker-end="url(#ah-t)"/>
+      <text class="svg-l" x="238" y="203" fill="var(--target)">state s&#8340;&#8330;&#8321;, reward r&#8340;</text>
+    </svg>
+    <figcaption><b>Wahi classic RL loop, sirf hamare project ki bhaasha me.</b> Agent kabhi kaagaz ko seedha nahi chhuta &mdash; wo sirf pen ko sarkane ka number bhejta hai, aur badle me ek nayi tasveer aur ek score paata hai. Poora "seekhna" is ek loop ko laakhon baar chalane se hota hai.</figcaption>
+  </figure>
+
+  <h3>Return: sirf abhi ka reward kaafi nahi</h3>
+
+  <p>Agar agent sirf agle step ka reward dekhe, to wo <em>lalchi</em> ho jayega. Drawing me aksar ek chaal abhi kuch nahi deti lekin aage ke 50 steps aasaan kar deti hai (jaise square ke corner par mudna). Isliye RL "abhi ka reward" nahi, <strong>return</strong> maximize karta hai &mdash; aaj se lekar episode ke ant tak ke saare rewards ka jod.</p>
+
+  <div class="fx">
+    <div class="fx-name">Discounted return</div>
+    <div class="fx-eq"><span class="t-plot">G<sub>t</sub></span> = <span class="t-good">r<sub>t+1</sub></span> + <span class="t-target">&gamma;</span>&thinsp;<span class="t-good">r<sub>t+2</sub></span> + <span class="t-target">&gamma;</span><sup>2</sup>&thinsp;<span class="t-good">r<sub>t+3</sub></span> + &hellip; = <span class="t-violet">&Sigma;<sub>k=0</sub><sup>&infin;</sup></span> <span class="t-target">&gamma;</span><sup>k</sup> <span class="t-good">r<sub>t+k+1</sub></span></div>
+    <ul class="fx-legend">
+      <li><span class="k t-plot">G<sub>t</sub></span><span>Time <em>t</em> se aage ka kul inaam. RL ka asli maqsad yahi badhana hai &mdash; ek step ka reward nahi.</span></li>
+      <li><span class="k t-good">r<sub>t+1</sub></span><span>Agle step par mila reward. Hamare yahan: IoU kitna badha.</span></li>
+      <li><span class="k t-target">&gamma;</span><span><b>Discount factor</b>, 0 se 1 ke beech. Ye kehta hai "door ka reward aaj ke reward se thoda kam keemti hai". Hamare project me <code>gamma=0.99</code>.</span></li>
+      <li><span class="k t-violet">&Sigma;</span><span>Jod &mdash; saare future steps ka.</span></li>
+    </ul>
+  </div>
+
+  <p><strong>&gamma; ko aise samjhein:</strong> &gamma; = 0 matlab agent bilkul lalchi, sirf agla step dekhta hai. &gamma; = 0.99 matlab agent ko lagbhag 100 steps aage tak ki parwah hai (rough thumb rule: horizon &asymp; 1/(1&minus;&gamma;) = 100). Hamare episode 240 steps ke hain, to 0.99 theek baithta hai &mdash; agent poore shape ke baare me soch sakta hai, lekin infinity tak nahi.</p>
+
+  <h3>Policy, Value aur Q &mdash; teen cheezein jo RL seekhta hai</h3>
+
+  <p>Ye teen naam poore RL me baar-baar aayenge, isliye ek baar theek se:</p>
+
+  <div class="fx">
+    <div class="fx-name">Policy &mdash; "kya karun?"</div>
+    <div class="fx-eq"><span class="t-plot">&pi;(a | s)</span> = state <span class="t-violet">s</span> me action <span class="t-target">a</span> chunne ka probability</div>
+    <ul class="fx-legend">
+      <li><span class="k t-plot">&pi;</span><span>Agent ka dimaag. Hamare project me ye ek CNN hai jo 64&times;64&times;3 image leta hai aur <code>(dx, dy)</code> ka <b>mean aur standard deviation</b> deta hai &mdash; yaani ek Gaussian distribution, jisme se action sample hota hai.</span></li>
+      <li><span class="k t-mute">&theta;</span><span>Policy ke andar ke neural network weights. <code>&pi;<sub>&theta;</sub></code> likhne ka matlab: "wo policy jo in weights se banti hai". Training = &theta; badalna.</span></li>
+    </ul>
+  </div>
+
+  <div class="fx">
+    <div class="fx-name">State value &mdash; "ye jagah kitni achhi hai?"</div>
+    <div class="fx-eq"><span class="t-plot">V<sup>&pi;</sup>(s)</span> = <span class="op">E</span><sub>&pi;</sub>[ <span class="t-good">G<sub>t</sub></span> | s<sub>t</sub> = <span class="t-violet">s</span> ]</div>
+    <ul class="fx-legend">
+      <li><span class="k t-plot">V(s)</span><span>"Agar main abhi is halat me hoon aur aage apni hi policy se khelun, to average me kitna kul reward milega?"</span></li>
+      <li><span class="k op">E</span><span><b>Expectation</b> = average. Isliye kyunki policy aur environment dono me randomness hai &mdash; ek hi state se har baar alag return mil sakta hai.</span></li>
+      <li><span class="k t-good">G<sub>t</sub></span><span>Upar wala return.</span></li>
+    </ul>
+  </div>
+
+  <div class="fx">
+    <div class="fx-name">Action value &mdash; "yahan se ye chaal kitni achhi hai?"</div>
+    <div class="fx-eq"><span class="t-plot">Q<sup>&pi;</sup>(s, a)</span> = <span class="op">E</span><sub>&pi;</sub>[ <span class="t-good">G<sub>t</sub></span> | s<sub>t</sub> = <span class="t-violet">s</span>, a<sub>t</sub> = <span class="t-target">a</span> ]</div>
+    <ul class="fx-legend">
+      <li><span class="k t-plot">Q(s,a)</span><span>V se ek kadam zyada detail: "is state me <em>ye khaas action</em> lene ke baad kitna milega". Q-Learning, SARSA aur DQN &mdash; teeno isi Q ko seekhte hain.</span></li>
+      <li><span class="k t-mute">rishta</span><span>V(s) = &Sigma;<sub>a</sub> &pi;(a|s) &middot; Q(s,a). Yaani V, Q ka policy ke hisaab se average hai.</span></li>
+    </ul>
+  </div>
+
+  <div class="note us">
+    <span class="tag">Hamare project me</span>
+    <p>PPO dono seekhta hai &mdash; <b>policy &pi;</b> (kya karna hai) aur <b>value V(s)</b> (ye halat kitni achhi hai). Q kabhi nahi seekhta. Ye chhoti si baat aage section 13 me bahut badi wajah banegi ki humne DQN kyu nahi liya.</p>
+  </div>
+</section>
+
+<section id="s2" class="col">
+  <div class="sec-head"><span class="sec-num">02</span><h2>Model-based vs Model-free RL</h2></div>
+
+  <p>"Model" ka yahan matlab neural network nahi hai. Model ka matlab hai: <strong>environment ka niyam &mdash; agar main state s me action a karun, to aage kya hoga aur kitna reward milega?</strong> Formally do cheezein: transition P(s&prime;|s,a) aur reward R(s,a).</p>
+
+  <div class="grid2">
+    <div class="card">
+      <span class="k">Model-based</span>
+      <h4>Agent ke paas duniya ka naksha hai</h4>
+      <p>Agent apne dimaag me aage ki chaal <em>simulate</em> kar sakta hai bina asli duniya me kiye &mdash; jaise chess player mann hi mann 5 chaal aage sochta hai. Bahut kam data me seekhta hai, lekin agar naksha galat hua to agent confidently galat plan banata hai.</p>
+    </div>
+    <div class="card">
+      <span class="k">Model-free</span>
+      <h4>Agent sirf koshish karke seekhta hai</h4>
+      <p>Koi naksha nahi. Action karo, jo hua so hua, reward dekho, policy thodi si badlo. Zyada data chahiye, lekin kabhi galat naksha ka shikaar nahi hota. PPO, SAC, DQN, Q-Learning &mdash; sab model-free.</p>
+    </div>
+  </div>
+
+  <div class="tw">
+  <table>
+    <tr><th></th><th>Model-based</th><th>Model-free</th></tr>
+    <tr><td>Duniya ka niyam</td><td>Pata hai ya seekhta hai</td><td>Kabhi nahi janta</td></tr>
+    <tr><td>Data ki bhookh</td><td class="yes">Kam</td><td class="no">Zyada</td></tr>
+    <tr><td>Galat model ka khatra</td><td class="no">Bada</td><td class="yes">Hai hi nahi</td></tr>
+    <tr><td>Udaharan</td><td>Dyna-Q, MuZero, MBPO</td><td>Q-Learning, DQN, PPO, SAC</td></tr>
+  </table>
+  </div>
+
+  <div class="note us">
+    <span class="tag">Hamare project me &mdash; ek dilchasp mod</span>
+    <p>Hamare paas <em>poora</em> model maujood hai: PyBullet simulator exactly janta hai ki pen kahan jayega aur kaunsa pixel kaala hoga. Phir bhi humne <b>model-free</b> PPO chuna. Kyu?</p>
+    <p>Kyunki asli maqsad hardware par jaana hai (sim-to-real). Asli robot ke paas na PyBullet hai, na ye pata hai ki asli pen ki ink kaise failegi, na camera ka noise. Agar agent simulator ke exact model par nirbhar ho jaye, wo simulator ka expert banega, robot ka nahi. Model-free agent sirf "action &rarr; jo dikha &rarr; reward" seekhta hai &mdash; aur ye teeno cheezein asli robot par bhi maujood hain.</p>
+    <p>Yahi wajah <code>reward_mode="vision"</code> ke peeche bhi hai: hum jaan-boojh kar agent ko camera ki <em>noisy</em> nazar se reward dete hain, ground truth se nahi &mdash; kyunki asli duniya me ground truth hota hi nahi.</p>
+  </div>
+</section>
+
+<section id="s3" class="col">
+  <div class="sec-head"><span class="sec-num">03</span><h2>Exploration vs Exploitation, aur greedy selection</h2></div>
+
+  <p>Ye RL ka sabse purana dwand hai. Aapko ek nayi jagah me 30 din khana khana hai. Pehle din jo restaurant achha laga &mdash; kya baaki 29 din wahi jaayein (<strong>exploitation</strong>: jo pata hai usme se best chuno), ya naye restaurant try karein is umeed me ki koi behtar mile (<strong>exploration</strong>)? Sirf exploit karoge to shayad shehar ka sabse achha khana kabhi na milega. Sirf explore karoge to har din average khana khaoge.</p>
+
+  <h3>Greedy selection</h3>
+
+  <div class="fx">
+    <div class="fx-name">Pure greedy policy</div>
+    <div class="fx-eq"><span class="t-target">a</span> = <span class="t-plot">arg max<sub>a</sub></span> <span class="t-violet">Q(s, a)</span></div>
+    <ul class="fx-legend">
+      <li><span class="k t-plot">arg max<sub>a</sub></span><span>"Wo action jiska Q sabse zyada hai." <em>max</em> value deta hai, <em>arg max</em> wo action deta hai jisne wo value di.</span></li>
+      <li><span class="k t-violet">Q(s,a)</span><span>Agent ka abhi ka andaaza ki ye action kitna achha hai &mdash; jo aksar galat hota hai, khaaskar shuruaat me.</span></li>
+    </ul>
+  </div>
+
+  <p>Pure greedy ka khatra: shuruaat me sab Q galat hote hain. Agar pehli baar galti se ek bekaar action ka Q thoda zyada aa gaya, agent hamesha wahi chunega, doosre action kabhi try hi nahi karega, aur unka Q kabhi sudhrega nahi. Agent <strong>ek local optimum me phans jata hai.</strong></p>
+
+  <div class="fx">
+    <div class="fx-name">&epsilon;-greedy &mdash; sabse simple ilaaj</div>
+    <div class="fx-eq"><span class="t-target">a</span> = { <span class="t-plot">arg max<sub>a</sub> Q(s,a)</span> &nbsp;probability <span class="t-good">1 &minus; &epsilon;</span> se &nbsp;;&nbsp; <span class="t-amber">koi bhi random action</span> &nbsp;probability <span class="t-good">&epsilon;</span> se }</div>
+    <ul class="fx-legend">
+      <li><span class="k t-good">&epsilon;</span><span>Chhota number, jaise 0.1. Yaani 10% baar agent jaan-boojh kar "bewakoofi" karta hai taaki nayi cheez pata chale.</span></li>
+      <li><span class="k t-mute">decay</span><span>Aam tareeka: &epsilon; ko 1.0 se shuru karke dheere-dheere 0.05 tak girana &mdash; shuru me sab try karo, baad me jo seekha usko istemal karo.</span></li>
+    </ul>
+  </div>
+
+  <h3>Continuous actions me exploration kaise hota hai</h3>
+
+  <p>&epsilon;-greedy tab kaam karta hai jab actions <em>ginti ke</em> hon (upar/neeche/left/right). Hamara action <code>(dx, dy)</code> hai &mdash; do real numbers, infinite possibilities. Inme "random action" ka matlab alag hai.</p>
+
+  <p>PPO ki policy ek action nahi deti, wo ek <strong>Gaussian distribution</strong> deti hai: mean &mu;(s) aur standard deviation &sigma;. Action us distribution se <em>sample</em> hota hai. Agar &sigma; bada hai, agent alag-alag cheezein try karta hai (exploration). Agar &sigma; chhota hai, wo har baar lagbhag apni sabse achhi chaal chalta hai (exploitation). Aur &sigma; khud seekha jata hai &mdash; koi &epsilon; schedule hand se set karne ki zaroorat nahi.</p>
+
+  <div class="fx">
+    <div class="fx-name">Entropy bonus &mdash; exploration ko zinda rakhne ka tareeka</div>
+    <div class="fx-eq">L<sup>total</sup> = L<sup>policy</sup> &minus; c<sub>v</sub> L<sup>value</sup> + <span class="t-target">c<sub>e</sub></span> &middot; <span class="t-plot">H[&pi;<sub>&theta;</sub>(&middot;|s)]</span></div>
+    <ul class="fx-legend">
+      <li><span class="k t-plot">H[&pi;]</span><span><b>Entropy</b> = policy kitni "undecided" hai. Bada &sigma; &rarr; bada H. Ise loss me <em>plus</em> karke hum agent ko inaam dete hain ki wo jaldi ek hi chaal par fix na ho jaye.</span></li>
+      <li><span class="k t-target">c<sub>e</sub></span><span>Entropy coefficient. Hamare project me <code>ent_coef=0.02</code> &mdash; SB3 ka default 0.0 hai, humne jaan-boojh kar badhaya.</span></li>
+    </ul>
+  </div>
+
+  <div class="note us">
+    <span class="tag">Hamare project me &mdash; ek asli local optimum jo humne dekha</span>
+    <p>Shuru me hamara reward sirf "target ke kitne pixel dhak gaye" tha. Agent ne kya seekha? <b>Kuch bhi mat banao.</b> Kyunki pen ko idhar-udhar ghumane se stray ink banti thi, IoU girta tha, reward negative aata tha &mdash; aur kuch na karne se reward 0 rehta tha. 0 &gt; negative, to "kuch na karo" hi best policy ban gayi. Ye classic exploration failure hai: achhi drawing tak pahunchne ka raasta shuru me <em>bura</em> lagta hai.</p>
+    <p>Do cheezon ne ise toda: <code>ent_coef=0.02</code> (agent ko zabardasti alag cheezein try karwaayi) aur <b>potential-based shaping</b> (section 15) &mdash; jo pen ko target ke paas aane par hi reward de deta hai, ink banane se pehle.</p>
+  </div>
+</section>
+<section id="s4" class="col">
+  <div class="sec-head"><span class="sec-num">04</span><h2>Monte Carlo methods &mdash; poora episode khelo, phir seekho</h2></div>
+
+  <p>Ab sawaal ye hai: V(s) ya Q(s,a) hum <em>seekhte</em> kaise hain? Sabse seedha jawab: <strong>kai baar khelo aur average nikaalo.</strong> Yahi Monte Carlo (MC) hai.</p>
+
+  <p>Naam "Monte Carlo" casino se aaya hai &mdash; matlab "random samples se andaaza lagana". Agar aapko puchha jaye "is dice game me average kitne point milte hain?", to aap ya to poora probability ka ganit karein, ya bas game 10,000 baar khel kar average nikaal lein. Doosra tareeka Monte Carlo hai.</p>
+
+  <div class="stepgrid">
+    <div class="step"><div><b>Poora episode khelo</b><span>Shuru se ant tak. Hamare project me: 240 steps, poori drawing ban jaane tak.</span></div></div>
+    <div class="step"><div><b>Ab peeche ki taraf return ginno</b><span>Har state ke liye G<sub>t</sub> nikaalo &mdash; us state ke baad jo bhi reward mila uska discounted jod.</span></div></div>
+    <div class="step"><div><b>Andaaza average ki taraf khisko</b><span>V(s) ko dekhe hue G ki taraf thoda sarkao.</span></div></div>
+  </div>
+
+  <div class="fx">
+    <div class="fx-name">Monte Carlo value update</div>
+    <div class="fx-eq"><span class="t-plot">V(s<sub>t</sub>)</span> &larr; <span class="t-plot">V(s<sub>t</sub>)</span> + <span class="t-amber">&alpha;</span> [ <span class="t-good">G<sub>t</sub></span> &minus; <span class="t-plot">V(s<sub>t</sub>)</span> ]</div>
+    <ul class="fx-legend">
+      <li><span class="k t-plot">V(s<sub>t</sub>)</span><span>Ab tak ka andaaza ki ye state kitni achhi hai.</span></li>
+      <li><span class="k t-good">G<sub>t</sub></span><span><b>Asli, poora, dekha hua return</b> &mdash; koi andaaza nahi, koi guess nahi. Episode khatam hone ke baad ye exactly pata hota hai.</span></li>
+      <li><span class="k t-amber">&alpha;</span><span>Learning rate, jaise 0.01. "Nayi jaankaari ki taraf kitna khisko."</span></li>
+      <li><span class="k t-mute">[ &hellip; ]</span><span>Error: "jo asli me mila" minus "jo maine socha tha". Agar positive, to state ko maine kam aanka tha &mdash; V badhao.</span></li>
+    </ul>
+  </div>
+
+  <div class="code">
+    <div class="code-top"><span class="file">monte_carlo.py</span><span>concept demo &mdash; project code nahi</span></div>
+<pre><code class="py"># Ek episode khelo, poora. Kuch mat seekho beech me.
+episode = []
+s, _ = env.reset()
+done = False
+while not done:
+    a = policy(s)
+    s2, r, term, trunc, _ = env.step(a)
+    episode.append((s, a, r))      # sirf jama karo
+    s, done = s2, term or trunc
+
+# Episode KHATAM. Ab peeche se aage badho aur return ginno.
+G = 0.0
+for s, a, r in reversed(episode):
+    G = r + gamma * G              # G_t = r_{t+1} + gamma * G_{t+1}
+    V[s] = V[s] + alpha * (G - V[s])   # asli return ki taraf khisko</code></pre>
+  </div>
+
+  <p><code>reversed()</code> zaroori hai: G<sub>t</sub> ko ginne ke liye G<sub>t+1</sub> chahiye, isliye ant se shuru karo. Ye choti si trick MC ka poora kaam hai.</p>
+
+  <div class="note ok">
+    <span class="tag">MC ki sabse badi khoobi</span>
+    <p>MC me koi <b>bias</b> nahi hai. G<sub>t</sub> asli dekha hua return hai, kisi doosre andaaze par nirbhar nahi. Isliye agar aap kaafi episodes chala lein, MC ka jawab bilkul sahi value par pahunchta hai &mdash; guarantee ke saath. Isi wajah se ye samajhne ke liye sabse aasan method hai.</p>
+  </div>
+</section>
+
+<section id="s5" class="col">
+  <div class="sec-head"><span class="sec-num">05</span><h2>Monte Carlo ke problems</h2></div>
+
+  <p>MC saaf hai, lekin practical robotics me ye kai jagah toot jata hai. Ye chaar dikkatein seedhe RoboSketch-RL par lagti hain &mdash; aur yahi wajah hai ki hamara project MC use nahi karta.</p>
+
+  <h3>Problem 1 &mdash; Episode khatam hone ka intezaar</h3>
+
+  <p>MC kuch seekh hi nahi sakta jab tak episode poora na ho. Hamare env me ek episode <strong>240 steps</strong> ka hai. Agar agent ne step 3 par ek shandar chaal chali, use uska credit step 240 tak nahi milta. Sochiye ek student jise poore saal padhne ke baad sirf ek final marksheet mile &mdash; wo kaise jaane ki kaunsa chapter theek tha?</p>
+
+  <p>Aur jo task kabhi khatam hi nahi hota (continuing tasks &mdash; jaise ek robot jo lagataar chalta rahe), wahan MC lag hi nahi sakta. Uska G<sub>t</sub> kabhi calculate hi nahi hoga.</p>
+
+  <h3>Problem 2 &mdash; Bahut zyada variance</h3>
+
+  <p>Ye sabse gambhir hai. G<sub>t</sub> me <em>240 steps ki saari randomness</em> jama ho jati hai. Ek hi state se do baar chal kar dekhiye &mdash; policy ne alag actions sample kiye, alag jagah pen gaya, alag drawing bani, aur G<sub>t</sub> bilkul alag aaya. Aapka signal shor me doob jata hai.</p>
+
+  <figure>
+    <svg viewBox="0 0 720 220" role="img" aria-label="Monte Carlo ka high variance versus TD ka kam variance">
+      <text class="svg-t" x="10" y="20">Ek hi state se 6 episodes &mdash; MC ka return har baar alag</text>
+      <line x1="60" y1="150" x2="700" y2="150" stroke="var(--hair)" stroke-width="1"/>
+      <line x1="60" y1="45" x2="60" y2="150" stroke="var(--hair)" stroke-width="1"/>
+      <text class="svg-l" x="8" y="52">G high</text>
+      <text class="svg-l" x="14" y="154">G low</text>
+      <line x1="60" y1="100" x2="700" y2="100" stroke="var(--good)" stroke-width="1.4" stroke-dasharray="5 4"/>
+      <text class="svg-l" x="612" y="94" fill="var(--good)">asli V(s)</text>
+      <g fill="var(--target)">
+        <circle cx="150" cy="58" r="5"/><circle cx="240" cy="141" r="5"/><circle cx="330" cy="72" r="5"/>
+        <circle cx="420" cy="131" r="5"/><circle cx="510" cy="63" r="5"/><circle cx="600" cy="123" r="5"/>
+      </g>
+      <g stroke="var(--target)" stroke-width="1.2" stroke-dasharray="2 3">
+        <line x1="150" y1="58" x2="150" y2="100"/><line x1="240" y1="141" x2="240" y2="100"/>
+        <line x1="330" y1="72" x2="330" y2="100"/><line x1="420" y1="131" x2="420" y2="100"/>
+        <line x1="510" y1="63" x2="510" y2="100"/><line x1="600" y1="123" x2="600" y2="100"/>
+      </g>
+      <text class="svg-s" x="60" y="185" fill="var(--target)">Har point ek poore 240-step episode ka return hai. Sahi average (green) tak pahunchne me sainkdon episodes lag jate hain.</text>
+      <text class="svg-s" x="60" y="205">TD ek step ka reward + agla andaaza use karta hai &mdash; utna uchhalta nahi, isliye bahut jaldi settle hota hai.</text>
+    </svg>
+    <figcaption><b>High variance ka matlab dhandhli, dheemi learning.</b> MC ka andaaza sahi jagah ke aas-paas hai (koi bias nahi) lekin har baar bahut door girta hai. Agent ko yeh average nikalne ke liye bahut zyada data chahiye.</figcaption>
+  </figure>
+
+  <h3>Problem 3 &mdash; Har step ka data barbaad hota hai</h3>
+
+  <p>MC ek poore episode (240 transitions) se sirf ek "learning event" banata hai. TD wahi 240 transitions se 240 updates nikaal leta hai. Robotics me jahan har step mehnga hai (asli robot, asli time), ye barbaadi bardaasht nahi hoti.</p>
+
+  <h3>Problem 4 &mdash; Bootstrapping nahi, isliye online nahi</h3>
+
+  <p>MC "bootstrap" nahi karta &mdash; yaani wo apne hi purane andaaze ka istemal nahi karta. Sunne me imaandari lagti hai, lekin iska nateeja ye hai ki MC <em>online</em> nahi seekh sakta, aur wo apni pehle seekhi hui cheezon ka fayda nahi utha sakta.</p>
+
+  <div class="tw">
+  <table>
+    <tr><th>MC ki problem</th><th>RoboSketch-RL par asar</th></tr>
+    <tr><td>Episode ke ant tak intezaar</td><td>240 steps tak koi feedback nahi; corner par mudne ka credit bahut der se milta</td></tr>
+    <tr><td>Bahut zyada variance</td><td>200k timesteps me shayad kuch bhi na seekhta; hamare paas itna compute nahi</td></tr>
+    <tr><td>Data ki barbaadi</td><td>8 parallel envs ka fayda lagbhag khatam ho jata</td></tr>
+    <tr><td>Continuing task me kaam nahi</td><td>Aage plateau-stop / variable-length episodes ke experiments mushkil ho jate</td></tr>
+  </table>
+  </div>
+
+  <div class="note warn">
+    <span class="tag">Nateeja</span>
+    <p>Isliye koi bhi modern deep RL algorithm &mdash; DQN, PPO, SAC &mdash; <b>pure Monte Carlo nahi hai.</b> Sabhi TD ya TD-jaisi cheez istemal karte hain. PPO ka GAE (section 11) exactly wahi hai: MC aur TD ke beech ka ek dial.</p>
+  </div>
+</section>
+
+<section id="s6" class="col">
+  <div class="sec-head"><span class="sec-num">06</span><h2>TD methods &mdash; har step par thoda-thoda seekho</h2></div>
+
+  <p>Temporal Difference (TD) learning RL ka sabse khoobsurat idea hai. Poora return dekhne ka intezaar mat karo. Ek step chalo, ek reward dekho, aur baaki ke liye <strong>apne hi andaaze par bharosa karo.</strong></p>
+
+  <p>Ise <strong>bootstrapping</strong> kehte hain &mdash; apne joote ke feete kheench kar khud ko uthana. Sunne me chakkar wala lagta hai (galat andaaze se galat andaaza sudhaarna?), lekin ganitiya taur par ye kaam karta hai, kyunki har update me ek <em>asli</em> reward r ghusta hai. Wo asli reward dheere-dheere poore system ko sach ki taraf kheenchta hai.</p>
+
+  <div class="fx">
+    <div class="fx-name">TD(0) &mdash; sabse buniyaadi TD update</div>
+    <div class="fx-eq"><span class="t-plot">V(s<sub>t</sub>)</span> &larr; <span class="t-plot">V(s<sub>t</sub>)</span> + <span class="t-amber">&alpha;</span> [ <span class="t-good">r<sub>t+1</sub></span> + <span class="t-target">&gamma; V(s<sub>t+1</sub>)</span> &minus; <span class="t-plot">V(s<sub>t</sub>)</span> ]</div>
+    <ul class="fx-legend">
+      <li><span class="k t-good">r<sub>t+1</sub></span><span>Ek asli reward, abhi mila hua. Ye sach ka tukda hai.</span></li>
+      <li><span class="k t-target">&gamma;V(s<sub>t+1</sub>)</span><span><b>Bootstrap term.</b> "Aage ka poora return main nahi jaanta, lekin agli state ka mera andaaza ye hai." MC yahan poora G<sub>t</sub> rakhta tha; TD sirf andaaza rakhta hai.</span></li>
+      <li><span class="k t-plot">V(s<sub>t</sub>)</span><span>Purana andaaza, jise sudhaarna hai.</span></li>
+      <li><span class="k t-amber">&alpha;</span><span>Learning rate.</span></li>
+    </ul>
+  </div>
+
+  <p>Bracket ke andar wali cheez itni important hai ki uska apna naam hai:</p>
+
+  <div class="fx">
+    <div class="fx-name">TD error &mdash; poore RL ka sabse zaroori number</div>
+    <div class="fx-eq"><span class="t-violet">&delta;<sub>t</sub></span> = <span class="t-good">r<sub>t+1</sub></span> + <span class="t-target">&gamma; V(s<sub>t+1</sub>)</span> &minus; <span class="t-plot">V(s<sub>t</sub>)</span></div>
+    <ul class="fx-legend">
+      <li><span class="k t-violet">&delta;<sub>t</sub></span><span>"Surprise". Jitna maine socha tha usse kitna behtar/bura nikla. &delta; &gt; 0 = umeed se achha hua. &delta; = 0 = bilkul waisa hi jaisa socha tha, kuch seekhne ko nahi.</span></li>
+      <li><span class="k t-mute">majedaar</span><span>Dimaag me dopamine neurons lagbhag isi &delta; jaisa signal firing karte hain &mdash; RL ka ye hissa neuroscience se milta hai.</span></li>
+    </ul>
+  </div>
+
+  <p>&delta; aage har jagah dikhega: SARSA me, Q-Learning me, DQN me, aur PPO ke GAE me &mdash; GAE to seedhe-seedhe &delta; ka ek weighted jod hai.</p>
+
+  <figure>
+    <svg viewBox="0 0 720 250" role="img" aria-label="Monte Carlo aur TD ke update ka farak">
+      <text class="svg-t" x="10" y="18">MONTE CARLO &mdash; poore raaste ka intezaar</text>
+      <g>
+        <circle cx="60" cy="60" r="13" fill="var(--plot-tint)" stroke="var(--plot)" stroke-width="1.5"/>
+        <text class="svg-l" x="60" y="64" text-anchor="middle" fill="var(--plot)">s&#8340;</text>
+        <circle cx="170" cy="60" r="10" fill="var(--surface)" stroke="var(--hair)"/>
+        <circle cx="280" cy="60" r="10" fill="var(--surface)" stroke="var(--hair)"/>
+        <circle cx="390" cy="60" r="10" fill="var(--surface)" stroke="var(--hair)"/>
+        <text class="svg-l" x="455" y="64" text-anchor="middle">&hellip;&hellip;</text>
+        <circle cx="540" cy="60" r="10" fill="var(--surface)" stroke="var(--hair)"/>
+        <rect x="620" y="47" width="26" height="26" rx="4" fill="var(--good-tint)" stroke="var(--good)" stroke-width="1.5"/>
+        <text class="svg-l" x="633" y="64" text-anchor="middle" fill="var(--good)">T</text>
+        <line x1="73" y1="60" x2="157" y2="60" stroke="var(--graphite)" stroke-width="1.3" marker-end="url(#ah2)"/>
+        <line x1="183" y1="60" x2="267" y2="60" stroke="var(--graphite)" stroke-width="1.3" marker-end="url(#ah2)"/>
+        <line x1="293" y1="60" x2="377" y2="60" stroke="var(--graphite)" stroke-width="1.3" marker-end="url(#ah2)"/>
+        <line x1="403" y1="60" x2="430" y2="60" stroke="var(--graphite)" stroke-width="1.3"/>
+        <line x1="480" y1="60" x2="527" y2="60" stroke="var(--graphite)" stroke-width="1.3" marker-end="url(#ah2)"/>
+        <line x1="553" y1="60" x2="616" y2="60" stroke="var(--graphite)" stroke-width="1.3" marker-end="url(#ah2)"/>
+        <path d="M633 84 Q 340 128 60 80" fill="none" stroke="var(--target)" stroke-width="1.8" stroke-dasharray="4 3" marker-end="url(#ah-t2)"/>
+        <text class="svg-l" x="300" y="122" text-anchor="middle" fill="var(--target)">update tabhi aata hai jab episode khatam ho</text>
+      </g>
+      <line x1="0" y1="145" x2="720" y2="145" stroke="var(--hair)"/>
+      <text class="svg-t" x="10" y="170">TD(0) &mdash; ek kadam kaafi hai</text>
+      <g>
+        <circle cx="60" cy="210" r="13" fill="var(--plot-tint)" stroke="var(--plot)" stroke-width="1.5"/>
+        <text class="svg-l" x="60" y="214" text-anchor="middle" fill="var(--plot)">s&#8340;</text>
+        <circle cx="170" cy="210" r="11" fill="var(--violet-tint)" stroke="var(--violet)" stroke-width="1.5"/>
+        <text class="svg-l" x="170" y="214" text-anchor="middle" fill="var(--violet)">s&#8314;</text>
+        <line x1="73" y1="210" x2="155" y2="210" stroke="var(--graphite)" stroke-width="1.3" marker-end="url(#ah2)"/>
+        <text class="svg-l" x="114" y="200" text-anchor="middle" fill="var(--good)">r</text>
+        <path d="M170 226 Q 115 250 62 226" fill="none" stroke="var(--target)" stroke-width="1.8" marker-end="url(#ah-t2)"/>
+        <text class="svg-l" x="215" y="214" fill="var(--target)">turant update: &delta; = r + &gamma;V(s&#8314;) &minus; V(s&#8340;)</text>
+        <text class="svg-s" x="215" y="234">episode chalta rahe, seekhna saath-saath chalta rahe</text>
+      </g>
+      <defs>
+        <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0 0 L10 5 L0 10 z" fill="var(--graphite)"/></marker>
+        <marker id="ah-t2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0 0 L10 5 L0 10 z" fill="var(--target)"/></marker>
+      </defs>
+    </svg>
+    <figcaption><b>Yahi ek farak MC aur TD ke beech sab kuch badal deta hai.</b> MC ka teer ant se shuru me aata hai; TD ka teer bas ek kadam peeche jata hai. Isliye TD har step par, episode ke beech me, aur na khatam hone wale task me bhi kaam karta hai.</figcaption>
+  </figure>
+
+  <div class="tw">
+  <table>
+    <tr><th></th><th>Monte Carlo</th><th>TD</th></tr>
+    <tr><td>Update kab</td><td>Episode ke ant me</td><td class="yes">Har step par</td></tr>
+    <tr><td>Kya use karta hai</td><td>Asli poora return G<sub>t</sub></td><td>r + &gamma;V(s&prime;) &mdash; ek asli reward + andaaza</td></tr>
+    <tr><td>Bias</td><td class="yes">Zero</td><td class="mid">Thoda hai (andaaze par tika hai)</td></tr>
+    <tr><td>Variance</td><td class="no">Bahut zyada</td><td class="yes">Kam</td></tr>
+    <tr><td>Bootstrapping</td><td>Nahi</td><td>Haan</td></tr>
+    <tr><td>Continuing task</td><td class="no">Kaam nahi karta</td><td class="yes">Karta hai</td></tr>
+    <tr><td>Vyavhaar me</td><td>Dheema, lekin bhulaawa nahi deta</td><td class="yes">Bahut tezi se seekhta hai</td></tr>
+  </table>
+  </div>
+
+  <div class="note">
+    <span class="tag">Beech ka raasta &mdash; n-step aur &lambda;</span>
+    <p>MC aur TD do sire hain ek hi line ke. TD(0) 1 step dekhta hai, MC saare steps. Beech me <b>n-step TD</b> hai: n steps ke asli reward lo, phir bootstrap karo. n jitna bada, MC ke utna kareeb (kam bias, zyada variance).</p>
+    <p>Aur agar aap saare n ka ek weighted average le lein, to <b>TD(&lambda;)</b> milta hai &mdash; jismein &lambda; ek knob hai 0 (pure TD) se 1 (pure MC) tak. PPO ka <b>GAE-&lambda;</b> bilkul yahi cheez hai, advantage ke liye. Isliye ye section PPO samajhne ke liye zaroori tha.</p>
+  </div>
+</section>
+
+<section id="s7" class="col">
+  <div class="sec-head"><span class="sec-num">07</span><h2>On-policy vs Off-policy &mdash; ek hi sawaal, do jawab</h2></div>
+
+  <p>Har RL algorithm ke paas do policies hoti hain, chahe wo alag hon ya ek hi:</p>
+
+  <div class="grid2">
+    <div class="card">
+      <span class="k">Behaviour policy</span>
+      <h4>Jo data banati hai</h4>
+      <p>Wo policy jo asal me environment me actions le rahi hai &mdash; jiske transitions collect ho rahe hain.</p>
+    </div>
+    <div class="card">
+      <span class="k">Target policy</span>
+      <h4>Jo seekhi ja rahi hai</h4>
+      <p>Wo policy jise hum behtar bana rahe hain, jise ant me use karenge.</p>
+    </div>
+  </div>
+
+  <p><strong>On-policy:</strong> dono <em>ek hi</em> hain. Agent apni hi chaal se seekhta hai. Data policy ke saath purana ho jata hai &mdash; jaise hi policy badli, purana data invalid.</p>
+
+  <p><strong>Off-policy:</strong> dono <em>alag</em> ho sakti hain. Agent kisi aur ke (ya apne purane) data se seekh sakta hai. Isliye purana data replay buffer me sambhal kar rakha ja sakta hai aur baar-baar istemal ho sakta hai.</p>
+
+  <div class="note">
+    <span class="tag">Ek aasan misaal</span>
+    <p><b>On-policy</b> = aap khud gaadi chala kar driving seekh rahe hain. Jo aap karte ho, ussi se seekhte ho. Imaandaar, lekin dheema &mdash; aur aapko apni hi galtiyon se guzarna padta hai.</p>
+    <p><b>Off-policy</b> = aap YouTube par doosron ki driving dekh kar seekh rahe hain, aur apni 3 saal purani recordings bhi dubara dekh rahe hain. Bahut zyada data se fayda, lekin ek pech hai: wo videos aapki abhi wali driving style ke nahi hain, to unse seekha hua sabak thoda galat ho sakta hai. Isi pech ko theek karne ke liye off-policy algorithms me <b>importance sampling</b> ya <b>Q-learning ka max operator</b> lagta hai.</p>
+  </div>
+
+  <div class="tw">
+  <table>
+    <tr><th></th><th>On-policy</th><th>Off-policy</th></tr>
+    <tr><td>Data kiska</td><td>Sirf abhi wali policy ka</td><td>Kisi bhi purani ya doosri policy ka</td></tr>
+    <tr><td>Replay buffer</td><td class="no">Nahi (data turant purana)</td><td class="yes">Haan, badi buffer</td></tr>
+    <tr><td>Sample efficiency</td><td class="no">Kam &mdash; data ek baar use hota hai</td><td class="yes">Zyada &mdash; data baar-baar</td></tr>
+    <tr><td>Stability</td><td class="yes">Zyada, aur predictable</td><td class="mid">Kam &mdash; tuning nazuk hoti hai</td></tr>
+    <tr><td>Udaharan</td><td>SARSA, REINFORCE, A2C, <b>PPO</b></td><td>Q-Learning, DQN, DDPG, TD3, SAC</td></tr>
+  </table>
+  </div>
+</section>
+<section id="s8" class="col">
+  <div class="sec-head"><span class="sec-num">08</span><h2>SARSA aur Q-Learning &mdash; ek chhote se farak ki badi kahani</h2></div>
+
+  <p>Ye do algorithms lagbhag ek jaise dikhte hain. Unke beech ka farak sirf <em>ek term</em> ka hai. Lekin wahi ek term on-policy aur off-policy ka poora farak hai &mdash; aur unka behaviour bilkul alag kar deta hai.</p>
+
+  <h3>SARSA &mdash; on-policy</h3>
+
+  <p>Naam khud algorithm hai: <strong>S</strong>tate, <strong>A</strong>ction, <strong>R</strong>eward, agla <strong>S</strong>tate, agla <strong>A</strong>ction. Update ke liye paanchon cheezein chahiye &mdash; aur "agla action" wo hai jo agent ne <em>asal me</em> liya.</p>
+
+  <div class="fx">
+    <div class="fx-name">SARSA update</div>
+    <div class="fx-eq"><span class="t-plot">Q(s<sub>t</sub>, a<sub>t</sub>)</span> &larr; <span class="t-plot">Q(s<sub>t</sub>, a<sub>t</sub>)</span> + &alpha; [ <span class="t-good">r<sub>t+1</sub></span> + &gamma; <span class="t-target">Q(s<sub>t+1</sub>, a<sub>t+1</sub>)</span> &minus; <span class="t-plot">Q(s<sub>t</sub>, a<sub>t</sub>)</span> ]</div>
+    <ul class="fx-legend">
+      <li><span class="k t-target">Q(s&prime;, a&prime;)</span><span><b>Yahi asli baat hai.</b> a&prime; wo action hai jo policy ne asal me chuna &mdash; agar policy &epsilon;-greedy hai to a&prime; kabhi-kabhi random bhi hoga. Yaani SARSA apni hi galtiyon ko hisaab me leta hai.</span></li>
+      <li><span class="k t-good">r<sub>t+1</sub></span><span>Asli mila reward.</span></li>
+      <li><span class="k t-mute">natija</span><span>SARSA "meri abhi wali (thodi random) policy kitni achhi hai" seekhta hai &mdash; isliye <b>on-policy</b>.</span></li>
+    </ul>
+  </div>
+
+  <h3>Q-Learning &mdash; off-policy</h3>
+
+  <p>Ek hi shabd badalta hai: asli liye gaye action ki jagah, <strong>sabse achhe</strong> action ki value.</p>
+
+  <div class="fx">
+    <div class="fx-name">Q-Learning update</div>
+    <div class="fx-eq"><span class="t-plot">Q(s<sub>t</sub>, a<sub>t</sub>)</span> &larr; <span class="t-plot">Q(s<sub>t</sub>, a<sub>t</sub>)</span> + &alpha; [ <span class="t-good">r<sub>t+1</sub></span> + &gamma; <span class="t-violet">max<sub>a&prime;</sub> Q(s<sub>t+1</sub>, a&prime;)</span> &minus; <span class="t-plot">Q(s<sub>t</sub>, a<sub>t</sub>)</span> ]</div>
+    <ul class="fx-legend">
+      <li><span class="k t-violet">max<sub>a&prime;</sub></span><span>"Agli state me jo <b>sabse achha</b> action ho sakta tha, uski value." Isse fark nahi padta ki agent ne asal me kya kiya. Isliye <b>off-policy</b> &mdash; behaviour policy explore kar rahi hai, lekin seekhi ja rahi hai perfect greedy policy.</span></li>
+      <li><span class="k t-mute">fayda</span><span>Agent bewakoofi bhari exploration karte hue bhi optimal policy seekh sakta hai. Yahi DQN ki buniyaad hai.</span></li>
+      <li><span class="k t-mute">nuksaan</span><span>max hamesha upar wale andaaze uthata hai, isliye Q-values ka <b>over-estimation</b> ho jata hai &mdash; Double DQN isi ko theek karta hai.</span></li>
+    </ul>
+  </div>
+
+  <div class="code">
+    <div class="code-top"><span class="file">sarsa_vs_qlearning.py</span><span>farak sirf ek line ka hai</span></div>
+<pre><code class="py"># --- SARSA (on-policy) ---------------------------------
+a  = eps_greedy(Q, s)
+while not done:
+    s2, r, done, _ = env.step(a)
+    a2 = eps_greedy(Q, s2)                 # ASLI agla action (random ho sakta hai)
+    target = r + gamma * Q[s2][a2]         # <-- wahi action jo liya jayega
+    Q[s][a] += alpha * (target - Q[s][a])
+    s, a = s2, a2
+
+# --- Q-Learning (off-policy) ---------------------------
+while not done:
+    a = eps_greedy(Q, s)
+    s2, r, done, _ = env.step(a)
+    target = r + gamma * max(Q[s2])        # <-- BEST action, chahe wo liya jaye ya nahi
+    Q[s][a] += alpha * (target - Q[s][a])
+    s = s2</code></pre>
+  </div>
+
+  <h3>Ye farak dikhta kaisa hai &mdash; Cliff Walking</h3>
+
+  <p>RL ka sabse mashhoor demo. Ek grid hai, neeche ki kataar me khai (cliff) hai. Khai me gire to bada minus reward aur episode khatam. Start bottom-left, goal bottom-right. Dono agents &epsilon;-greedy se explore karte hain (10% chaalein random).</p>
+
+  <figure>
+    <svg viewBox="0 0 720 260" role="img" aria-label="Cliff walking me SARSA ka safe raasta aur Q-learning ka optimal raasta">
+      <g stroke="var(--hair)" stroke-width="1" fill="none">
+        <rect x="60" y="40" width="600" height="160"/>
+        <line x1="60" y1="80" x2="660" y2="80"/><line x1="60" y1="120" x2="660" y2="120"/>
+        <line x1="60" y1="160" x2="660" y2="160"/>
+        <line x1="110" y1="40" x2="110" y2="200"/><line x1="160" y1="40" x2="160" y2="200"/>
+        <line x1="210" y1="40" x2="210" y2="200"/><line x1="260" y1="40" x2="260" y2="200"/>
+        <line x1="310" y1="40" x2="310" y2="200"/><line x1="360" y1="40" x2="360" y2="200"/>
+        <line x1="410" y1="40" x2="410" y2="200"/><line x1="460" y1="40" x2="460" y2="200"/>
+        <line x1="510" y1="40" x2="510" y2="200"/><line x1="560" y1="40" x2="560" y2="200"/>
+        <line x1="610" y1="40" x2="610" y2="200"/>
+      </g>
+      <rect x="110" y="160" width="500" height="40" fill="var(--target-tint)" stroke="var(--target)" stroke-width="1.5"/>
+      <text class="svg-l" x="360" y="185" text-anchor="middle" fill="var(--target)">THE CLIFF &mdash; reward &minus;100, episode khatam</text>
+      <rect x="60" y="160" width="50" height="40" fill="var(--sunken)"/>
+      <text class="svg-l" x="85" y="185" text-anchor="middle" fill="var(--ink)">S</text>
+      <rect x="610" y="160" width="50" height="40" fill="var(--good-tint)" stroke="var(--good)" stroke-width="1.5"/>
+      <text class="svg-l" x="635" y="185" text-anchor="middle" fill="var(--good)">G</text>
+
+      <path d="M85 160 L85 60 L635 60 L635 160" fill="none" stroke="var(--plot)" stroke-width="2.6" stroke-linejoin="round"/>
+      <text class="svg-l" x="360" y="50" text-anchor="middle" fill="var(--plot)">SARSA &mdash; safe raasta, cliff se door</text>
+
+      <path d="M85 150 L85 140 L635 140 L635 150" fill="none" stroke="var(--violet)" stroke-width="2.6" stroke-dasharray="6 4" stroke-linejoin="round"/>
+      <text class="svg-l" x="360" y="133" text-anchor="middle" fill="var(--violet)">Q-Learning &mdash; sabse chhota raasta, cliff ke bilkul kinare</text>
+
+      <text class="svg-s" x="60" y="228">SARSA ko pata hai ki wo 10% baar random chalega, isliye wo cliff ke paas ka raasta khud "khatarnaak" maan leta hai &mdash; kyunki uska</text>
+      <text class="svg-s" x="60" y="246">update asli (kabhi-kabhi random) agle action se hota hai. Q-Learning max leta hai, to wo maan leta hai ki wo hamesha perfect chalega.</text>
+    </svg>
+    <figcaption><b>Dono "sahi" hain, sirf alag sawaal ka jawab de rahe hain.</b> Q-Learning theoretically optimal path seekhta hai (agar aap perfect ho). SARSA <em>us policy ke liye</em> best path seekhta hai jo asal me chalayi ja rahi hai, galtiyon samet &mdash; isliye training ke dauraan uska asli score behtar hota hai, kyunki wo khai me kam girta hai.</figcaption>
+  </figure>
+
+  <div class="note us">
+    <span class="tag">Hamare project se rishta</span>
+    <p>SARSA aur Q-Learning dono <b>tabular</b> hain &mdash; ek table jisme har (state, action) ke liye ek khaana ho. Hamare state 64&times;64&times;3 ki image hai, aur action do real numbers. Na state ginti me aate hain, na actions. Isliye ye dono seedhe laagu hi nahi ho sakte. Lekin <b>&delta;, bootstrapping, on-policy vs off-policy</b> &mdash; ye teeno idea hamare PPO me zinda hain.</p>
+  </div>
+</section>
+
+<section id="s9" class="col">
+  <div class="sec-head"><span class="sec-num">09</span><h2>DQN &mdash; Q-table ki jagah neural network</h2></div>
+
+  <h3>Table kaam kyu nahi karta</h3>
+
+  <p>Ek chhota hisaab jo sab kuch saaf kar deta hai. Hamari observation hai <code>64 &times; 64 &times; 3</code> uint8 image. Iska matlab 12,288 pixels, har ek 256 values me se koi bhi. Kul possible states:</p>
+
+  <div class="fx">
+    <div class="fx-name">Hamare state space ka aakar</div>
+    <div class="fx-eq">|S| = 256<sup>64&times;64&times;3</sup> = 256<sup>12288</sup> &asymp; 10<sup>29,592</sup></div>
+    <ul class="fx-legend">
+      <li><span class="k t-target">tulna</span><span>Poore brahmand me lagbhag 10<sup>80</sup> atoms hain. Hamara state space uska 10<sup>29,512</sup> guna hai. Table banane ka koi sawaal hi nahi.</span></li>
+      <li><span class="k t-plot">hal</span><span><b>Function approximation</b> &mdash; har state ko yaad rakhne ki jagah, ek neural network se <em>andaaza</em> lagao. CNN ko ye bhi samajh aa jata hai ki "milti-julti tasveeron ki value milti-julti hoti hai" &mdash; jo table kabhi nahi seekh sakta.</span></li>
+    </ul>
+  </div>
+
+  <h3>DQN ka core</h3>
+
+  <p>DQN (Deep Q-Network, 2015) ne Q-Learning ka wahi update liya aur Q-table ki jagah CNN rakh diya. Table update ki jagah ab ek <strong>loss minimize</strong> hota hai:</p>
+
+  <div class="fx">
+    <div class="fx-name">DQN loss</div>
+    <div class="fx-eq">L(<span class="t-plot">&theta;</span>) = <span class="op">E</span>[ ( <span class="t-good">r</span> + &gamma; <span class="t-violet">max<sub>a&prime;</sub> Q(s&prime;, a&prime;; <span class="t-amber">&theta;<sup>&minus;</sup></span>)</span> &minus; <span class="t-plot">Q(s, a; &theta;)</span> )<sup>2</sup> ]</div>
+    <ul class="fx-legend">
+      <li><span class="k t-plot">&theta;</span><span>Main network ke weights &mdash; jo abhi train ho rahe hain.</span></li>
+      <li><span class="k t-amber">&theta;<sup>&minus;</sup></span><span><b>Target network</b> &mdash; wahi network, lekin kuch hazaar steps purani copy, jise jam kar rakha jata hai. Iske bina target har step badalta rehta hai aur training phat jati hai ("apni hi poonch ka peechha").</span></li>
+      <li><span class="k t-violet">max<sub>a&prime;</sub></span><span>Q-Learning wala max. <b>Yeh saare possible actions par lagta hai</b> &mdash; is line par section 13 ka poora faisla tika hai.</span></li>
+      <li><span class="k t-good">r</span><span>Replay buffer se nikaala gaya ek purana transition ka reward.</span></li>
+    </ul>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <span class="k">Trick 1</span>
+      <h4>Experience replay</h4>
+      <p>Lakhon purane transitions ek buffer me rakho aur unme se random mini-batch nikaal kar train karo. Isse lagataar aane wale data ka correlation tootta hai, aur har transition kai baar kaam aata hai. Ye sirf isliye legal hai kyunki Q-Learning <b>off-policy</b> hai.</p>
+    </div>
+    <div class="card">
+      <span class="k">Trick 2</span>
+      <h4>Target network</h4>
+      <p>Target ke liye ek jami hui purani copy. Ye "chal-goal" problem hataata hai. Dono tricks ke bina DQN Atari par kaam hi nahi karta tha.</p>
+    </div>
+  </div>
+
+  <h3>DQN ki wo ek limitation jo hamare liye faisla-kun hai</h3>
+
+  <div class="note warn">
+    <span class="tag">DQN sirf discrete actions par chalta hai</span>
+    <p>Har jagah <code>max<sub>a&prime;</sub> Q(s&prime;, a&prime;)</code> likha hai. Ise nikaalne ke liye aapko <b>har action ka Q ginna padta hai aur sabse bada chunna padta hai.</b> Atari me ye aasan hai &mdash; 18 buttons, 18 numbers, max le lo.</p>
+    <p>Hamara action <code>(dx, dy) &isin; [&minus;1, 1]<sup>2</sup></code> hai &mdash; <b>infinite</b> actions. "Sabse achhe action" ko dhoondhne ke liye har step par ek poora optimization problem hal karna padega. Har step par. 200,000 steps ke liye. Ye vyavhaarik hai hi nahi.</p>
+    <p>Iska jugaad hai &mdash; action ko discretize karna, jaise 8 dishaayein. Lekin phir aap kabhi 22.5&deg; ka smooth arc nahi bana sakte, aur circle banana hi hamara task hai. Isliye DQN yahin bahar ho jata hai.</p>
+  </div>
+</section>
+
+<section id="s10" class="col">
+  <div class="sec-head"><span class="sec-num">10</span><h2>Policy Gradient aur Actor-Critic</h2></div>
+
+  <p>Ab tak har algorithm ne <em>value</em> seekhi (Q ya V) aur policy usse nikaali &mdash; "sabse zyada Q wala action chuno". Policy gradient ek doosra hi raasta pakadta hai: <strong>policy ko seedhe seekho.</strong> Network hi batayega kya karna hai; Q ko beech me laane ki zaroorat nahi.</p>
+
+  <p>Ye do wajah se badiya hai. Pehla, continuous actions apne aap chalte hain &mdash; network Gaussian ka mean de dega, koi max lena hi nahi hai. Doosra, policy stochastic ho sakti hai, jo exploration aur partial observability dono me madad karta hai.</p>
+
+  <div class="fx">
+    <div class="fx-name">Policy gradient theorem &mdash; REINFORCE</div>
+    <div class="fx-eq"><span class="t-plot">&nabla;<sub>&theta;</sub> J(&theta;)</span> = <span class="op">E</span>[ <span class="t-violet">&nabla;<sub>&theta;</sub> log &pi;<sub>&theta;</sub>(a<sub>t</sub>|s<sub>t</sub>)</span> &middot; <span class="t-good">G<sub>t</sub></span> ]</div>
+    <ul class="fx-legend">
+      <li><span class="k t-plot">&nabla;J(&theta;)</span><span>Wo dishaa jisme weights badalne se kul reward badhega. Gradient ascent isi par chalta hai.</span></li>
+      <li><span class="k t-violet">&nabla; log &pi;</span><span>"Is action ki probability badhane ki dishaa." Akela ye kehta hai: jo kiya, uska chance badha do.</span></li>
+      <li><span class="k t-good">G<sub>t</sub></span><span>Return &mdash; <b>kitna</b> badhana hai. Achha nikla to zyada, bura nikla to negative (yaani ghata do).</span></li>
+      <li><span class="k t-mute">saar</span><span>"Jo chaal achhi nikli, use aage zyada karo. Jo buri nikli, kam karo." Bas itna hi hai.</span></li>
+    </ul>
+  </div>
+
+  <p>Lekin dhyaan dein &mdash; ismein G<sub>t</sub> hai, yaani <strong>Monte Carlo return</strong>. Section 05 wali saari problems yahan wapas aa gayi: bahut zyada variance, episode ke ant ka intezaar. REINFORCE isi wajah se practically dheema aur ustable hai.</p>
+
+  <h3>Do sudhaar jo PPO tak le jaate hain</h3>
+
+  <h4>Sudhaar 1 &mdash; Baseline aur Advantage</h4>
+
+  <p>Maan lijiye har action ka return +100 se +110 ke beech hai. G<sub>t</sub> hamesha bada positive hai, to gradient <em>har</em> action ki probability badhata hai &mdash; achhe aur bure dono ki. Sirf thoda alag-alag. Ye behad shor bhara signal hai.</p>
+
+  <p>Ilaaj: return me se ek <strong>baseline</strong> ghata do &mdash; V(s), yaani "is state me average kitna milta hai". Jo bacha wo hai <strong>advantage</strong>.</p>
+
+  <div class="fx">
+    <div class="fx-name">Advantage</div>
+    <div class="fx-eq"><span class="t-target">A(s, a)</span> = <span class="t-plot">Q(s, a)</span> &minus; <span class="t-good">V(s)</span></div>
+    <ul class="fx-legend">
+      <li><span class="k t-target">A(s,a)</span><span>"Ye action is state ke <b>average</b> se kitna behtar tha." Positive = average se achha, probability badhao. Negative = average se bura, ghatao.</span></li>
+      <li><span class="k t-good">V(s)</span><span>Baseline. Isse gradient ka bias nahi badalta, sirf variance girta hai &mdash; ye ek ganitiya guarantee hai.</span></li>
+      <li><span class="k t-mute">faayda</span><span>Ab "sab kuch +100 hai" wali situation me bhi signal saaf hai: 105 wala action average se achha, 102 wala bura.</span></li>
+    </ul>
+  </div>
+
+  <h4>Sudhaar 2 &mdash; Actor-Critic</h4>
+
+  <p>Advantage ke liye V(s) chahiye. To ek doosra network usko seekh lega. Ab do hisse hain:</p>
+
+  <div class="grid2">
+    <div class="card">
+      <span class="k">Actor</span>
+      <h4>Policy &pi;<sub>&theta;</sub>(a|s)</h4>
+      <p>Kaam karta hai &mdash; action chunta hai. Advantage ke hisaab se update hota hai.</p>
+    </div>
+    <div class="card">
+      <span class="k">Critic</span>
+      <h4>Value V<sub>&phi;</sub>(s)</h4>
+      <p>Judge karta hai &mdash; batata hai ye state kitni achhi thi. TD se train hota hai (section 06 wala &delta;).</p>
+    </div>
+  </div>
+
+  <h3>GAE &mdash; advantage ka MC-to-TD dial</h3>
+
+  <p>Advantage ka andaaza kaise lagayein? Do sire hain, wahi jo section 06 me the:</p>
+
+  <div class="fx">
+    <div class="fx-name">Generalized Advantage Estimation (GAE-&lambda;)</div>
+    <div class="fx-eq"><span class="t-target">A<sub>t</sub></span> = <span class="t-violet">&delta;<sub>t</sub></span> + (<span class="t-plot">&gamma;&lambda;</span>)<span class="t-violet">&delta;<sub>t+1</sub></span> + (<span class="t-plot">&gamma;&lambda;</span>)<sup>2</sup><span class="t-violet">&delta;<sub>t+2</sub></span> + &hellip; &nbsp;&nbsp;jahan&nbsp; <span class="t-violet">&delta;<sub>t</sub></span> = r<sub>t</sub> + &gamma;V(s<sub>t+1</sub>) &minus; V(s<sub>t</sub>)</div>
+    <ul class="fx-legend">
+      <li><span class="k t-violet">&delta;<sub>t</sub></span><span>Wahi TD error jo section 06 me mila tha. GAE unka ek weighted jod hai &mdash; isliye TD samajhna zaroori tha.</span></li>
+      <li><span class="k t-plot">&lambda;</span><span><b>Dial.</b> &lambda; = 0 &rarr; sirf &delta;<sub>t</sub>, yaani pure TD: kam variance, thoda bias. &lambda; = 1 &rarr; Monte Carlo: bias zero, variance chhat par. Practical default <b>&lambda; = 0.95</b> &mdash; jo hamare project me bhi chal raha hai (SB3 ka <code>gae_lambda</code>).</span></li>
+      <li><span class="k t-mute">yaani</span><span>PPO na pure MC hai, na pure TD &mdash; wo dono ke beech ek tuned mixture hai. Section 04 se 06 tak ka saara safar yahan aakar jud jata hai.</span></li>
+    </ul>
+  </div>
+
+  <div class="note">
+    <span class="tag">Ab bhi ek badi problem baaki hai</span>
+    <p>Actor-critic ke baad bhi policy gradient me ek jaanleva dikkat hai: <b>step size</b>. Kitna bada gradient step lein? Chhota lein to training kachhue ki chaal chalti hai. Bada lein to policy ek hi update me tabaah ho sakti hai &mdash; aur supervised learning ke ulat, yahan wapasi nahi hoti, kyunki agli baar ka data usi tooti hui policy se aayega. Yahi wo problem hai jise <b>PPO</b> hal karta hai.</p>
+  </div>
+</section>
+<section id="s11" class="col">
+  <div class="sec-head"><span class="sec-num">11</span><h2>PPO &mdash; Proximal Policy Optimization</h2></div>
+
+  <p class="lede">"Proximal" ka matlab hai <em>paas ka</em>. PPO ka poora idea ek line me: <strong>policy ko sudharo, lekin ek update me itna mat badlo ki wo pehchan me hi na aaye.</strong></p>
+
+  <h3>11.1 &mdash; Wo problem jise PPO hal karta hai</h3>
+
+  <p>Policy gradient kehta hai "is dishaa me chalo". Wo ye nahi batata ki <em>kitna</em> chalo. Aur RL me galat step size sirf dheemi training nahi, poori tabaahi laata hai:</p>
+
+  <div class="stepgrid">
+    <div class="step"><div><b>Ek bada gradient step lagta hai</b><span>Policy achanak bahut badal jati hai.</span></div></div>
+    <div class="step"><div><b>Nayi policy kharaab hai</b><span>Ab agent bekaar actions le raha hai.</span></div></div>
+    <div class="step"><div><b>Ab jo data aayega wo bhi bekaar hoga</b><span>Kyunki data isi tooti policy se aata hai. Supervised learning me dataset fix hota hai &mdash; RL me dataset khud policy banati hai.</span></div></div>
+    <div class="step"><div><b>Wapasi ka raasta nahi</b><span>Bekaar data se bekaar gradient, aur agent kabhi ubhar nahi paata. Ise <b>performance collapse</b> kehte hain.</span></div></div>
+  </div>
+
+  <p>TRPO (2015) ne iska sakht hal diya: policy ko itna badlo ki purani aur nayi policy ke beech KL-divergence ek limit se kam rahe. Ye kaam karta hai, lekin ismein second-order optimization aur conjugate gradient chahiye &mdash; likhna aur samajhna dono mushkil.</p>
+
+  <p>PPO (2017) ne wahi cheez ek behad saral trick se hasil ki, sirf <strong>clipping</strong> se. Aaj PPO robotics aur RLHF dono ka default hai kyunki wo TRPO jaisa stable hai aur likhne me 30 line ka.</p>
+
+  <h3>11.2 &mdash; Probability ratio</h3>
+
+  <div class="fx">
+    <div class="fx-name">Ratio &mdash; policy kitni badal gayi</div>
+    <div class="fx-eq"><span class="t-plot">r<sub>t</sub>(&theta;)</span> = <span class="t-violet">&pi;<sub>&theta;</sub>(a<sub>t</sub>|s<sub>t</sub>)</span> / <span class="t-amber">&pi;<sub>&theta;<sub>old</sub></sub>(a<sub>t</sub>|s<sub>t</sub>)</span></div>
+    <ul class="fx-legend">
+      <li><span class="k t-violet">&pi;<sub>&theta;</sub></span><span>Abhi wali (naye weights se banti) policy is action ko kitna probability deti hai.</span></li>
+      <li><span class="k t-amber">&pi;<sub>&theta;old</sub></span><span>Wo policy jisne ye data asal me banaya tha. Ye ek fix number hai, rollout ke waqt store kar liya jata hai.</span></li>
+      <li><span class="k t-plot">r<sub>t</sub></span><span><b>r = 1</b> &rarr; policy bilkul nahi badli. <b>r = 1.5</b> &rarr; nayi policy is action ko 50% zyada karti hai. <b>r = 0.5</b> &rarr; aadha kar diya. Yaani r ek "kitna door chale gaye" ka meter hai.</span></li>
+      <li><span class="k t-mute">code me</span><span>Probability ka bhaag numerically kharaab hota hai, isliye hamesha log me kaam karte hain: <code>ratio = exp(logp_new &minus; logp_old)</code>.</span></li>
+    </ul>
+  </div>
+
+  <h3>11.3 &mdash; Clipped objective: PPO ka dil</h3>
+
+  <div class="fx">
+    <div class="fx-name">PPO-Clip objective</div>
+    <div class="fx-eq">L<sup>CLIP</sup>(&theta;) = <span class="op">E</span><sub>t</sub>[ <span class="t-good">min</span>( <span class="t-plot">r<sub>t</sub>(&theta;)</span> <span class="t-target">A<sub>t</sub></span> , &nbsp; <span class="t-violet">clip(r<sub>t</sub>(&theta;), 1&minus;&epsilon;, 1+&epsilon;)</span> <span class="t-target">A<sub>t</sub></span> ) ]</div>
+    <ul class="fx-legend">
+      <li><span class="k t-plot">r<sub>t</sub>A<sub>t</sub></span><span><b>Pehla term:</b> aam policy gradient. Achha action (A &gt; 0) &rarr; r badhao. Bura action (A &lt; 0) &rarr; r ghatao. Akela ye term bina rok-tok chalega.</span></li>
+      <li><span class="k t-violet">clip(r, 1&minus;&epsilon;, 1+&epsilon;)</span><span><b>Doosra term:</b> wahi cheez, lekin r ko zabardasti [0.8, 1.2] ke andar daba kar (&epsilon; = 0.2). Yaani "policy 20% se zyada mat badalna".</span></li>
+      <li><span class="k t-good">min(&middot;, &middot;)</span><span><b>Yahi asli chaturai hai.</b> Dono me se <em>chhota</em> lo. Iska matlab: PPO ka objective hamesha ek <b>pessimistic lower bound</b> hai. Zyada badalne ka koi <em>faayda</em> nahi milega, lekin zyada badalne se hone wala <em>nuksaan</em> poora dikhega.</span></li>
+      <li><span class="k t-target">A<sub>t</sub></span><span>GAE se nikala advantage (section 10). Iska sign hi tay karta hai ki clip kis taraf kaam karega.</span></li>
+      <li><span class="k t-mute">&epsilon;</span><span>Clip range, aam taur par 0.1&ndash;0.3. SB3 ka default <code>clip_range=0.2</code> &mdash; hamare project me yahi chal raha hai.</span></li>
+    </ul>
+  </div>
+
+  <p>Ye <code>min</code> kyu itna zaroori hai, ise ek tasveer se dekhna sabse aasan hai. Do haalat hain, is baat par depend karke ki action achha tha ya bura:</p>
+
+  <figure>
+    <svg viewBox="0 0 720 300" role="img" aria-label="PPO clipped objective, achhe aur bure action ke liye">
+      <text class="svg-t" x="60" y="24">A &gt; 0 &mdash; action achha tha</text>
+      <text class="svg-t" x="420" y="24">A &lt; 0 &mdash; action bura tha</text>
+
+      <line x1="60" y1="230" x2="310" y2="230" stroke="var(--hair)" stroke-width="1.2"/>
+      <line x1="60" y1="70" x2="60" y2="240" stroke="var(--hair)" stroke-width="1.2"/>
+      <rect x="156" y="70" width="48" height="160" fill="var(--good-tint)" opacity=".6"/>
+      <line x1="180" y1="70" x2="180" y2="238" stroke="var(--graphite)" stroke-width="1" stroke-dasharray="3 3"/>
+      <line x1="204" y1="70" x2="204" y2="238" stroke="var(--target)" stroke-width="1.2" stroke-dasharray="4 3"/>
+      <path d="M60 230 L204 146 L310 146" fill="none" stroke="var(--plot)" stroke-width="2.8" stroke-linejoin="round"/>
+      <circle cx="204" cy="146" r="4.5" fill="var(--target)"/>
+      <text class="svg-l" x="180" y="252" text-anchor="middle">1.0</text>
+      <text class="svg-l" x="204" y="266" text-anchor="middle" fill="var(--target)">1+&epsilon;</text>
+      <text class="svg-l" x="156" y="252" text-anchor="middle">0.8</text>
+      <text class="svg-l" x="300" y="252" text-anchor="middle">r</text>
+      <text class="svg-l" x="14" y="80">L</text>
+      <text class="svg-s" x="216" y="136" fill="var(--target)">yahan se flat</text>
+      <text class="svg-s" x="216" y="152" fill="var(--target)">gradient = 0</text>
+      <text class="svg-s" x="66" y="196" fill="var(--plot)">badhne ka</text>
+      <text class="svg-s" x="66" y="212" fill="var(--plot)">inaam</text>
+
+      <line x1="420" y1="90" x2="670" y2="90" stroke="var(--hair)" stroke-width="1.2"/>
+      <line x1="420" y1="80" x2="420" y2="250" stroke="var(--hair)" stroke-width="1.2"/>
+      <rect x="516" y="90" width="48" height="150" fill="var(--good-tint)" opacity=".6"/>
+      <line x1="540" y1="82" x2="540" y2="248" stroke="var(--graphite)" stroke-width="1" stroke-dasharray="3 3"/>
+      <line x1="516" y1="82" x2="516" y2="248" stroke="var(--target)" stroke-width="1.2" stroke-dasharray="4 3"/>
+      <path d="M420 146 L516 146 L660 230" fill="none" stroke="var(--plot)" stroke-width="2.8" stroke-linejoin="round"/>
+      <circle cx="516" cy="146" r="4.5" fill="var(--target)"/>
+      <text class="svg-l" x="540" y="262" text-anchor="middle">1.0</text>
+      <text class="svg-l" x="510" y="276" text-anchor="middle" fill="var(--target)">1&minus;&epsilon;</text>
+      <text class="svg-l" x="660" y="262" text-anchor="middle">r</text>
+      <text class="svg-l" x="404" y="88">0</text>
+      <text class="svg-s" x="426" y="134" fill="var(--target)">flat: policy ko</text>
+      <text class="svg-s" x="426" y="150" fill="var(--target)">aur neeche dhakelne ka faayda nahi</text>
+      <text class="svg-s" x="566" y="206" fill="var(--plot)">giravat khuli hai &mdash;</text>
+      <text class="svg-s" x="566" y="222" fill="var(--plot)">nuksaan poora dikhega</text>
+    </svg>
+    <figcaption><b>Dono panel me flat hissa "yahan se aage badalne ka koi inaam nahi" kehta hai.</b> Achhe action (baayen) me PPO r ko 1.2 se aage badhane par kuch nahi deta &mdash; ek hi achha sample poori policy ko kheench kar nahi le ja sakta. Bure action (daayen) me left side flat hai lekin right side khuli hai: agar ratio galat dishaa me chala gaya, to poora penalty lagega. Yahi asymmetry <code>min</code> se aati hai, aur yahi PPO ko safe banati hai.</figcaption>
+  </figure>
+
+  <div class="note">
+    <span class="tag">Ek line me clip ka matlab</span>
+    <p>"Ek update me policy ko 20% se zyada badalne ka koi <b>inaam</b> nahi milega &mdash; lekin agar wo galat taraf 20% se zyada chali gayi, to poori <b>saza</b> milegi." Isi tarah PPO bina KL constraint ke, bina second-order maths ke, TRPO ka kaam kar leta hai.</p>
+  </div>
+
+  <h3>11.4 &mdash; Poora loss (teen hisse)</h3>
+
+  <div class="fx">
+    <div class="fx-name">PPO ka final objective</div>
+    <div class="fx-eq">L<sub>total</sub> = <span class="t-plot">L<sup>CLIP</sup></span> &minus; <span class="t-target">c<sub>1</sub> &middot; (V<sub>&phi;</sub>(s<sub>t</sub>) &minus; V<sub>t</sub><sup>targ</sup>)<sup>2</sup></span> + <span class="t-good">c<sub>2</sub> &middot; H[&pi;<sub>&theta;</sub>]</span></div>
+    <ul class="fx-legend">
+      <li><span class="k t-plot">L<sup>CLIP</sup></span><span><b>Actor.</b> Upar wala clipped objective &mdash; achhe actions zyada, bure kam.</span></li>
+      <li><span class="k t-target">value loss</span><span><b>Critic.</b> V<sub>&phi;</sub> ko sach ke kareeb laao. V<sup>targ</sup> = advantage + purani value. Coefficient c<sub>1</sub> = 0.5 (SB3 default). Ghata isliye kyunki ye error hai, jise kam karna hai.</span></li>
+      <li><span class="k t-good">entropy H</span><span><b>Explorer.</b> Policy ko jaldi ek chaal par jamne se rokta hai. Hamare project me c<sub>2</sub> = <code>ent_coef=0.02</code>.</span></li>
+      <li><span class="k t-mute">code me</span><span>PyTorch minimize karta hai, isliye code me sabhi sign ulat jate hain: <code>loss = -policy_obj + c1*value_loss - c2*entropy</code>.</span></li>
+    </ul>
+  </div>
+
+  <h3>11.5 &mdash; PPO ka poora chakkar</h3>
+
+  <div class="stepgrid">
+    <div class="step"><div><b>Rollout collect karo</b><span>Abhi wali policy se N steps chalao (hamare yahan 512 steps &times; 8 parallel envs = 4096 transitions). Har step par (s, a, r, done, V(s), log &pi;(a|s)) store karo.</span></div></div>
+    <div class="step"><div><b>Advantage nikaalo</b><span>GAE-&lambda; se, peeche se aage chalte hue. Saath me value target bhi.</span></div></div>
+    <div class="step"><div><b>Advantage normalize karo</b><span>Mean 0, std 1. Isse learning rate har task par lagbhag ek jaisa kaam karta hai.</span></div></div>
+    <div class="step"><div><b>Usi data par K epochs chalao</b><span>Yahan PPO thoda "chori" karta hai &mdash; wo <em>ek hi</em> rollout par 6 baar update karta hai (mini-batches me). Isi baar-baar use se ratio 1 se door jata hai, aur clip use rok kar rakhta hai. <b>Clip ka asli kaam yahi hai.</b></span></div></div>
+    <div class="step"><div><b>Purana data phenk do</b><span>Policy badal chuki hai, to data ab purana ho gaya. Nayi rollout se shuru. Yahi PPO ko <b>on-policy</b> banata hai.</span></div></div>
+  </div>
+
+  <h3>11.6 &mdash; Hamare hyperparameters, aur unka matlab</h3>
+
+  <div class="tw">
+  <table>
+    <tr><th>Parameter</th><th>Hamari value</th><th>Matlab kya hai</th><th>Yahi kyu</th></tr>
+    <tr><td><code>policy</code></td><td class="num">CnnPolicy</td><td>Observation image hai, to CNN body</td><td>Hamara state 64&times;64&times;3 tasveer hai, vector nahi</td></tr>
+    <tr><td><code>n_steps</code></td><td class="num">512</td><td>Har env se kitne steps ka rollout</td><td>512&times;8 = 4096 transitions per update &mdash; 240-step episode se bada, to poore episodes dikhte hain</td></tr>
+    <tr><td><code>batch_size</code></td><td class="num">256</td><td>Ek gradient step me kitne samples</td><td>4096/256 = 16 mini-batch per epoch</td></tr>
+    <tr><td><code>n_epochs</code></td><td class="num">6</td><td>Ek hi data par kitni baar update</td><td>Zyada = data ka behtar istemal, lekin ratio door bhagta hai. 6 SB3 ke 10 se thoda conservative hai</td></tr>
+    <tr><td><code>gamma</code></td><td class="num">0.99</td><td>Discount factor</td><td>Horizon &asymp;100 steps &mdash; 240-step drawing episode ke liye theek</td></tr>
+    <tr><td><code>learning_rate</code></td><td class="num">3e-4</td><td>Adam ka step size</td><td>PPO ka sabse aazmaya hua default</td></tr>
+    <tr><td><code>ent_coef</code></td><td class="num">0.02</td><td>Entropy bonus</td><td><b>Humne badhaya</b> (SB3 default 0.0) &mdash; "kuch mat banao" wale local optimum se nikalne ke liye</td></tr>
+    <tr><td><code>clip_range</code></td><td class="num">0.2</td><td>&epsilon;</td><td>Default; hamare paas ise badalne ki koi wajah abhi nahi mili</td></tr>
+    <tr><td><code>gae_lambda</code></td><td class="num">0.95</td><td>MC&harr;TD dial</td><td>Default; bias-variance ka aazmaaya hua balance</td></tr>
+  </table>
+  </div>
+
+  <div class="code">
+    <div class="code-top"><span class="file">rl/train.py</span><span>hamara asli setup</span></div>
+<pre><code class="py">from stable_baselines3 import PPO
+from stable_baselines3.common.vec_env import DummyVecEnv, VecMonitor
+
+# 8 alag environments, har ek apne seed ke saath -> 8 guna tez rollout
+venv = DummyVecEnv([make_env(args.shape, args.use_arm, args.max_steps,
+                             args.step_size, args.seed + i, args.reward_mode,
+                             args.time_obs)
+                    for i in range(n)])
+venv = VecMonitor(venv)
+
+model = PPO("CnnPolicy", venv, verbose=1, seed=args.seed,
+            n_steps=512, batch_size=256, n_epochs=6, gamma=0.99,
+            ent_coef=args.ent_coef, learning_rate=3e-4)
+
+model.learn(total_timesteps=args.timesteps)</code></pre>
+  </div>
+
+  <div class="note us">
+    <span class="tag">Hamare project me &mdash; 8 parallel envs ka asli faayda</span>
+    <p>PPO on-policy hai, yaani har rollout ke baad data phek diya jata hai. Ye mehnga hai. Iska ilaaj hai <b>parallelism</b>: 8 environments ek saath chalao, to ek hi policy version se 8 guna data mil jata hai. Hamara kinematic sim (<code>use_arm=False</code>) itna halka hai ki 8 copies aaram se chalti hain &mdash; yahi wajah hai ki on-policy ki "sample inefficiency" hamare liye asli dikkat nahi banti. Section 13 me ye tark phir aayega.</p>
+  </div>
+</section>
+
+<section id="s12" class="col">
+  <div class="sec-head"><span class="sec-num">12</span><h2>PPO ka code &mdash; shuru se, line by line</h2></div>
+
+  <p>Neeche PPO ka poora core hai, PyTorch me, hamare hi observation shape ke hisaab se. Hum apne project me SB3 istemal karte hain (kyunki research me algorithm ka bug aur experiment ka result alag karna bahut mushkil ho jata hai), lekin <em>samajhne</em> ke liye ye code hi asli cheez hai &mdash; SB3 ke andar bhi thik yahi chal raha hai.</p>
+
+  <h4>Hissa 1 &mdash; Network: ek body, do heads</h4>
+
+  <div class="code">
+    <div class="code-top"><span class="file">ppo_from_scratch.py</span><span>1/4 &mdash; actor-critic network</span></div>
+<pre><code class="py">import torch
+import torch.nn as nn
+from torch.distributions import Normal
+
+class ActorCritic(nn.Module):
+    """Ek hi CNN body, do heads:
+       actor  -> action ka Gaussian (mean + std)
+       critic -> V(s), ye state kitni achhi hai
+    Body share karne se features dono ke liye ek baar seekhe jate hain."""
+
+    def __init__(self, obs_ch=3, n_act=2):
+        super().__init__()
+        self.body = nn.Sequential(                    # 64x64x3 image -&gt; 512 features
+            nn.Conv2d(obs_ch, 32, 8, stride=4), nn.ReLU(),
+            nn.Conv2d(32, 64, 4, stride=2), nn.ReLU(),
+            nn.Conv2d(64, 64, 3, stride=1), nn.ReLU(),
+            nn.Flatten(), nn.Linear(64 * 4 * 4, 512), nn.ReLU())
+        self.mu      = nn.Linear(512, n_act)          # Gaussian ka MEAN, state se
+        self.log_std = nn.Parameter(torch.zeros(n_act))  # SPREAD: state-independent,
+                                                      # lekin seekha jata hai
+        self.v       = nn.Linear(512, 1)              # critic head
+
+    def dist_and_value(self, obs):
+        h = self.body(obs / 255.0)                    # uint8 -&gt; [0,1]
+        dist = Normal(self.mu(h), self.log_std.exp()) # yahi hamari policy pi(a|s)
+        return dist, self.v(h).squeeze(-1)</code></pre>
+  </div>
+
+  <p><code>log_std</code> ko <em>parameter</em> banane ka matlab: exploration ka size khud training me tay hota hai. Shuru me std bada hota hai (agent kaafi random hilta hai), aur jaise-jaise wo confident hota hai, std apne aap girta hai. &epsilon;-greedy ka schedule hand se likhne ki zaroorat khatam.</p>
+
+  <h4>Hissa 2 &mdash; GAE se advantage</h4>
+
+  <div class="code">
+    <div class="code-top"><span class="file">ppo_from_scratch.py</span><span>2/4 &mdash; GAE-lambda</span></div>
+<pre><code class="py">def compute_gae(rews, vals, dones, last_val, gamma=0.99, lam=0.95):
+    """Advantage = "ye action average se kitna behtar tha".
+    Peeche se aage chalte hain, kyunki A_t ko A_{t+1} chahiye."""
+    adv, running = torch.zeros_like(rews), 0.0
+    for t in reversed(range(len(rews))):
+        next_val = last_val if t == len(rews) - 1 else vals[t + 1]
+        mask     = 1.0 - dones[t]          # episode khatam ho gaya -&gt; aage kuch nahi
+        delta    = rews[t] + gamma * next_val * mask - vals[t]   # TD error (sec 06)
+        running  = delta + gamma * lam * mask * running          # delta ka weighted jod
+        adv[t]   = running
+    returns = adv + vals                   # critic ka target
+    return adv, returns</code></pre>
+  </div>
+
+  <p><code>mask</code> wali line chhoti dikhti hai lekin zaroori hai: episode khatam hone par agli state ki value ko zero karna padta hai, warna do alag episodes ka reward aapas me mil jayega. Hamare env me ye baat aur nazuk hai &mdash; hum <code>terminated</code> (agent ne shape bana liya / stop kaha) aur <code>truncated</code> (240 steps khatam) alag rakhte hain, kyunki truncation par value ko bootstrap <em>karna</em> chahiye, terminate par nahi.</p>
+
+  <h4>Hissa 3 &mdash; PPO update (ye poora algorithm hai)</h4>
+
+  <div class="code">
+    <div class="code-top"><span class="file">ppo_from_scratch.py</span><span>3/4 &mdash; clipped update</span></div>
+<pre><code class="py">def ppo_update(net, opt, obs, act, old_logp, adv, ret,
+               clip=0.2, epochs=6, batch=256, c_v=0.5, c_e=0.02):
+
+    # advantage normalise: mean 0, std 1. Isse learning rate har task par
+    # ek jaisa kaam karta hai aur badi advantages update ko uda nahi deti.
+    adv = (adv - adv.mean()) / (adv.std() + 1e-8)
+    n = len(obs)
+
+    for _ in range(epochs):                     # WAHI data, 6 baar
+        for idx in torch.randperm(n).split(batch):
+            dist, value = net.dist_and_value(obs[idx])
+            logp  = dist.log_prob(act[idx]).sum(-1)   # dx aur dy dono ka jod
+            ratio = (logp - old_logp[idx]).exp()      # r(theta), log me safe
+
+            # ---- PPO ka dil: do terms, chhota wala lo ----
+            unclipped = ratio * adv[idx]
+            clipped   = ratio.clamp(1 - clip, 1 + clip) * adv[idx]
+            policy_loss = -torch.min(unclipped, clipped).mean()
+            # minus isliye: hum objective ko BADHANA chahte hain,
+            # lekin optimizer loss ko GHATATA hai.
+
+            value_loss = ((ret[idx] - value) ** 2).mean()   # critic
+            entropy    = dist.entropy().sum(-1).mean()      # explorer
+
+            loss = policy_loss + c_v * value_loss - c_e * entropy
+
+            opt.zero_grad()
+            loss.backward()
+            nn.utils.clip_grad_norm_(net.parameters(), 0.5)  # ek aur safety belt
+            opt.step()</code></pre>
+  </div>
+
+  <h4>Hissa 4 &mdash; Bahar ka loop</h4>
+
+  <div class="code">
+    <div class="code-top"><span class="file">ppo_from_scratch.py</span><span>4/4 &mdash; rollout aur training loop</span></div>
+<pre><code class="py">net = ActorCritic(obs_ch=3, n_act=2)
+opt = torch.optim.Adam(net.parameters(), lr=3e-4)
+obs, _ = env.reset()
+
+for update in range(n_updates):
+    O, A, LP, R, D, V = [], [], [], [], [], []
+
+    # ---- 1. ROLLOUT: abhi wali policy se 512 steps ----
+    for t in range(512):
+        with torch.no_grad():                       # rollout me gradient nahi
+            dist, v = net.dist_and_value(obs)
+            a = dist.sample()                       # SAMPLE, mean nahi -&gt; exploration
+            lp = dist.log_prob(a).sum(-1)           # ye ratio ke liye chahiye hoga
+        obs2, r, term, trunc, _ = env.step(a.numpy())
+        O.append(obs); A.append(a); LP.append(lp)
+        R.append(r);   V.append(v); D.append(term or trunc)
+        obs = obs2
+
+    # ---- 2. ADVANTAGE ----
+    with torch.no_grad():
+        _, last_v = net.dist_and_value(obs)
+    adv, ret = compute_gae(stack(R), stack(V), stack(D), last_v)
+
+    # ---- 3. UPDATE (6 epochs usi data par) ----
+    ppo_update(net, opt, stack(O), stack(A), stack(LP), adv, ret)
+
+    # ---- 4. data ab PURANA hai. Phenk do, dubara rollout karo. ----</code></pre>
+  </div>
+
+  <div class="note">
+    <span class="tag">Aakhri comment sabse zaroori hai</span>
+    <p>Wo ek line &mdash; "data ab purana hai, phenk do" &mdash; PPO ke on-policy hone ka poora matlab hai. Ek off-policy algorithm (DQN, SAC) yahan data ko ek buffer me daal deta aur agle laakh steps tak dubara-dubara use karta. PPO nahi karta. Iski keemat hai zyada environment steps; iska inaam hai stability. Section 13 me hum dikhate hain ki <b>hamare project me ye sauda faaydemand kyu hai.</b></p>
+  </div>
+</section>
+<section id="s13" class="col">
+  <div class="sec-head"><span class="sec-num">13</span><h2>Humne PPO hi kyu chuna?</h2></div>
+
+  <p class="lede">Ye section poore page ka jawab hai. Har algorithm ko hamare asli task ke saamne rakh kar dekha gaya hai &mdash; aur teen wajah nikli jo faisla-kun thi.</p>
+
+  <h3>13.1 &mdash; Pehle task ka sach</h3>
+
+  <div class="tw">
+  <table>
+    <tr><th>Hamare task ki khaasiyat</th><th>Value</th><th>Kis algorithm ko rok deti hai</th></tr>
+    <tr><td>Action space</td><td class="num">Continuous, [&minus;1,1]<sup>2</sup></td><td class="no">DQN, Q-Learning, SARSA sab bahar</td></tr>
+    <tr><td>Observation</td><td class="num">64&times;64&times;3 image</td><td>Tabular methods bahar; CNN chahiye</td></tr>
+    <tr><td>Episode</td><td class="num">240 steps, fixed</td><td>Pure MC dheema aur ustable</td></tr>
+    <tr><td>Reward</td><td class="num">Dense (har step &Delta;IoU)</td><td>Achhi khabar &mdash; sabke liye aasan</td></tr>
+    <tr><td>Simulation ki laagat</td><td class="num">Bahut kam (kinematic)</td><td>Sample efficiency ki majboori nahi</td></tr>
+    <tr><td>Research zaroorat</td><td class="num">Seeds ke beech reproducible</td><td class="no">Nazuk, tuning-sensitive algorithms bahar</td></tr>
+  </table>
+  </div>
+
+  <h3>13.2 &mdash; Har algorithm ka faisla</h3>
+
+  <div class="tw">
+  <table>
+    <tr><th>Algorithm</th><th>Continuous?</th><th>Faisla</th><th>Wajah</th></tr>
+    <tr><td><b>SARSA</b></td><td class="no">Nahi</td><td class="no">Bahar</td><td>Tabular. 10<sup>29,592</sup> states ki table nahi ban sakti.</td></tr>
+    <tr><td><b>Q-Learning</b></td><td class="no">Nahi</td><td class="no">Bahar</td><td>Wahi. Lekin uska idea (bootstrapping) hamare andar zinda hai.</td></tr>
+    <tr><td><b>DQN</b></td><td class="no">Nahi</td><td class="no">Bahar</td><td><code>max<sub>a</sub></code> infinite actions par nahi liya ja sakta. Discretize karein to smooth curve marr jaayenge.</td></tr>
+    <tr><td><b>REINFORCE</b></td><td class="yes">Haan</td><td class="no">Bahar</td><td>Pure Monte Carlo &mdash; variance itni ki 200k steps me kuch na seekhta.</td></tr>
+    <tr><td><b>A2C</b></td><td class="yes">Haan</td><td class="mid">Ho sakta tha</td><td>Chalta, lekin PPO ka clip ise har jagah harata hai. PPO hi A2C + safety hai.</td></tr>
+    <tr><td><b>DDPG / TD3</b></td><td class="yes">Haan</td><td class="mid">Ho sakta tha</td><td>Off-policy, sample-efficient &mdash; lekin hyperparameters ke prati bahut nazuk, seeds ke beech bikharta hai.</td></tr>
+    <tr><td><b>SAC</b></td><td class="yes">Haan</td><td class="mid">Aage aayega</td><td>Off-policy me sabse stable. RQ3 me PPO se tulna ke liye plan me hai.</td></tr>
+    <tr><td><b>PPO</b></td><td class="yes">Haan</td><td class="yes">CHUNA</td><td>Continuous, stable, CNN ke saath aazmaya hua, reproducible, aur robotics ka default baseline.</td></tr>
+  </table>
+  </div>
+
+  <h3>13.3 &mdash; Wajah 1: action continuous hai (ye akela hi faisla kar deta hai)</h3>
+
+  <p>Hamara agent kehta hai "pen ko 0.37 units daayen aur 0.12 units upar sarkao". DQN ki puri machinery <code>max<sub>a</sub> Q(s,a)</code> par khadi hai &mdash; aur infinite actions par max lena sambhav nahi.</p>
+
+  <p>Iska ek jugaad hai: action ko discretize kar do, jaise 8 dishaayein &times; 3 lambaai = 24 actions. Lekin phir:</p>
+
+  <ul>
+    <li>Circle sirf 8 dishaon se banega &mdash; wo circle nahi, octagon hoga. Aur circle hamare chaar targets me se ek hai.</li>
+    <li>Sim-to-real par ye aur bura hai: asli arm ke servo continuous angles lete hain; ek discretized policy jhatke se chalegi.</li>
+    <li><code>path_ratio</code> (hamari efficiency metric) barbaad ho jayega, kyunki zig-zag majboori ban jayega.</li>
+  </ul>
+
+  <p>PPO me ye samasya hai hi nahi. Network Gaussian ka mean deta hai, action sample hota hai, khatam. Koi max nahi, koi discretization nahi.</p>
+
+  <h3>13.4 &mdash; Wajah 2: hamare project me off-policy kyu nahi</h3>
+
+  <p>Off-policy ka bada faayda hai replay buffer &mdash; purana data baar-baar use karo. Lekin hamare khaas project me wo faayda kaafi had tak <em>kaam ka nahi rehta</em>, aur uske saath teen asli dikkatein aati hain.</p>
+
+  <div class="note warn">
+    <span class="tag">Dikkat 1 &mdash; hamara reward khud badalta raha</span>
+    <p>Research ke dauraan hum reward function baar-baar badalte rahe: pehle coverage-only, phir &Delta;IoU, phir potential-based shaping, phir <code>truth</code> / <code>vision</code> / <code>vision_real</code> teen modes. Replay buffer me pada har purana transition <b>us waqt ke reward function se</b> ginaa gaya tha. Off-policy agent unhi purane, ab galat, rewards par train hota rehta.</p>
+    <p>On-policy me ye samasya hai hi nahi &mdash; har rollout abhi ke env aur abhi ke reward se aata hai, aur update ke baad phenk diya jata hai.</p>
+  </div>
+
+  <div class="note warn">
+    <span class="tag">Dikkat 2 &mdash; hamara state canvas ke itihaas par tika hai</span>
+    <p>Hamare env me state ka ek channel hai <b>"ab tak kya draw ho chuka"</b>. Wo canvas poore episode me jama hota hai. Aur reward &Delta;IoU hai &mdash; yaani <em>usi canvas ka badlaav</em>.</p>
+    <p>Iska matlab: ek transition (s, a, r, s&prime;) apne poore itihaas se juda hua hai. Buffer me alag-alag episodes ke, alag-alag policies ke, alag-alag adhoore canvas ke transitions mila kar batch banana &mdash; ye kaam karta hai (DQN yahi karta hai) lekin ismein correlation aur non-stationarity dono bahut zyada hain. On-policy rollout me poore trajectories saath rehte hain, jo GAE ke liye zaroori bhi hai.</p>
+  </div>
+
+  <div class="note warn">
+    <span class="tag">Dikkat 3 &mdash; research ke liye stability &gt; speed</span>
+    <p>Hamara headline result H2 hai: "camera-reward agent ground-truth agent jitna hi achha hai". Ye claim tabhi tikta hai jab dono arms <b>ek hi protocol par, kai seeds par, dobara chalane par wahi number</b> dein.</p>
+    <p>Off-policy methods (khaaskar DDPG/TD3) seeds ke beech bahut bikharte hain. Agar hamara variance itna zyada hota, to 0.028 ka farak (H2 ka poora sawaal) shor me doob jata &mdash; aur paper me kuch kehne layak nahi bachta. PPO ka predictable behaviour yahan ek <em>scientific</em> zaroorat hai, sirf convenience nahi.</p>
+  </div>
+
+  <div class="note ok">
+    <span class="tag">Aur off-policy ka faayda hamare liye chhota kyu hai</span>
+    <p>Off-policy ka asli inaam <b>sample efficiency</b> hai &mdash; jab har environment step mehnga ho (asli robot, asli waqt, asli tootne ka khatra). Hamara default sim <code>use_arm=False</code> hai: pen seedhe move hota hai, ink OpenCV se lagti hai, koi physics nahi. Ye itna sasta hai ki 8 environments parallel me chalte hain aur 200,000 steps minton me poore hote hain.</p>
+    <p>Yaani hum wo cheez kharid rahe hain (stability) jo hamare paas kam hai, us cheez ke badle (sample efficiency) jo hamare paas kaafi hai. <b>Yahi sahi sauda hai.</b></p>
+  </div>
+
+  <div class="note us">
+    <span class="tag">Imaandaar baat &mdash; ye faisla hamesha ke liye nahi hai</span>
+    <p>Jab hum <b>sim-to-real</b> par jaayenge, samikaran badal jayega: asli robot par har step mehnga hoga, reward function tab tak fix ho chuka hoga, aur sample efficiency achanak sabse zaroori cheez ban jayegi. Us waqt <b>SAC</b> theek wahi algorithm hoga. Isiliye wo roadmap (RQ3) me hai &mdash; hataya nahi gaya hai, sirf abhi uski baari nahi hai.</p>
+  </div>
+
+  <h3>13.5 &mdash; Ek line me</h3>
+
+  <div class="fx">
+    <div class="fx-name">Faisla</div>
+    <div class="fx-eq"><span class="t-plot">continuous action</span> &rArr; DQN bahar &nbsp;&middot;&nbsp; <span class="t-target">badalta reward + itihaas-nirbhar state</span> &rArr; replay buffer ka faayda kam &nbsp;&middot;&nbsp; <span class="t-good">sasta sim</span> &rArr; sample efficiency ki majboori nahi &nbsp;&rArr;&nbsp; <span class="t-violet">PPO</span></div>
+  </div>
+</section>
+
+<section id="s14" class="col">
+  <div class="sec-head"><span class="sec-num">14</span><h2>Hamara environment &mdash; Gymnasium se DrawEnv tak</h2></div>
+
+  <h3>14.1 &mdash; Gymnasium ka contract</h3>
+
+  <p>Gymnasium (purana naam OpenAI Gym) ek standard interface hai. Iska poora asool ye hai: agar aapka environment ye chaar cheezein de de, to duniya ka koi bhi RL algorithm usme chal jayega &mdash; algorithm ko aapke task ke baare me kuch janna hi nahi padta.</p>
+
+  <div class="code">
+    <div class="code-top"><span class="file">Gymnasium API</span><span>chaar cheezein, bas</span></div>
+<pre><code class="py">class MyEnv(gym.Env):
+    observation_space = spaces.Box(...)   # 1. state kaisa dikhta hai
+    action_space      = spaces.Box(...)   # 2. agent kya kar sakta hai
+
+    def reset(self, seed=None, options=None):
+        return obs, info                  # 3. naya episode shuru
+
+    def step(self, action):
+        return obs, reward, terminated, truncated, info   # 4. ek kadam</code></pre>
+  </div>
+
+  <p><code>terminated</code> aur <code>truncated</code> ka farak chhota lagta hai lekin RL ke liye bada hai:</p>
+
+  <div class="tw">
+  <table>
+    <tr><th>Flag</th><th>Matlab</th><th>Hamare env me</th><th>Value function ka asar</th></tr>
+    <tr><td><code>terminated</code></td><td>Task sach me khatam</td><td>IoU &ge; 0.60 pahunch gaya, ya agent ne "stop" kaha</td><td>Aage kuch nahi &mdash; bootstrap <b>nahi</b> karna</td></tr>
+    <tr><td><code>truncated</code></td><td>Bahar se kaat diya</td><td>240 steps pure ho gaye, ya plateau detect hua</td><td>Episode chal sakta tha &mdash; bootstrap <b>karna</b> chahiye</td></tr>
+  </table>
+  </div>
+
+  <h3>14.2 &mdash; Observation: teen tasveerein ek me</h3>
+
+  <p>Agent ko ek 64&times;64&times;3 uint8 image milti hai. Teeno channel alag sawaal ka jawab dete hain:</p>
+
+  <figure>
+    <svg viewBox="0 0 720 250" role="img" aria-label="Teen observation channels: target, drawn, pen">
+      <g transform="translate(30,30)">
+        <rect x="0" y="0" width="130" height="130" rx="6" fill="var(--surface)" stroke="var(--plot)" stroke-width="1.6"/>
+        <rect x="26" y="26" width="78" height="78" fill="none" stroke="var(--plot)" stroke-width="7"/>
+        <text class="svg-t" x="65" y="152" text-anchor="middle" fill="var(--plot)">channel 0</text>
+        <text class="svg-s" x="65" y="170" text-anchor="middle">TARGET</text>
+        <text class="svg-l" x="65" y="190" text-anchor="middle">"kya banana hai"</text>
+      </g>
+      <g transform="translate(220,30)">
+        <rect x="0" y="0" width="130" height="130" rx="6" fill="var(--surface)" stroke="var(--hair)" stroke-width="1.6"/>
+        <path d="M26 26 L104 26 L104 104 L60 104" fill="none" stroke="var(--ink)" stroke-width="7" stroke-linecap="round"/>
+        <text class="svg-t" x="65" y="152" text-anchor="middle">channel 1</text>
+        <text class="svg-s" x="65" y="170" text-anchor="middle">DRAWN</text>
+        <text class="svg-l" x="65" y="190" text-anchor="middle">"ab tak kya bana"</text>
+      </g>
+      <g transform="translate(410,30)">
+        <rect x="0" y="0" width="130" height="130" rx="6" fill="var(--surface)" stroke="var(--hair)" stroke-width="1.6"/>
+        <circle cx="60" cy="104" r="9" fill="var(--target)"/>
+        <text class="svg-t" x="65" y="152" text-anchor="middle" fill="var(--target)">channel 2</text>
+        <text class="svg-s" x="65" y="170" text-anchor="middle">PEN</text>
+        <text class="svg-l" x="65" y="190" text-anchor="middle">"main abhi kahan hoon"</text>
+      </g>
+      <g transform="translate(600,30)">
+        <rect x="0" y="0" width="90" height="130" rx="6" fill="var(--amber-tint)" stroke="var(--amber)" stroke-width="1.6" stroke-dasharray="5 4"/>
+        <text class="svg-l" x="45" y="60" text-anchor="middle" fill="var(--amber)">255 &times;</text>
+        <text class="svg-l" x="45" y="78" text-anchor="middle" fill="var(--amber)">steps/max</text>
+        <text class="svg-t" x="45" y="152" text-anchor="middle" fill="var(--amber)">channel 3</text>
+        <text class="svg-s" x="45" y="170" text-anchor="middle">TIME</text>
+        <text class="svg-l" x="45" y="190" text-anchor="middle">optional (O1)</text>
+      </g>
+      <text class="svg-s" x="30" y="228">Teeno (ya chaaron) ek saath stack hokar CNN me jate hain. CNN ko "kya banana hai" aur "kya ban chuka" ka farak khud dikh jata hai.</text>
+    </svg>
+    <figcaption><b>Ye design ek RL faisla hai, sirf engineering nahi.</b> Target ko observation me daalne ka matlab hai ki ek hi policy alag-alag shapes seekh sakti hai &mdash; shape state ka hissa hai, alag task nahi. Channel 3 hamara O1 ablation hai: bina uske agent ko pata hi nahi chalta ki episode kab khatam hoga, yaani task <b>partially observable</b> ho jata hai.</figcaption>
+  </figure>
+
+  <h3>14.3 &mdash; Action space</h3>
+
+  <div class="code">
+    <div class="code-top"><span class="file">rl/draw_env.py</span><span>action aur observation ki definition</span></div>
+<pre><code class="py"># action: dx, dy in [-1,1] (step_size se multiply hote hain), pen_down in [0,1],
+# aur - sirf allow_stop hone par - ek chautha "main khatam" head [0,1].
+lo, hi = [-1.0, -1.0, 0.0], [1.0, 1.0, 1.0]
+if allow_stop:
+    lo.append(0.0)
+    hi.append(1.0)
+self.action_space = spaces.Box(low=np.array(lo, np.float32),
+                               high=np.array(hi, np.float32))
+
+# observation: uint8 image (target, drawn, pen marker [, time left])
+self.obs_channels = 4 if time_in_obs else 3
+self.observation_space = spaces.Box(
+    low=0, high=255, shape=(obs_res, obs_res, self.obs_channels),
+    dtype=np.uint8)</code></pre>
+  </div>
+
+  <div class="note us">
+    <span class="tag">Ek design faisla jo aage bahut kaam aayega</span>
+    <p>Agent ka action <b>pen space</b> me hai (pen ko kahan le jao), <b>joint space</b> me nahi (kaunsa motor kitna ghumao). Inverse kinematics beech me baith kar pen ki jagah ko joint angles me badalti hai.</p>
+    <p>Faayda: seekhi hui policy <b>kisi bhi arm par</b> chal sakti hai. KUKA se sasta 4-DOF arm par jaate waqt sirf IK badlegi, policy nahi. Agar humne joint angles seekhe hote, to poori training KUKA ke saath hi bandh ho jati &mdash; aur sim-to-real ka poora sapna atak jata.</p>
+  </div>
+
+  <h3>14.4 &mdash; Episode ka jeevan</h3>
+
+  <div class="stepgrid">
+    <div class="step"><div><b>reset()</b><span>Canvas saaf. Pen ko target par uss point par rakha jata hai jo kaagaz ke centre ke sabse paas hai &mdash; deterministically.</span></div></div>
+    <div class="step"><div><b>step(action) &times; 240</b><span>Pen sarakta hai, ek line inks hoti hai, IoU napa jata hai, reward milta hai.</span></div></div>
+    <div class="step"><div><b>terminated</b><span>Agar reward-IoU 0.60 paar &mdash; saath me +2.0 bonus.</span></div></div>
+    <div class="step"><div><b>truncated</b><span>240 steps pure. Yahi aam taur par hota hai.</span></div></div>
+  </div>
+
+  <div class="note">
+    <span class="tag">Ek chhoti si baat jisne bada farak daala</span>
+    <p>Pehle pen kaagaz ke <b>centre</b> se shuru hota tha, aur pen hamesha neeche rehta hai. Nateeja: har drawing me centre se shape tak ek bekaar "poonch" ban jati thi &mdash; jo hamara sabse bada IoU nuksaan tha.</p>
+    <p>Pen ko shape ke upar se shuru karne se wo poonch gayab ho gayi. Lekin <em>random</em> on-target start ne ulta nuksaan kiya (line ka IoU 0.51 se 0.22 gir gaya) &mdash; kyunki usne episode me itni variance daal di jise policy ko absorb karna pada. Isliye ab start <b>deterministic</b> hai. Ye RL ka ek asli sabak hai: <b>variance sirf reward me nahi, episode ke initial conditions me bhi aati hai.</b></p>
+  </div>
+</section>
+
+<section id="s15" class="col">
+  <div class="sec-head"><span class="sec-num">15</span><h2>Reward design &mdash; jahan project ki asli mehnat hai</h2></div>
+
+  <p class="lede">RL me algorithm chunna aasan hissa hai. Reward likhna mushkil hissa hai &mdash; kyunki agent bilkul wahi maximize karega jo aapne likha, wo nahi jo aapke dimaag me tha.</p>
+
+  <h3>15.1 &mdash; Base metric: IoU</h3>
+
+  <div class="fx">
+    <div class="fx-name">Intersection over Union</div>
+    <div class="fx-eq"><span class="t-plot">IoU</span> = | <span class="t-good">D</span> &cap; <span class="t-target">T</span> | / | <span class="t-good">D</span> &cup; <span class="t-target">T</span> |</div>
+    <ul class="fx-legend">
+      <li><span class="k t-good">D</span><span><b>Drawn</b> &mdash; jitne pixels par ink lagi.</span></li>
+      <li><span class="k t-target">T</span><span><b>Target</b> &mdash; jitne pixels par ink honi chahiye thi.</span></li>
+      <li><span class="k t-plot">IoU</span><span>1.0 = perfect. 0 = bilkul alag. <b>Ye khud hi stray ink ko saza deta hai</b> &mdash; kyunki galat jagah ki ink union badhati hai, intersection nahi. Isliye "poora kaagaz kaala kar do" wali cheating apne aap ruk jati hai.</span></li>
+    </ul>
+  </div>
+
+  <h3>15.2 &mdash; Reward = IoU ka <em>badhna</em>, IoU khud nahi</h3>
+
+  <p>Agar reward har step par IoU hota, to agent ko sirf lambe episode ka faayda milta (ek achhi drawing 200 steps tak reward deti rehti). Isliye hum <strong>delta</strong> dete hain &mdash; is step me IoU kitna <em>badha</em>.</p>
+
+  <div class="fx">
+    <div class="fx-name">Hamara reward (rl/draw_env.py, _reward)</div>
+    <div class="fx-eq">r<sub>t</sub> = <span class="t-plot">w<sub>iou</sub> &middot; &Delta;IoU<sub>t</sub></span> + <span class="t-violet">w<sub>prox</sub> &middot; (&Phi;<sub>t</sub> &minus; &Phi;<sub>t&minus;1</sub>)</span> &minus; <span class="t-amber">c<sub>time</sub></span> &minus; <span class="t-target">w<sub>smooth</sub> &middot; mean|a<sub>t</sub> &minus; a<sub>t&minus;1</sub>|</span></div>
+    <ul class="fx-legend">
+      <li><span class="k t-plot">&Delta;IoU</span><span>Mukhya signal. <code>iou_weight=10.0</code>. Ek khoobsurat ganitiya baat: ye poore episode me <b>telescope</b> karta hai &mdash; saare &Delta;IoU jodne par sirf final IoU bachta hai. Yaani "return maximize karna" = "achhi drawing banana", exactly.</span></li>
+      <li><span class="k t-violet">&Phi; shaping</span><span>Potential-based shaping. <code>prox_weight=0.4</code>. Pen ko target ke paas <em>aane</em> par hi reward, ink lagne se pehle. Isne "kuch mat banao" wale local optimum ko toda.</span></li>
+      <li><span class="k t-amber">c<sub>time</sub></span><span>Per-step laagat, abhi 0. Efficiency ke liye badhaya ja sakta hai.</span></li>
+      <li><span class="k t-target">smoothness</span><span><code>smooth_penalty=0.02</code>. Achanak dishaa badalne par chhoti saza &rarr; seedhi, saaf strokes.</span></li>
+    </ul>
+  </div>
+
+  <h3>15.3 &mdash; Potential-based shaping: ek guarantee ke saath</h3>
+
+  <p>Reward me "madad" jodna khatarnaak hai &mdash; aksar agent madad ko hi hack kar leta hai. Lekin ek khaas roop me shaping <strong>ganitiya taur par surakshit</strong> hai (Ng, Harada &amp; Russell, 1999): agar extra reward ek <em>potential function ka farak</em> ho, to optimal policy bilkul nahi badalti.</p>
+
+  <div class="fx">
+    <div class="fx-name">Potential-based shaping theorem</div>
+    <div class="fx-eq"><span class="t-good">F(s, s&prime;)</span> = <span class="t-plot">&gamma;&Phi;(s&prime;)</span> &minus; <span class="t-violet">&Phi;(s)</span> &nbsp;&rArr;&nbsp; optimal policy <span class="t-target">nahi badalti</span></div>
+    <ul class="fx-legend">
+      <li><span class="k t-good">F</span><span>Jodha gaya extra reward.</span></li>
+      <li><span class="k t-plot">&Phi;(s)</span><span>Koi bhi function jo state ki "achhaai" batata ho. Hamare yahan: <b>&Phi; = &minus;(pen se target ki nazdeeki doori)</b> &mdash; pen target par ho to &Phi; = 0, door ho to negative.</span></li>
+      <li><span class="k t-target">guarantee</span><span>Kyunki F poore episode me telescope hokar ek constant ban jata hai, wo kisi policy ko doosri se aage nahi kar sakta. Yaani hum <b>seekhne ki raftaar</b> badhate hain bina task ki paribhaasha badle.</span></li>
+    </ul>
+  </div>
+
+  <div class="code">
+    <div class="code-top"><span class="file">rl/draw_env.py</span><span>shaping ka asli code</span></div>
+<pre><code class="py">self._target_dt = cv2.distanceTransform(
+    255 - self.target, cv2.DIST_L2, 3).astype(np.float32) / canvas_res
+# har pixel se sabse nazdeek TARGET ink pixel ki doori, ek baar pehle hi nikaal li
+
+def _potential(self):
+    """Potential Phi = -(pen se sabse nazdeek target ink ki doori).
+    Zyada achha = zyada bada (pen target par -> 0)."""
+    col, row = self._world_to_px(*self.pen_xy)
+    return -float(self._target_dt[row, col])
+
+def _reward(self, iou):
+    d_iou = iou - self._prev_iou          # mukhya signal
+    self._prev_iou = iou
+    r = self.iou_weight * d_iou
+
+    phi = self._potential()               # shaping: bina task badle guidance
+    r += self.prox_weight * (phi - self._prev_phi)
+    self._prev_phi = phi
+
+    r -= self.time_penalty
+    return r</code></pre>
+  </div>
+
+  <h3>15.4 &mdash; Sirf IoU se kaam nahi chalta: doosri metrics</h3>
+
+  <p>IoU ek cheez nahi dekh sakta: <em>kaise</em> banaya gaya. Ek jhatkedaar, tedha-medha path bhi theek-thaak IoU la sakta hai. Isliye hum saath me ye bhi napte hain:</p>
+
+  <div class="tw">
+  <table>
+    <tr><th>Metric</th><th>Formula / matlab</th><th>Kya pakadti hai</th></tr>
+    <tr><td><b>Coverage</b></td><td>|D &cap; T| / |T|</td><td>Recall &mdash; target ka kitna hissa bhara gaya</td></tr>
+    <tr><td><b>Precision</b></td><td>|D &cap; T| / |D|</td><td>Kitni ink target se bahar gayi</td></tr>
+    <tr><td><b>Chamfer</b></td><td>average doori do ink sets ke beech</td><td>IoU se naram &mdash; "paas hai lekin overlap nahi" ko bhi credit</td></tr>
+    <tr><td><b>SNR</b></td><td>strokes(drawn) / strokes(target)</td><td>Fragmentation. <em>Abhi informative nahi</em> &mdash; pen kabhi uthta hi nahi to hamesha ~1.0</td></tr>
+    <tr><td><b>path_ratio</b></td><td>pen ne kitna chala / outline ki lambaai</td><td><b>Ye asli kaam ki hai</b> &mdash; zig-zag aur bekaar bhatakna pakadti hai. 1.0 = perfect trace</td></tr>
+  </table>
+  </div>
+
+  <div class="note us">
+    <span class="tag">Reward hacking &mdash; aur humne use kaise check kiya</span>
+    <p>Hamara <code>vision</code> reward agent ko <b>camera ki nazar</b> se score karta hai. Yahan ek asli khatra hai: agent kuch aisa bana le jo <em>camera ko</em> achha lage lekin asal me bura ho &mdash; classic reward hacking.</p>
+    <p>Isliye env har step par <b>dono</b> record karta hai: <code>reward_iou</code> (jo agent optimize kar raha hai) aur <code>iou</code> (asli sach). Inka farak hi hamara H3 test hai. 3328 episodes par natija: average gap &minus;0.0001, correlation 0.997&ndash;0.999. Yaani <b>camera reward hack nahi ho raha.</b> Ye ek asli scientific check hai jo har RL project me hona chahiye.</p>
+  </div>
+</section>
+<section id="s16" class="col">
+  <div class="sec-head"><span class="sec-num">16</span><h2>Poori pipeline &mdash; ek step me kya-kya hota hai</h2></div>
+
+  <p>Ab tak ke saare tukde jod kar dekhte hain. Neeche wo poora raasta hai jo <em>ek</em> environment step me chalta hai, aur uske bahar wo loop jo 200,000 baar chalta hai.</p>
+
+  <figure>
+    <svg viewBox="0 0 720 470" role="img" aria-label="RoboSketch-RL ki poori training pipeline">
+      <rect x="20" y="16" width="200" height="70" rx="9" fill="var(--plot-tint)" stroke="var(--plot)" stroke-width="1.6"/>
+      <text class="svg-t" x="120" y="42" text-anchor="middle" fill="var(--plot)">PPO POLICY</text>
+      <text class="svg-l" x="120" y="60" text-anchor="middle">CnnPolicy &rarr; Normal(&mu;, &sigma;)</text>
+      <text class="svg-l" x="120" y="76" text-anchor="middle">a = dist.sample()</text>
+
+      <path d="M220 51 L300 51" stroke="var(--plot)" stroke-width="1.8" marker-end="url(#p-a)"/>
+      <text class="svg-l" x="260" y="42" text-anchor="middle" fill="var(--plot)">[dx, dy]</text>
+
+      <rect x="300" y="16" width="180" height="70" rx="9" fill="var(--surface)" stroke="var(--hair)" stroke-width="1.6"/>
+      <text class="svg-t" x="390" y="42" text-anchor="middle">INVERSE KINEMATICS</text>
+      <text class="svg-l" x="390" y="60" text-anchor="middle">pen (x,y) &rarr; 7 joint angles</text>
+      <text class="svg-l" x="390" y="76" text-anchor="middle">use_arm=True par PyBullet</text>
+
+      <path d="M480 51 L560 51" stroke="var(--graphite)" stroke-width="1.8" marker-end="url(#g-a)"/>
+
+      <rect x="560" y="16" width="140" height="70" rx="9" fill="var(--surface)" stroke="var(--hair)" stroke-width="1.6"/>
+      <text class="svg-t" x="630" y="42" text-anchor="middle">PEN INKS</text>
+      <text class="svg-l" x="630" y="60" text-anchor="middle">cv2.line() canvas par</text>
+      <text class="svg-l" x="630" y="76" text-anchor="middle">128&times;128</text>
+
+      <path d="M630 86 L630 118" stroke="var(--graphite)" stroke-width="1.8" marker-end="url(#g-a)"/>
+
+      <rect x="470" y="118" width="230" height="86" rx="9" fill="var(--target-tint)" stroke="var(--target)" stroke-width="1.6"/>
+      <text class="svg-t" x="585" y="142" text-anchor="middle" fill="var(--target)">PERCEPTION &mdash; do raaste</text>
+      <text class="svg-l" x="585" y="162" text-anchor="middle">truth: canvas jaisa hai (baseline)</text>
+      <text class="svg-l" x="585" y="180" text-anchor="middle">vision: camera + threshold (H2)</text>
+      <text class="svg-l" x="585" y="196" text-anchor="middle">vision_real: asli PyBullet render</text>
+
+      <path d="M470 161 L400 161" stroke="var(--target)" stroke-width="1.8" marker-end="url(#t-a)"/>
+
+      <rect x="200" y="118" width="200" height="86" rx="9" fill="var(--surface)" stroke="var(--hair)" stroke-width="1.6"/>
+      <text class="svg-t" x="300" y="142" text-anchor="middle">REWARD</text>
+      <text class="svg-l" x="300" y="162" text-anchor="middle">10 &middot; &Delta;IoU</text>
+      <text class="svg-l" x="300" y="180" text-anchor="middle">+ 0.4 &middot; &Delta;&Phi; &minus; 0.02 &middot; jerk</text>
+      <text class="svg-l" x="300" y="196" text-anchor="middle">info: iou, reward_iou, gap</text>
+
+      <path d="M200 161 L128 161 L128 96" stroke="var(--graphite)" stroke-width="1.8" fill="none" marker-end="url(#g-a)"/>
+      <text class="svg-l" x="34" y="140" fill="var(--graphite)">obs + reward</text>
+      <text class="svg-l" x="34" y="156" fill="var(--graphite)">wapas agent ko</text>
+
+      <line x1="20" y1="232" x2="700" y2="232" stroke="var(--hair)" stroke-dasharray="4 4"/>
+      <text class="svg-t" x="20" y="258">Bahar ka loop &mdash; PPO training</text>
+
+      <rect x="20" y="278" width="152" height="76" rx="9" fill="var(--surface)" stroke="var(--hair)" stroke-width="1.6"/>
+      <text class="svg-t" x="96" y="302" text-anchor="middle">1. ROLLOUT</text>
+      <text class="svg-l" x="96" y="320" text-anchor="middle">8 envs &times; 512 steps</text>
+      <text class="svg-l" x="96" y="336" text-anchor="middle">= 4096 transitions</text>
+
+      <path d="M172 316 L196 316" stroke="var(--graphite)" stroke-width="1.8" marker-end="url(#g-a)"/>
+
+      <rect x="196" y="278" width="152" height="76" rx="9" fill="var(--surface)" stroke="var(--hair)" stroke-width="1.6"/>
+      <text class="svg-t" x="272" y="302" text-anchor="middle">2. GAE</text>
+      <text class="svg-l" x="272" y="320" text-anchor="middle">&lambda; = 0.95, &gamma; = 0.99</text>
+      <text class="svg-l" x="272" y="336" text-anchor="middle">advantage + returns</text>
+
+      <path d="M348 316 L372 316" stroke="var(--graphite)" stroke-width="1.8" marker-end="url(#g-a)"/>
+
+      <rect x="372" y="278" width="152" height="76" rx="9" fill="var(--plot-tint)" stroke="var(--plot)" stroke-width="1.6"/>
+      <text class="svg-t" x="448" y="302" text-anchor="middle" fill="var(--plot)">3. PPO UPDATE</text>
+      <text class="svg-l" x="448" y="320" text-anchor="middle">6 epochs &times; 16 batches</text>
+      <text class="svg-l" x="448" y="336" text-anchor="middle">clip &epsilon; = 0.2</text>
+
+      <path d="M524 316 L548 316" stroke="var(--graphite)" stroke-width="1.8" marker-end="url(#g-a)"/>
+
+      <rect x="548" y="278" width="152" height="76" rx="9" fill="var(--surface)" stroke="var(--hair)" stroke-width="1.6"/>
+      <text class="svg-t" x="624" y="302" text-anchor="middle">4. DATA PHENKO</text>
+      <text class="svg-l" x="624" y="320" text-anchor="middle">on-policy: purana</text>
+      <text class="svg-l" x="624" y="336" text-anchor="middle">data ab bekaar</text>
+
+      <path d="M624 354 L624 378 L96 378 L96 358" fill="none" stroke="var(--violet)" stroke-width="1.8" marker-end="url(#v-a)"/>
+      <text class="svg-l" x="360" y="396" text-anchor="middle" fill="var(--violet)">ye chakkar ~49 baar chalta hai = 200,000 timesteps</text>
+
+      <rect x="20" y="410" width="680" height="46" rx="9" fill="var(--good-tint)" stroke="var(--good)" stroke-width="1.6"/>
+      <text class="svg-t" x="360" y="430" text-anchor="middle" fill="var(--good)">EVALUATE &mdash; deterministic policy, hamesha ASLI IoU par</text>
+      <text class="svg-l" x="360" y="448" text-anchor="middle">vision-trained agent ko bhi sach se hi jaancha jata hai, uski apni nazar se nahi</text>
+
+      <defs>
+        <marker id="g-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--graphite)"/></marker>
+        <marker id="p-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--plot)"/></marker>
+        <marker id="t-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--target)"/></marker>
+        <marker id="v-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--violet)"/></marker>
+      </defs>
+    </svg>
+    <figcaption><b>Upar ek step, neeche poora training loop.</b> Sabse zaroori line sabse neeche hai: agent chahe apni noisy camera-nazar se train ho, uska <em>score</em> hamesha asli IoU par lagta hai. Warna hum sirf ye naapte ki agent apne aap ko kitna achha samajhta hai.</figcaption>
+  </figure>
+</section>
+
+<section id="s17" class="col">
+  <div class="sec-head"><span class="sec-num">17</span><h2>Hamare results &mdash; aur unse mile RL ke sabak</h2></div>
+
+  <p>Ye sirf project ke numbers nahi hain; har ek RL ka ek aam paath sikhata hai. Isliye dono saath rakhe hain.</p>
+
+  <h3>H2 &mdash; Camera-reward, ground-truth reward jitna hi achha</h3>
+
+  <p>Ye project ki novelty hai. 4 shapes &times; 3 seeds &times; 200k steps, dono arms ka bilkul ek protocol.</p>
+
+  <div class="tw">
+  <table>
+    <tr><th>Reward kahan se aaya</th><th>Asli IoU (mean &plusmn; std)</th><th>Matlab</th></tr>
+    <tr><td>Ground truth (exact canvas)</td><td class="num">0.382 &plusmn; 0.052</td><td>Baseline &mdash; agent ko "perfect nazar" mili</td></tr>
+    <tr><td>Camera (noisy perception)</td><td class="num">0.354 &plusmn; 0.063</td><td>Wahi jo asli robot par mumkin hai</td></tr>
+  </table>
+  </div>
+
+  <p>Farak 0.028 hai &mdash; jo seed-to-seed spread se <em>chhota</em> hai, aur har shape ke error bars overlap karte hain. Isliye imaandaar dawa ye hai: dono <strong>statistically alag nahi hain</strong>, ye nahi ki koi jeeta.</p>
+
+  <div class="note">
+    <span class="tag">RL sabak</span>
+    <p>Reward ka <b>source</b> ek design choice hai, aur wo choice policy me seedhe bahti hai. Agar aap agent ko wo jaankaari se reward denge jo deploy ke waqt maujood nahi hogi, to aapne ek aisa agent bana liya jo sim me hi reh sakta hai. Isliye "reward kis cheez se milega" wo sawaal hai jo <em>hardware se pehle</em> pucha jana chahiye, baad me nahi.</p>
+  </div>
+
+  <h3>H3 &mdash; Kya camera reward hack ho raha hai? Nahi.</h3>
+
+  <p>3328 training episodes par, agent ka <em>samjha hua</em> IoU kabhi uske <em>asli</em> IoU se aage nahi bhaaga. Mean gap &minus;0.0001, correlation 0.997&ndash;0.999.</p>
+
+  <div class="note">
+    <span class="tag">RL sabak</span>
+    <p>Har proxy reward ke saath ye test hona chahiye. Aapko do cheezein alag-alag log karni padengi: <b>jo agent optimize kar raha hai</b>, aur <b>jo aap asal me chahte hain</b>. Agar training ke saath inka gap badhta jaye &mdash; aapka agent reward hack kar raha hai, chahe wo dikhne me kitna hi achha lage.</p>
+  </div>
+
+  <h3>O1 &mdash; Partial observability: agent ko ghadi nahi dikhti thi</h3>
+
+  <p>Hamara episode 240 steps par kat jata hai, lekin agent ko ye <em>dikhta hi nahi tha</em>. Do bilkul ek jaise canvas &mdash; ek me 5 steps bache, ek me 100 &mdash; agent ko ek jaise lagte the, jabki dono me sahi kaam alag hai. Ye classic <strong>partial observability</strong> hai: state Markov nahi thi.</p>
+
+  <p>Ilaaj: ek chautha channel, jisme har pixel = 255 &times; (steps / max_steps). Natija 24 runs par:</p>
+
+  <div class="tw">
+  <table>
+    <tr><th>Metric</th><th>Mean change</th><th>Pairs behtar</th><th>t</th><th>Nateeja</th></tr>
+    <tr><td>IoU</td><td class="num">+0.039</td><td class="num">9/12</td><td class="num">+2.17</td><td>Halka lekin asli</td></tr>
+    <tr><td>Peak IoU</td><td class="num">+0.040</td><td class="num">9/12</td><td class="num">+2.22</td><td>Shayad asli</td></tr>
+    <tr><td>Overshoot</td><td class="num">+0.001</td><td class="num">5/12</td><td class="num">+0.11</td><td class="no">Koi asar nahi</td></tr>
+  </table>
+  </div>
+
+  <div class="note us">
+    <span class="tag">Ek galat bhavishyavani, imaandaari se darj</span>
+    <p>Humne likha tha ki O1 <b>overshoot</b> kam karega &mdash; tark ye tha ki overshoot episode ke ant me hota hai, aur O1 agent ko ant dikha deta hai. <b>Data ne mana kar diya:</b> overshoot par asar bilkul zero (t = 0.11). IoU behtar hua, lekin us wajah se nahi jo humne socha tha. Ye research log me isliye darj hai kyunki failed prediction bhi ek nateeja hai.</p>
+  </div>
+
+  <h3>Overshoot &mdash; credit assignment ki asli tasveer</h3>
+
+  <p>Sabse dilchasp khoj: agent shape ko episode ke <strong>pehle ~15%</strong> me hi bana leta hai, phir usse bigaad deta hai, aur baaki ~74% steps ek jame hue canvas par baithe rehta hai. Peak se final tak average <strong>0.064 IoU</strong> ka nuksaan &mdash; jo H2 ke poore truth-vs-vision gap (0.028) se do guna se bhi zyada hai.</p>
+
+  <div class="tw">
+  <table>
+    <tr><th>Arm (square, seed 0)</th><th>Steps use hue</th><th>Final IoU</th><th>Peak IoU</th><th>Overshoot</th></tr>
+    <tr><td>baseline</td><td class="num">240</td><td class="num">0.465</td><td class="num">0.511</td><td class="num">0.046</td></tr>
+    <tr><td>plateau stop</td><td class="num">73</td><td class="num">0.479</td><td class="num">0.482</td><td class="num">0.002</td></tr>
+    <tr><td>learned stop</td><td class="num">15</td><td class="num">0.266</td><td class="num">0.266</td><td class="num">0.000</td></tr>
+  </table>
+  </div>
+
+  <p><code>plateau</code> arm ne episode 3&times; chhota kar diya <em>aur</em> IoU thoda behtar bhi ho gaya. <code>stop</code> arm ne overshoot poora khatam kar diya &mdash; lekin 15 steps me ruk kar, aadha shape banaye bina. Isliye hamara verdict rule sakht hai: <strong>overshoot tabhi "theek hua" mana jayega jab peak IoU bhi bana rahe.</strong> Jaldi ruk kar bura shape banana koi hal nahi hai.</p>
+
+  <div class="note">
+    <span class="tag">RL sabak &mdash; do, aur dono bade hain</span>
+    <p><b>1. Naapne ka waqt bhi ek design choice hai.</b> Hum IoU episode ke <em>ant</em> me naapte the. Agent ke liye best drawing beech me thi. Metric ne agent ko kam aanka &mdash; poore 0.064 se.</p>
+    <p><b>2. "Ruk jao" ek action hai jo policy ko seekhna padta hai.</b> Ek plateau detector <em>lagging</em> hai &mdash; "k steps se sudhaar nahi hua" tabhi pata chalta hai jab peak nikal chuka ho. Square ka nuksaan step 41 aur 47 ke beech hota hai; koi bhi k use nahi pakad sakta. Sirf agent ko us pal pata hota hai ki usne shape poora kar liya &mdash; isliye stop ek <b>action head</b> hona chahiye, ek environment rule nahi.</p>
+  </div>
+
+  <div class="note warn">
+    <span class="tag">Abhi khula sawaal</span>
+    <p>Overshoot ablation abhi <b>9/24 runs</b> par ruka hua hai (triangle seed-0 aur poora seed-1 baaki). Aur jab tak ye poora nahi hota, H2 ka 0.028 gap sawaalon ke ghere me hai &mdash; kyunki camera arm ground-truth arm se lagbhag <em>dugna</em> overshoot me kho raha hai. Yaani ho sakta hai wo gap asli farak na hokar sirf "hum kab naapte hain" ka artifact ho.</p>
+  </div>
+</section>
+
+<section id="s18" class="col">
+  <div class="sec-head"><span class="sec-num">18</span><h2>Formula cheat sheet</h2></div>
+
+  <p>Sab kuch ek jagah, dobara dekhne ke liye.</p>
+
+  <div class="tw">
+  <table>
+    <tr><th>Naam</th><th>Formula</th><th>Ek line me</th></tr>
+    <tr><td>Return</td><td class="num">G<sub>t</sub> = &Sigma; &gamma;<sup>k</sup> r<sub>t+k+1</sub></td><td>Aaj se aage ka kul discounted inaam</td></tr>
+    <tr><td>State value</td><td class="num">V<sup>&pi;</sup>(s) = E[G<sub>t</sub> | s]</td><td>Ye halat kitni achhi hai</td></tr>
+    <tr><td>Action value</td><td class="num">Q<sup>&pi;</sup>(s,a) = E[G<sub>t</sub> | s, a]</td><td>Yahan se ye chaal kitni achhi hai</td></tr>
+    <tr><td>MC update</td><td class="num">V(s) &larr; V(s) + &alpha;[G<sub>t</sub> &minus; V(s)]</td><td>Asli poore return ki taraf khisko</td></tr>
+    <tr><td>TD error</td><td class="num">&delta;<sub>t</sub> = r + &gamma;V(s&prime;) &minus; V(s)</td><td>"Surprise" &mdash; RL ka sabse zaroori number</td></tr>
+    <tr><td>TD(0)</td><td class="num">V(s) &larr; V(s) + &alpha;&delta;<sub>t</sub></td><td>Ek step chal kar turant seekho</td></tr>
+    <tr><td>SARSA</td><td class="num">Q(s,a) &larr; Q + &alpha;[r + &gamma;Q(s&prime;,a&prime;) &minus; Q]</td><td>On-policy: asli agla action</td></tr>
+    <tr><td>Q-Learning</td><td class="num">Q(s,a) &larr; Q + &alpha;[r + &gamma;max<sub>a&prime;</sub>Q(s&prime;,a&prime;) &minus; Q]</td><td>Off-policy: best agla action</td></tr>
+    <tr><td>DQN loss</td><td class="num">(r + &gamma;max<sub>a&prime;</sub>Q(s&prime;,a&prime;;&theta;<sup>&minus;</sup>) &minus; Q(s,a;&theta;))<sup>2</sup></td><td>Q-Learning + CNN + target network</td></tr>
+    <tr><td>&epsilon;-greedy</td><td class="num">best action w.p. 1&minus;&epsilon;, random w.p. &epsilon;</td><td>Discrete exploration</td></tr>
+    <tr><td>Policy gradient</td><td class="num">&nabla;J = E[&nabla;log &pi;(a|s) &middot; G<sub>t</sub>]</td><td>Achhi chaal ki probability badhao</td></tr>
+    <tr><td>Advantage</td><td class="num">A(s,a) = Q(s,a) &minus; V(s)</td><td>Average se kitna behtar</td></tr>
+    <tr><td>GAE</td><td class="num">A<sub>t</sub> = &Sigma; (&gamma;&lambda;)<sup>k</sup> &delta;<sub>t+k</sub></td><td>MC &harr; TD ka dial</td></tr>
+    <tr><td>PPO ratio</td><td class="num">r<sub>t</sub>(&theta;) = &pi;<sub>&theta;</sub>(a|s) / &pi;<sub>&theta;old</sub>(a|s)</td><td>Policy kitni badli</td></tr>
+    <tr><td>PPO clip</td><td class="num">min(r<sub>t</sub>A<sub>t</sub>, clip(r<sub>t</sub>, 1&plusmn;&epsilon;)A<sub>t</sub>)</td><td>20% se zyada badalne ka inaam nahi</td></tr>
+    <tr><td>PPO total</td><td class="num">L<sup>CLIP</sup> &minus; c<sub>1</sub>L<sup>V</sup> + c<sub>2</sub>H[&pi;]</td><td>Actor + critic + explorer</td></tr>
+    <tr><td>Shaping</td><td class="num">F = &gamma;&Phi;(s&prime;) &minus; &Phi;(s)</td><td>Surakshit madad &mdash; optimal policy nahi badalti</td></tr>
+    <tr><td>IoU</td><td class="num">|D &cap; T| / |D &cup; T|</td><td>Drawing target se kitni milti hai</td></tr>
+    <tr><td>Hamara reward</td><td class="num">10&Delta;IoU + 0.4&Delta;&Phi; &minus; 0.02&middot;jerk</td><td>Shape banao, seedha banao, bhatko mat</td></tr>
+  </table>
+  </div>
+
+  <h3>Aage padhne ke liye</h3>
+
+  <ul>
+    <li><strong>Sutton &amp; Barto, <em>Reinforcement Learning: An Introduction</em></strong> &mdash; MC, TD, SARSA, Q-Learning ke chapters. Cliff walking wahin se hai. Muft online.</li>
+    <li><strong>Schulman et al. (2017), <em>Proximal Policy Optimization Algorithms</em></strong> &mdash; PPO ka asli paper, sirf 12 page.</li>
+    <li><strong>Schulman et al. (2016), <em>High-Dimensional Continuous Control Using GAE</em></strong> &mdash; GAE ka paper.</li>
+    <li><strong>Ng, Harada &amp; Russell (1999)</strong> &mdash; potential-based shaping ka theorem, jispar hamara <code>_potential()</code> khada hai.</li>
+    <li><strong>Hamare project ki files:</strong> <code>rl/draw_env.py</code> (env aur reward), <code>rl/train.py</code> (PPO setup), <code>docs/RESEARCH_LOG.md</code> (har faisla aur uski wajah).</li>
+  </ul>
+</section>
+
+<div class="foot col">
+  RoboSketch-RL &mdash; Vision-Guided Reinforcement Learning for Autonomous Robotic Drawing<br>
+  Ye page project ke asli code par bana hai: rl/draw_env.py, rl/train.py, rl/metrics.py, docs/RESEARCH_LOG.md<br>
+  Saare numbers results/h2_seeds.jsonl, results/o1_ablation.jsonl aur results/overshoot_ablation.jsonl se hain.
+</div>
+
+</main>
+</div>
+
+<script>
+(function(){
+  // ---- scroll-spy TOC ----
+  var links = Array.prototype.slice.call(document.querySelectorAll('#toc a'));
+  var secs  = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+  function spy(){
+    var best = 0;
+    for (var i = 0; i < secs.length; i++){
+      if (secs[i] && secs[i].getBoundingClientRect().top <= 140) best = i;
+    }
+    links.forEach(function(a, i){ a.classList.toggle('on', i === best); });
+  }
+  var tick = false;
+  window.addEventListener('scroll', function(){
+    if (tick) return;
+    tick = true;
+    requestAnimationFrame(function(){ spy(); tick = false; });
+  }, {passive:true});
+  spy();
+
+  // ---- chhota python syntax highlighter ----
+  var RX = /("[^"]*"|'[^']*')|\b(def|class|return|if|elif|else|for|while|in|not|and|or|import|from|as|with|lambda|None|True|False|self|super|yield|break|continue|pass)\b|\b(\d+\.?\d*(?:e-?\d+)?)\b/g;
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  document.querySelectorAll('code.py').forEach(function(el){
+    var lines = el.textContent.split('\n').map(function(line){
+      var hash = -1, q = null;
+      for (var i = 0; i < line.length; i++){
+        var c = line[i];
+        if (q){ if (c === q) q = null; }
+        else if (c === '"' || c === "'") q = c;
+        else if (c === '#'){ hash = i; break; }
+      }
+      var code = hash === -1 ? line : line.slice(0, hash);
+      var cmt  = hash === -1 ? ''   : line.slice(hash);
+      // ek hi pass, taaki inserted markup dubara match na ho
+      code = esc(code).replace(RX, function(m, str, kw, num){
+        if (str) return '<span class="tok-s">' + str + '</span>';
+        if (kw)  return '<span class="tok-k">' + kw + '</span>';
+        return '<span class="tok-n">' + num + '</span>';
+      });
+      return code + (cmt ? '<span class="tok-c">' + esc(cmt) + '</span>' : '');
+    });
+    el.innerHTML = lines.join('\n');
+  });
+})();
+</script>

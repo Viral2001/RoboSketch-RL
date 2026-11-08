@@ -1,0 +1,6 @@
+4 runs done, 2 to go (seeds=[0, 100])
+
+[1/2] square   coord seed=100 ...
+        -> default 0.317  train 0.306  heldout 0.104  heldout_scale 0.127  heldout_rot 0.166
+[2/2] triangle coord seed=100 ...
+        -> default 0.346  train 0.332  heldout 0.131  heldout_scale 0.214  heldout_rot 0.160

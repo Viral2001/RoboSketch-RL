@@ -1,0 +1,14 @@
+# RoboSketch-RL dependencies
+#
+# NOTE: On Windows, install PyBullet via conda (it has no PyPI wheel and needs
+# a C++ compiler to build from source). Preferred setup is environment.yml:
+#     conda env create -f environment.yml
+#     conda activate robosketch
+#
+# The packages below are the pip-installable ones (used after the conda env
+# with python + pybullet exists):
+gymnasium
+stable-baselines3
+opencv-python
+numpy
+# pybullet   <- install via conda-forge, not pip (see environment.yml)

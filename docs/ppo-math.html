@@ -1,0 +1,633 @@
+<title>PPO ka Ganit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap">
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$']] },
+  svg: { fontCache: 'global', scale: 1.02 },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js"></script>
+<style>
+:root{
+  --paper:#EDEFF2; --surface:#FAFBFC; --sunken:#E1E5EA; --hair:#C7CED7;
+  --ink:#14171C; --graphite:#555D69;
+  --plot:#17539E; --plot-tint:#DCE6F4;
+  --target:#BC3B2E; --target-tint:#F6E2DF;
+  --good:#17694A; --good-tint:#DCEDE5;
+  --amber:#8F6206; --amber-tint:#F5E9D2;
+  --violet:#5F41A8;
+  --shadow:0 1px 2px rgba(20,23,28,.06),0 8px 24px -12px rgba(20,23,28,.18);
+  --f-disp:'Archivo',system-ui,sans-serif;
+  --f-body:'Source Serif 4',Georgia,serif;
+  --f-mono:'JetBrains Mono',ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F1216; --surface:#171B21; --sunken:#1E242C; --hair:#2B323C;
+    --ink:#E3E8EE; --graphite:#96A0AD;
+    --plot:#6FA6EC; --plot-tint:#152742;
+    --target:#EA8071; --target-tint:#3A211D;
+    --good:#54C79A; --good-tint:#143026;
+    --amber:#D6A951; --amber-tint:#332813;
+    --violet:#AE96EE;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F1216; --surface:#171B21; --sunken:#1E242C; --hair:#2B323C;
+  --ink:#E3E8EE; --graphite:#96A0AD;
+  --plot:#6FA6EC; --plot-tint:#152742;
+  --target:#EA8071; --target-tint:#3A211D;
+  --good:#54C79A; --good-tint:#143026;
+  --amber:#D6A951; --amber-tint:#332813;
+  --violet:#AE96EE;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);
+  font-size:17.5px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:var(--plot);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--plot);outline-offset:3px;border-radius:3px}
+::selection{background:var(--plot-tint);color:var(--ink)}
+
+.wrap{max-width:760px;margin:0 auto;padding:0 clamp(18px,5vw,32px) 120px}
+h1,h2,h3,h4{font-family:var(--f-disp);letter-spacing:-.02em;text-wrap:balance;margin:0}
+h1{font-size:clamp(32px,6vw,48px);font-weight:700;line-height:1.05}
+h2{font-size:clamp(22px,3.4vw,28px);font-weight:700;line-height:1.15}
+h3{font-size:18px;font-weight:600;margin-top:30px}
+p{margin:14px 0}
+strong{font-weight:600}
+ul,ol{padding-left:22px;margin:14px 0}
+li{margin:6px 0}
+li::marker{color:var(--plot)}
+code{font-family:var(--f-mono);font-size:.84em;background:var(--sunken);padding:1px 5px;border-radius:4px}
+
+/* header */
+.top{padding:64px 0 26px}
+.eyebrow{font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--target);margin-bottom:14px}
+.lede{font-size:19px;color:var(--graphite);line-height:1.6;margin-top:18px}
+.nav{display:flex;flex-wrap:wrap;gap:7px;margin:28px 0 0;
+  padding:18px 0 0;border-top:1px solid var(--hair)}
+.nav a{font-family:var(--f-mono);font-size:11.5px;text-decoration:none;
+  border:1px solid var(--hair);background:var(--surface);color:var(--graphite);
+  padding:5px 11px;border-radius:100px;white-space:nowrap}
+.nav a:hover{border-color:var(--plot);color:var(--plot)}
+
+/* step ladder */
+.step{position:relative;padding:44px 0 8px 0;scroll-margin-top:18px}
+.step-head{display:flex;gap:16px;align-items:baseline;
+  border-top:2px solid var(--ink);padding-top:14px;margin-bottom:8px}
+.step-n{font-family:var(--f-mono);font-size:12.5px;font-weight:700;color:var(--target);flex:none}
+
+/* math */
+mjx-container[display="true"]{
+  overflow-x:auto;overflow-y:hidden;padding:6px 2px;margin:0!important}
+.math{background:var(--surface);border:1px solid var(--hair);border-radius:9px;
+  padding:16px 18px;margin:22px 0;box-shadow:var(--shadow)}
+.math.key{border-color:var(--plot);border-width:1.6px;background:var(--plot-tint)}
+.math-cap{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--graphite);margin-bottom:8px}
+.math.key .math-cap{color:var(--plot)}
+.mean{font-size:15.5px;line-height:1.55;color:var(--graphite);
+  border-top:1px dashed var(--hair);margin-top:14px;padding-top:11px}
+.mean b{color:var(--ink);font-weight:600}
+
+/* callouts */
+.box{border-left:3px solid var(--plot);background:var(--plot-tint);
+  padding:14px 18px;margin:22px 0;border-radius:0 7px 7px 0;font-size:16.5px}
+.box.warn{border-color:var(--target);background:var(--target-tint)}
+.box.ok{border-color:var(--good);background:var(--good-tint)}
+.box.us{border-color:var(--amber);background:var(--amber-tint)}
+.box .tag{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.13em;
+  text-transform:uppercase;font-weight:700;display:block;margin-bottom:5px;color:var(--plot)}
+.box.warn .tag{color:var(--target)} .box.ok .tag{color:var(--good)} .box.us .tag{color:var(--amber)}
+.box p{margin:8px 0} .box p:first-of-type{margin-top:0} .box p:last-child{margin-bottom:0}
+
+/* code */
+.code{background:var(--surface);border:1px solid var(--hair);border-radius:9px;
+  margin:22px 0;overflow:hidden;box-shadow:var(--shadow)}
+.code-top{font-family:var(--f-mono);font-size:11px;color:var(--graphite);
+  padding:8px 15px;border-bottom:1px solid var(--hair);background:var(--sunken)}
+.code pre{margin:0;padding:15px;overflow-x:auto;font-family:var(--f-mono);
+  font-size:12.6px;line-height:1.7}
+.tok-c{color:var(--graphite);font-style:italic}
+.tok-k{color:var(--violet)}
+.tok-s{color:var(--good)}
+.tok-n{color:var(--target)}
+
+/* table */
+.tw{overflow-x:auto;margin:22px 0;border:1px solid var(--hair);border-radius:9px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;font-family:var(--f-disp);font-weight:500}
+th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--hair);vertical-align:top}
+th{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--graphite);
+  background:var(--sunken);font-weight:600;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+figure{margin:26px 0;background:var(--surface);border:1px solid var(--hair);
+  border-radius:10px;padding:20px 18px 0;box-shadow:var(--shadow)}
+figure svg{display:block;width:100%;height:auto}
+figcaption{font-size:13.5px;color:var(--graphite);line-height:1.55;
+  padding:13px 2px 16px;border-top:1px solid var(--hair);margin-top:16px}
+figcaption b{color:var(--ink)}
+.svg-l{font-family:'JetBrains Mono',monospace;font-size:11px;fill:var(--graphite)}
+.svg-t{font-family:'Archivo',sans-serif;font-size:12.5px;font-weight:600;fill:var(--ink)}
+
+.foot{margin-top:70px;padding-top:22px;border-top:2px solid var(--ink);
+  font-family:var(--f-mono);font-size:12px;color:var(--graphite);line-height:1.8}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+
+<header class="top">
+  <p class="eyebrow">RoboSketch-RL &middot; Deep dive</p>
+  <h1>PPO ka Ganit</h1>
+  <p class="lede">Shuru se poori derivation &mdash; policy gradient se lekar clipped objective tak. Har formula ke saath uska seedha-sada matlab, aur ant me wahi cheez hamare drawing robot par kaise lagti hai.</p>
+  <nav class="nav">
+    <a href="#p1">1 &middot; Problem</a>
+    <a href="#p2">2 &middot; Zaroori 4 cheezein</a>
+    <a href="#p3">3 &middot; Policy gradient</a>
+    <a href="#p4">4 &middot; Baseline &amp; advantage</a>
+    <a href="#p5">5 &middot; Ratio &amp; surrogate</a>
+    <a href="#p6">6 &middot; Clipping</a>
+    <a href="#p7">7 &middot; GAE</a>
+    <a href="#p8">8 &middot; Algorithm + code</a>
+    <a href="#p9">9 &middot; Hamare project me</a>
+  </nav>
+</header>
+
+<section class="step" id="p1">
+  <div class="step-head"><span class="step-n">01</span><h2>PPO kis problem ko hal karta hai</h2></div>
+
+  <p>Ek bacche ko cycle chalana sikha rahe hain. Wo thoda daayen jhuka aur cycle theek chali. Ab aap kya karenge &mdash; kahenge "thoda aur daayen jhuk", ya "poori taakat se daayen gir jao"?</p>
+
+  <p>Doosri baat kehne par wo gir jayega. Aur RL me girna aur bhi bura hai, kyunki <strong>agla data bhi wahi girti hui cycle banayegi.</strong> Supervised learning me dataset fix hota hai &mdash; galat step lo to bhi agle epoch me wahi saaf data milta hai. RL me agent khud apna data banata hai. Policy kharaab hui, to data kharaab, to gradient kharaab, aur wapasi ka raasta band. Ise <strong>performance collapse</strong> kehte hain.</p>
+
+  <p>To sawaal ye hai: <em>gradient ki dishaa to pata hai, par kadam kitna bada lein?</em> PPO ka jawab ek line me:</p>
+
+  <div class="box">
+    <span class="tag">PPO ka poora idea</span>
+    <p>Policy ko sudharo, lekin ek update me itna mat badlo ki wo pehchan me hi na aaye. "Proximal" ka matlab hi hai <b>paas ka</b> &mdash; nayi policy purani ke paas hi rahegi.</p>
+  </div>
+
+  <p>Aage ke 7 steps me hum ye <em>derive</em> karenge ki wo "paas rehna" ganit me exactly kya banta hai.</p>
+</section>
+
+<section class="step" id="p2">
+  <div class="step-head"><span class="step-n">02</span><h2>Sirf 4 cheezein, phir derivation shuru</h2></div>
+
+  <div class="math">
+    <div class="math-cap">1 &mdash; Policy</div>
+    $$\pi_\theta(a \mid s)$$
+    <div class="mean"><b>Matlab:</b> agent ka dimaag. State \(s\) dekh kar action \(a\) chunne ka probability. \(\theta\) neural network ke weights hain &mdash; training ka matlab hai <b>sirf \(\theta\) badalna</b>.</div>
+  </div>
+
+  <div class="math">
+    <div class="math-cap">2 &mdash; Return</div>
+    $$G_t = \sum_{k=0}^{\infty} \gamma^k\, r_{t+k+1}$$
+    <div class="mean"><b>Matlab:</b> abhi se lekar ant tak mila kul inaam. \(\gamma\) (0 se 1) kehta hai "door ka inaam thoda kam keemti". Hamare project me \(\gamma = 0.99\).</div>
+  </div>
+
+  <div class="math">
+    <div class="math-cap">3 &mdash; Value</div>
+    $$V^\pi(s) = \mathbb{E}_\pi\!\left[G_t \mid s_t = s\right]$$
+    <div class="mean"><b>Matlab:</b> "is halat me hone par average kitna milega." \(\mathbb{E}\) ka matlab sirf <b>average</b> hai &mdash; kyunki har baar alag cheez ho sakti hai, to average lete hain.</div>
+  </div>
+
+  <div class="math">
+    <div class="math-cap">4 &mdash; Objective</div>
+    $$J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta}\big[R(\tau)\big]$$
+    <div class="mean"><b>Matlab:</b> \(\tau\) (tau) ek poora episode hai &mdash; \((s_0, a_0, r_0, s_1, a_1, \ldots)\). \(J(\theta)\) = "meri policy se average kitna reward milta hai". <b>Poora RL isi \(J\) ko badhane ki koshish hai.</b></div>
+  </div>
+
+  <div class="box us">
+    <span class="tag">Hamare project me</span>
+    <p>\(s\) = 64&times;64&times;3 tasveer (target shape, ab tak ka drawing, pen ki jagah). \(a\) = \((dx, dy)\), pen ko kitna sarkana hai. \(r\) = IoU kitna badha. \(\tau\) = 240 steps ki ek poori drawing.</p>
+  </div>
+</section>
+
+<section class="step" id="p3">
+  <div class="step-head"><span class="step-n">03</span><h2>Policy gradient theorem &mdash; derivation</h2></div>
+
+  <p>Humein \(J(\theta)\) badhana hai. Calculus kehta hai: gradient nikaalo aur us dishaa me chalo. Lekin dikkat ye hai ki \(J\) ke andar <strong>expectation</strong> hai, aur us expectation ki probability khud \(\theta\) par depend karti hai. Iska gradient kaise lein?</p>
+
+  <h3>Kadam 1 &mdash; Expectation ko integral likho</h3>
+
+  <div class="math">
+    $$\nabla_\theta J(\theta) = \nabla_\theta \int P(\tau \mid \theta)\, R(\tau)\, d\tau = \int \nabla_\theta P(\tau \mid \theta)\, R(\tau)\, d\tau$$
+    <div class="mean"><b>Matlab:</b> \(R(\tau)\) me \(\theta\) hai hi nahi (reward environment deta hai, policy nahi), isliye gradient sirf \(P\) par lagta hai.</div>
+  </div>
+
+  <h3>Kadam 2 &mdash; Log-derivative trick (poori derivation ki jaan)</h3>
+
+  <p>Ye ek chhoti si calculus identity hai. School me padha hoga: \(\frac{d}{dx}\log f(x) = \frac{f'(x)}{f(x)}\). Ise ulta likho:</p>
+
+  <div class="math key">
+    <div class="math-cap">Log-derivative trick</div>
+    $$\nabla_\theta P = P \cdot \nabla_\theta \log P$$
+    <div class="mean"><b>Kyu zaroori hai:</b> is trick ke baad \(P\) wapas integral ke bahar factor ban jata hai, yaani hum phir se <b>expectation</b> likh sakte hain &mdash; aur expectation ko hum <b>sampling se estimate</b> kar sakte hain. Yahi wo pul hai jo theory ko chalne wale code me badalta hai.</div>
+  </div>
+
+  <div class="math">
+    $$\nabla_\theta J(\theta) = \int P(\tau\mid\theta)\, \nabla_\theta \log P(\tau\mid\theta)\, R(\tau)\, d\tau = \mathbb{E}_{\tau \sim \pi_\theta}\!\left[\nabla_\theta \log P(\tau\mid\theta)\, R(\tau)\right]$$
+  </div>
+
+  <h3>Kadam 3 &mdash; Environment ka gyaan apne aap gayab ho jata hai</h3>
+
+  <p>Ek trajectory ka probability ye hai:</p>
+
+  <div class="math">
+    $$P(\tau\mid\theta) = \underbrace{\rho_0(s_0)}_{\text{shuruaat}} \prod_{t=0}^{T} \underbrace{\pi_\theta(a_t\mid s_t)}_{\text{policy}} \cdot \underbrace{P(s_{t+1}\mid s_t, a_t)}_{\text{environment}}$$
+  </div>
+
+  <p>Log lene par product jod ban jata hai:</p>
+
+  <div class="math">
+    $$\log P(\tau\mid\theta) = \log \rho_0(s_0) + \sum_{t=0}^{T} \Big[\log \pi_\theta(a_t\mid s_t) + \log P(s_{t+1}\mid s_t,a_t)\Big]$$
+  </div>
+
+  <p>Ab \(\nabla_\theta\) lagayiye. \(\rho_0\) aur \(P(s_{t+1}\mid s_t,a_t)\) me \(\theta\) hai hi nahi &mdash; wo environment ke niyam hain, policy ke nahi. <strong>Unka gradient zero hai. Wo poori tarah gayab ho jate hain.</strong></p>
+
+  <div class="math key">
+    <div class="math-cap">Policy gradient theorem</div>
+    $$\nabla_\theta J(\theta) = \mathbb{E}\!\left[\sum_{t=0}^{T} \nabla_\theta \log \pi_\theta(a_t \mid s_t)\; R(\tau)\right]$$
+    <div class="mean"><b>Matlab, bilkul aasan bhaasha me:</b> "jo chaal chali, uska chance badhao &mdash; utna hi jitna achha nateeja mila." Agar \(R\) positive hai to us action ka probability badhta hai; negative hai to ghatta hai.<br><br><b>Aur sabse badi baat:</b> is formula me environment ka model kahin nahi hai. Isiliye hum PyBullet ke physics equations jaane bina bhi seekh sakte hain &mdash; yahi <b>model-free RL</b> ki poori buniyaad hai, aur yahi wajah hai ki ye policy aage asli robot par bhi kaam kar sakti hai.</div>
+  </div>
+
+  <h3>Kadam 4 &mdash; Causality: aaj ka kaam kal ka inaam nahi badal sakta</h3>
+
+  <p>Upar wale formula me har action ko <em>poore</em> episode ka reward mil raha hai &mdash; usse pehle ka bhi. Lekin step 100 ka action step 5 ke reward ko kaise badal sakta hai? Nahi badal sakta. Isliye \(R(\tau)\) ki jagah sirf <strong>aage ka</strong> reward rakhte hain:</p>
+
+  <div class="math">
+    $$\nabla_\theta J(\theta) = \mathbb{E}\!\left[\sum_{t=0}^{T} \nabla_\theta \log \pi_\theta(a_t\mid s_t)\; G_t\right]$$
+    <div class="mean"><b>Matlab:</b> har action ko sirf uske <b>baad</b> mile reward ka credit milega. Ye math ko galat nahi karta (average wahi rehta hai), lekin shor kaafi kam kar deta hai. Isko <b>REINFORCE</b> algorithm kehte hain.</div>
+  </div>
+</section>
+<section class="step" id="p4">
+  <div class="step-head"><span class="step-n">04</span><h2>Baseline aur Advantage &mdash; shor kam karna</h2></div>
+
+  <p>REINFORCE sahi hai, lekin bahut <strong>shor bhara</strong> hai. Socho har action ka return +100 se +110 ke beech hai. \(G_t\) hamesha bada positive hai, to gradient <em>har</em> action ka probability badhata hai &mdash; achhe ka bhi, bure ka bhi. Bas thoda alag-alag.</p>
+
+  <p>Ilaaj: \(G_t\) me se koi cheez ghata do jo action par depend na kare. Sawaal ye hai &mdash; kya isse jawab galat ho jayega? <strong>Nahi.</strong> Ye rahi proof:</p>
+
+  <div class="math">
+    <div class="math-cap">Baseline se bias nahi aata &mdash; proof</div>
+    $$\mathbb{E}_{a \sim \pi_\theta}\!\big[\nabla_\theta \log \pi_\theta(a\mid s)\, b(s)\big] = b(s) \sum_a \pi_\theta(a\mid s)\, \nabla_\theta \log \pi_\theta(a\mid s)$$
+    $$= b(s) \sum_a \nabla_\theta \pi_\theta(a\mid s) = b(s)\, \nabla_\theta \underbrace{\sum_a \pi_\theta(a\mid s)}_{= \; 1} = b(s) \cdot \nabla_\theta 1 = 0$$
+    <div class="mean"><b>Kya hua:</b> log-trick ulta lagaya (\(\pi \nabla \log \pi = \nabla \pi\)), phir jod ko andar le gaye. Saare probabilities ka jod hamesha <b>1</b> hota hai, aur 1 ek constant hai &mdash; uska gradient <b>0</b>.<br><br><b>Iska matlab:</b> \(b(s)\) chahe kuch bhi ho, wo expectation me kuch nahi jodta. Yaani hum <b>bilkul muft me</b> shor kam kar sakte hain, jawab galat kiye bina.</div>
+  </div>
+
+  <p>Ab sabse achha \(b(s)\) kya hoga? Zahir hai &mdash; \(V(s)\), yaani "is state me average kitna milta hai". Jo bachega wo hai:</p>
+
+  <div class="math key">
+    <div class="math-cap">Advantage</div>
+    $$A^\pi(s,a) = Q^\pi(s,a) - V^\pi(s)$$
+    <div class="mean"><b>Matlab:</b> "ye action is halat ke <b>average</b> se kitna behtar tha."<br>
+    \(A &gt; 0\) &rarr; average se achha &rarr; is action ka chance <b>badhao</b>.<br>
+    \(A &lt; 0\) &rarr; average se bura &rarr; chance <b>ghatao</b>.<br><br>
+    Ab "sab kuch +100 hai" wali dikkat khatam: 105 wala action average se achha, 102 wala bura. Signal saaf.</div>
+  </div>
+
+  <div class="math">
+    $$\nabla_\theta J(\theta) = \mathbb{E}\!\left[\nabla_\theta \log \pi_\theta(a_t \mid s_t)\; A_t\right]$$
+    <div class="mean">Yahi <b>actor-critic</b> hai: <b>actor</b> \(\pi_\theta\) kaam karta hai, <b>critic</b> \(V_\phi\) batata hai ki average kya tha.</div>
+  </div>
+</section>
+
+<section class="step" id="p5">
+  <div class="step-head"><span class="step-n">05</span><h2>Ratio aur surrogate objective</h2></div>
+
+  <p>Ab ek practical dikkat. Upar wala gradient <strong>sirf tabhi sahi hai jab data abhi wali policy se aaya ho.</strong> Ek gradient step lete hi \(\theta\) badal jata hai, aur poora data bekaar. Ek rollout &mdash; ek update. Bahut mehnga sauda.</p>
+
+  <p>Hum chahte hain: <em>ek hi rollout par kai baar update karein.</em> Iske liye ganit ka ek purana auzaar hai &mdash; <strong>importance sampling</strong>.</p>
+
+  <div class="math">
+    <div class="math-cap">Importance sampling &mdash; identity</div>
+    $$\mathbb{E}_{a \sim \pi_\theta}\big[f(a)\big] = \sum_a \pi_\theta(a) f(a) = \sum_a \pi_{\theta_{old}}(a)\, \frac{\pi_\theta(a)}{\pi_{\theta_{old}}(a)}\, f(a) = \mathbb{E}_{a \sim \pi_{\theta_{old}}}\!\left[\frac{\pi_\theta(a)}{\pi_{\theta_{old}}(a)} f(a)\right]$$
+    <div class="mean"><b>Kya kiya:</b> upar-neeche \(\pi_{old}\) se guna-bhaag kar diya &mdash; value nahi badli, lekin ab expectation <b>purani</b> policy par hai.<br><br><b>Matlab:</b> "purane data se naye policy ka average nikal sakte ho, bas har sample ko ek weight se tolo." Wo weight hi ratio hai.</div>
+  </div>
+
+  <div class="math key">
+    <div class="math-cap">Probability ratio</div>
+    $$r_t(\theta) = \frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{old}}(a_t \mid s_t)}$$
+    <div class="mean"><b>Ye ek meter hai &mdash; policy kitni badli:</b><br>
+    \(r = 1\) &rarr; bilkul nahi badli.<br>
+    \(r = 1.5\) &rarr; nayi policy is action ko 50% zyada karti hai.<br>
+    \(r = 0.5\) &rarr; aadha kar diya.<br><br>
+    <b>Code me:</b> probability ka bhaag numerically kharaab hota hai, isliye hamesha log me: <code>ratio = exp(logp_new &minus; logp_old)</code>.</div>
+  </div>
+
+  <div class="math">
+    <div class="math-cap">Surrogate objective</div>
+    $$L^{CPI}(\theta) = \mathbb{E}_t\!\left[r_t(\theta)\, A_t\right]$$
+    <div class="mean"><b>"Surrogate" matlab badal (stand-in):</b> hum asli \(J(\theta)\) ki jagah is aasan cheez ko badhate hain. Ye purane data se ban jata hai, isliye ek hi rollout par kai baar chalaya ja sakta hai.</div>
+  </div>
+
+  <div class="box ok">
+    <span class="tag">Check &mdash; ye wahi purana gradient hai</span>
+    <p>Jab \(\theta = \theta_{old}\), to \(r_t = 1\) aur \(\nabla_\theta r_t = \dfrac{\nabla_\theta \pi_\theta}{\pi_{\theta_{old}}} = \nabla_\theta \log \pi_\theta\). Isliye</p>
+    $$\nabla_\theta L^{CPI}\big|_{\theta = \theta_{old}} = \mathbb{E}\big[\nabla_\theta \log \pi_\theta(a_t\mid s_t)\, A_t\big]$$
+    <p>&mdash; bilkul wahi policy gradient jo section 04 me nikla tha. Yaani surrogate koi naya algorithm nahi hai; wo <b>ussi cheez ko dobara likhne ka tareeka</b> hai, jisse purana data reuse ho sake.</p>
+  </div>
+</section>
+
+<section class="step" id="p6">
+  <div class="step-head"><span class="step-n">06</span><h2>Clipping &mdash; PPO ka asli kadam</h2></div>
+
+  <p>Lekin \(L^{CPI}\) akela khatarnaak hai. Agar \(A_t &gt; 0\) ho aur hum bina rok-tok isko badhate rahen, to optimizer \(r_t\) ko <strong>infinity tak</strong> le jayega &mdash; "ye action achha tha, to ise 500 guna zyada karo". Aur importance sampling ka poora bharosa tabhi tak hai jab tak nayi policy purani ke <em>paas</em> hai; door jate hi wo estimate bekaar ho jata hai.</p>
+
+  <p>TRPO ne isko KL-divergence ki sakht constraint se roka, jiske liye bhaari second-order maths chahiye. PPO ne wahi kaam ek behad saral trick se kiya:</p>
+
+  <div class="math key">
+    <div class="math-cap">PPO-Clip objective</div>
+    $$L^{CLIP}(\theta) = \mathbb{E}_t\Big[\min\big(\,r_t(\theta)A_t,\;\; \mathrm{clip}(r_t(\theta),\, 1-\epsilon,\, 1+\epsilon)\, A_t\,\big)\Big]$$
+    <div class="mean">
+    <b>\(r_t A_t\)</b> &mdash; aam wala term, bina rok ke.<br>
+    <b>\(\mathrm{clip}(r_t, 1-\epsilon, 1+\epsilon)\)</b> &mdash; \(r_t\) ko zabardasti \([0.8,\,1.2]\) ke andar daba do (\(\epsilon = 0.2\)).<br>
+    <b>\(\min\)</b> &mdash; dono me se <b>chhota</b> lo. Yahi asli chaturai hai.</div>
+  </div>
+
+  <h3>\(\min\) kyu? Dono case alag se dekhiye</h3>
+
+  <div class="tw">
+  <table>
+    <tr><th>Case</th><th>Objective banta hai</th><th>Kya hota hai</th></tr>
+    <tr><td><b>\(A_t &gt; 0\)</b><br>action achha tha</td><td class="num">\(\min(r_t,\,1+\epsilon)\,A_t\)</td><td>\(r_t\) ko \(1.2\) tak badhane ka inaam milta hai, uske aage <b>flat</b> &mdash; gradient zero. Ek achha sample poori policy ko kheench kar nahi le ja sakta.</td></tr>
+    <tr><td><b>\(A_t &lt; 0\)</b><br>action bura tha</td><td class="num">\(\max(r_t,\,1-\epsilon)\,A_t\)</td><td>\(r_t\) ko \(0.8\) tak ghatane ka inaam, uske aage flat. Lekin agar \(r_t\) galat dishaa me chala jaye, to <b>poora penalty</b> lagta hai.</td></tr>
+  </table>
+  </div>
+
+  <figure>
+    <svg viewBox="0 0 700 250" role="img" aria-label="Clipped objective ka graph, A positive aur A negative ke liye">
+      <text class="svg-t" x="55" y="18">A &gt; 0 (achha action)</text>
+      <text class="svg-t" x="410" y="18">A &lt; 0 (bura action)</text>
+      <line x1="55" y1="200" x2="300" y2="200" stroke="var(--hair)" stroke-width="1.2"/>
+      <line x1="55" y1="50" x2="55" y2="210" stroke="var(--hair)" stroke-width="1.2"/>
+      <rect x="151" y="50" width="48" height="150" fill="var(--good-tint)" opacity=".55"/>
+      <line x1="175" y1="50" x2="175" y2="208" stroke="var(--graphite)" stroke-width="1" stroke-dasharray="3 3"/>
+      <path d="M55 200 L199 116 L300 116" fill="none" stroke="var(--plot)" stroke-width="2.8" stroke-linejoin="round"/>
+      <circle cx="199" cy="116" r="4.5" fill="var(--target)"/>
+      <text class="svg-l" x="175" y="220" text-anchor="middle">1</text>
+      <text class="svg-l" x="205" y="234" text-anchor="middle" fill="var(--target)">1+&epsilon;</text>
+      <text class="svg-l" x="292" y="220" text-anchor="middle">r</text>
+      <text class="svg-l" x="211" y="106" fill="var(--target)">flat &rarr; gradient 0</text>
+
+      <line x1="410" y1="60" x2="655" y2="60" stroke="var(--hair)" stroke-width="1.2"/>
+      <line x1="410" y1="50" x2="410" y2="215" stroke="var(--hair)" stroke-width="1.2"/>
+      <rect x="506" y="60" width="48" height="150" fill="var(--good-tint)" opacity=".55"/>
+      <line x1="530" y1="52" x2="530" y2="212" stroke="var(--graphite)" stroke-width="1" stroke-dasharray="3 3"/>
+      <path d="M410 116 L506 116 L650 200" fill="none" stroke="var(--plot)" stroke-width="2.8" stroke-linejoin="round"/>
+      <circle cx="506" cy="116" r="4.5" fill="var(--target)"/>
+      <text class="svg-l" x="530" y="228" text-anchor="middle">1</text>
+      <text class="svg-l" x="500" y="242" text-anchor="middle" fill="var(--target)">1&minus;&epsilon;</text>
+      <text class="svg-l" x="647" y="228" text-anchor="middle">r</text>
+      <text class="svg-l" x="416" y="106" fill="var(--target)">flat</text>
+      <text class="svg-l" x="556" y="176" fill="var(--plot)">khuli giravat &mdash; poora penalty</text>
+    </svg>
+    <figcaption><b>Dono panel me flat hissa kehta hai: "yahan se aage badalne ka koi inaam nahi."</b> Lekin daayen panel ki giravat khuli hai &mdash; galti ka penalty poora lagta hai. Yahi <b>asymmetry</b> \(\min\) se aati hai, aur yahi PPO ko surakshit banati hai.</figcaption>
+  </figure>
+
+  <div class="box">
+    <span class="tag">Ek line me clip ka matlab</span>
+    <p>"Policy ko 20% se zyada badalne ka koi <b>inaam</b> nahi milega &mdash; lekin agar wo galat taraf 20% se zyada chali gayi, to poori <b>saza</b> milegi."</p>
+    <p>Ganit ki bhaasha me: \(L^{CLIP}\) hamesha \(L^{CPI}\) ka ek <b>pessimistic lower bound</b> hai. Aur lower bound ko badhana surakshit hota hai &mdash; kyunki asli cheez usse kam kabhi nahi hogi.</p>
+  </div>
+
+  <h3>Poora loss &mdash; teen hisse</h3>
+
+  <div class="math key">
+    $$L_t(\theta,\phi) = \underbrace{L^{CLIP}(\theta)}_{\text{actor}} \; - \; \underbrace{c_1 \big(V_\phi(s_t) - V_t^{\,targ}\big)^2}_{\text{critic}} \; + \; \underbrace{c_2\, H\big[\pi_\theta\big](s_t)}_{\text{explorer}}$$
+    <div class="mean">
+    <b>Actor</b> &mdash; achhe actions zyada, bure kam.<br>
+    <b>Critic</b> &mdash; \(V_\phi\) ko sach ke kareeb laao (\(c_1 = 0.5\)). Ghata isliye kyunki ye <em>error</em> hai.<br>
+    <b>Explorer</b> &mdash; entropy \(H\). Policy jitni "undecided" ho, utna inaam &mdash; taaki wo jaldi ek hi chaal par jam na jaye. Hamare project me \(c_2 = 0.02\).<br><br>
+    <b>Code me sign ulat jate hain</b>, kyunki PyTorch loss ko <em>ghatata</em> hai: <code>loss = -policy_obj + c1*value_loss - c2*entropy</code>.</div>
+  </div>
+</section>
+
+<section class="step" id="p7">
+  <div class="step-head"><span class="step-n">07</span><h2>GAE &mdash; \(A_t\) aata kahan se hai</h2></div>
+
+  <p>Ab tak humne \(A_t\) ko maan liya tha. Lekin \(A_t = Q - V\) me \(Q\) hamare paas hai nahi. To andaaza kaise lagayein?</p>
+
+  <p>Shuruaat ek chhoti si cheez se &mdash; <strong>TD error</strong>:</p>
+
+  <div class="math">
+    $$\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$$
+    <div class="mean"><b>Matlab: "surprise".</b> Jo mila (\(r_t\) + agli halat ki value) minus jo maine socha tha (\(V(s_t)\)). Agar positive &mdash; umeed se achha hua.<br><br>Ye khud advantage ka ek (shor-rahit lekin thoda biased) andaaza hai.</div>
+  </div>
+
+  <p>Ya hum 2 steps dekh sakte hain, ya 3, ya poore episode:</p>
+
+  <div class="math">
+    $$\hat{A}_t^{(1)} = \delta_t, \qquad \hat{A}_t^{(2)} = \delta_t + \gamma\delta_{t+1}, \qquad \hat{A}_t^{(k)} = \sum_{l=0}^{k-1} \gamma^l\, \delta_{t+l}$$
+    <div class="mean">\(k\) chhota &rarr; <b>kam shor, thoda bias</b> (kyunki \(V\) ke andaaze par jaldi bharosa kar liya).<br>\(k\) bada &rarr; <b>bias kam, shor zyada</b> (kyunki poore episode ki randomness ghus gayi).</div>
+  </div>
+
+  <p>Kaunsa \(k\) lein? GAE ka jawab: <strong>sabko lo, aur unka weighted average nikaalo</strong> &mdash; weights ek dial \(\lambda\) se:</p>
+
+  <div class="math key">
+    <div class="math-cap">Generalized Advantage Estimation</div>
+    $$\hat{A}_t^{GAE(\gamma,\lambda)} = (1-\lambda)\sum_{k=1}^{\infty} \lambda^{k-1} \hat{A}_t^{(k)} \;=\; \sum_{l=0}^{\infty} (\gamma\lambda)^l\, \delta_{t+l}$$
+    <div class="mean"><b>Ye simplify kaise hua:</b> jab saare \(\hat{A}^{(k)}\) ko \(\lambda\) ke weights se joda jata hai, to har \(\delta_{t+l}\) apne saare weights milakar \((\gamma\lambda)^l\) ban jata hai. Ek geometric series ka jod &mdash; formula behad saaf ho jata hai.<br><br>
+    <b>\(\lambda = 0\)</b> &rarr; sirf \(\delta_t\) &rarr; pure TD (kam shor, thoda bias).<br>
+    <b>\(\lambda = 1\)</b> &rarr; Monte Carlo (bias zero, shor bahut).<br>
+    <b>\(\lambda = 0.95\)</b> &rarr; beech ka aazmaaya hua balance &mdash; hamare project me yahi.</div>
+  </div>
+
+  <div class="math">
+    <div class="math-cap">Code me &mdash; recursive roop</div>
+    $$\hat{A}_t = \delta_t + \gamma\lambda\, \hat{A}_{t+1}$$
+    <div class="mean">Infinite jod ko banane ki zaroorat nahi &mdash; <b>ant se shuru karke peeche chalo</b>, ek hi loop me poora ho jata hai. Agla code isi ko implement karta hai.</div>
+  </div>
+</section>
+<section class="step" id="p8">
+  <div class="step-head"><span class="step-n">08</span><h2>Algorithm aur code</h2></div>
+
+  <div class="box">
+    <span class="tag">PPO &mdash; ek chakkar</span>
+    <p><b>1.</b> Abhi wali policy \(\pi_{\theta_{old}}\) se \(N\) steps chalao. Har step par \((s, a, r, \text{done}, V(s), \log\pi(a|s))\) store karo.<br>
+    <b>2.</b> GAE se \(\hat{A}_t\) aur value target \(V_t^{targ} = \hat{A}_t + V(s_t)\) nikaalo.<br>
+    <b>3.</b> \(\hat{A}\) ko normalize karo (mean 0, std 1).<br>
+    <b>4.</b> Usi data par \(K\) epochs, mini-batches me, \(L_t\) par gradient step lo.<br>
+    <b>5.</b> \(\theta_{old} \leftarrow \theta\). Purana data phenk do. Wapas step 1.</p>
+  </div>
+
+  <p>Step 4 hi wo jagah hai jahan clip zaroori ban jata hai: ek hi data par 6 baar update karne se \(r_t\) 1 se door bhagta hai, aur clip use rok kar rakhta hai.</p>
+
+  <div class="code">
+    <div class="code-top">1 / 3 &mdash; network: ek body, do heads</div>
+<pre><code class="py">import torch, torch.nn as nn
+from torch.distributions import Normal
+
+class ActorCritic(nn.Module):
+    def __init__(self, obs_ch=3, n_act=2):
+        super().__init__()
+        self.body = nn.Sequential(               # 64x64x3 image -&gt; 512 features
+            nn.Conv2d(obs_ch, 32, 8, stride=4), nn.ReLU(),
+            nn.Conv2d(32, 64, 4, stride=2), nn.ReLU(),
+            nn.Flatten(), nn.LazyLinear(512), nn.ReLU())
+        self.mu      = nn.Linear(512, n_act)     # Gaussian ka MEAN
+        self.log_std = nn.Parameter(torch.zeros(n_act))   # SPREAD, seekha jata hai
+        self.v       = nn.Linear(512, 1)         # critic V(s)
+
+    def dist_and_value(self, obs):
+        h = self.body(obs / 255.0)
+        return Normal(self.mu(h), self.log_std.exp()), self.v(h).squeeze(-1)</code></pre>
+  </div>
+
+  <p><code>log_std</code> ko seekhne wala parameter banane ka matlab: <strong>exploration ka size khud training tay karti hai.</strong> Shuru me spread bada (agent kaafi random hilta hai), confident hone par apne aap girta hai. Koi \(\epsilon\)-schedule haath se likhne ki zaroorat nahi.</p>
+
+  <div class="code">
+    <div class="code-top">2 / 3 &mdash; GAE (section 07 ka recursive formula)</div>
+<pre><code class="py">def compute_gae(rews, vals, dones, last_val, gamma=0.99, lam=0.95):
+    adv, running = torch.zeros_like(rews), 0.0
+    for t in reversed(range(len(rews))):            # ANT se shuru, peeche chalo
+        next_val = last_val if t == len(rews) - 1 else vals[t + 1]
+        mask     = 1.0 - dones[t]                   # episode khatam -&gt; aage kuch nahi
+        delta    = rews[t] + gamma * next_val * mask - vals[t]      # TD error
+        running  = delta + gamma * lam * mask * running             # A_t = d + gl*A_t+1
+        adv[t]   = running
+    return adv, adv + vals                          # (advantage, value target)</code></pre>
+  </div>
+
+  <div class="code">
+    <div class="code-top">3 / 3 &mdash; PPO update: yahi poora algorithm hai</div>
+<pre><code class="py">def ppo_update(net, opt, obs, act, old_logp, adv, ret,
+               clip=0.2, epochs=6, batch=256, c_v=0.5, c_e=0.02):
+
+    adv = (adv - adv.mean()) / (adv.std() + 1e-8)   # normalize
+    n = len(obs)
+
+    for _ in range(epochs):                          # WAHI data, 6 baar
+        for idx in torch.randperm(n).split(batch):
+            dist, value = net.dist_and_value(obs[idx])
+            logp  = dist.log_prob(act[idx]).sum(-1)  # dx aur dy dono ka jod
+            ratio = (logp - old_logp[idx]).exp()     # r(theta), log me safe
+
+            # ---------- PPO ka dil ----------
+            unclipped = ratio * adv[idx]
+            clipped   = ratio.clamp(1 - clip, 1 + clip) * adv[idx]
+            policy_loss = -torch.min(unclipped, clipped).mean()
+            # minus: objective BADHANA hai, par optimizer loss GHATATA hai
+
+            value_loss = ((ret[idx] - value) ** 2).mean()
+            entropy    = dist.entropy().sum(-1).mean()
+            loss = policy_loss + c_v * value_loss - c_e * entropy
+
+            opt.zero_grad()
+            loss.backward()
+            nn.utils.clip_grad_norm_(net.parameters(), 0.5)
+            opt.step()</code></pre>
+  </div>
+
+  <p>Formula se code tak ka naksha:</p>
+
+  <div class="tw">
+  <table>
+    <tr><th>Formula</th><th>Code ki line</th></tr>
+    <tr><td class="num">\(r_t(\theta)\)</td><td><code>ratio = (logp - old_logp).exp()</code></td></tr>
+    <tr><td class="num">\(r_t A_t\)</td><td><code>unclipped = ratio * adv</code></td></tr>
+    <tr><td class="num">\(\mathrm{clip}(r_t, 1\pm\epsilon)A_t\)</td><td><code>clipped = ratio.clamp(0.8, 1.2) * adv</code></td></tr>
+    <tr><td class="num">\(\min(\cdot,\cdot)\)</td><td><code>torch.min(unclipped, clipped)</code></td></tr>
+    <tr><td class="num">\(c_1 (V_\phi - V^{targ})^2\)</td><td><code>c_v * ((ret - value) ** 2).mean()</code></td></tr>
+    <tr><td class="num">\(c_2 H[\pi_\theta]\)</td><td><code>c_e * dist.entropy().mean()</code></td></tr>
+    <tr><td class="num">\(\delta_t\)</td><td><code>rews[t] + gamma * next_val * mask - vals[t]</code></td></tr>
+  </table>
+  </div>
+</section>
+
+<section class="step" id="p9">
+  <div class="step-head"><span class="step-n">09</span><h2>Hamare project me ye sab kaise lagta hai</h2></div>
+
+  <p>Upar ka har symbol RoboSketch-RL me ek asli cheez hai:</p>
+
+  <div class="tw">
+  <table>
+    <tr><th>Ganit</th><th>Hamare project me</th></tr>
+    <tr><td class="num">\(s_t\)</td><td>64&times;64&times;3 image &mdash; channel 0 target shape, channel 1 ab tak ka drawing, channel 2 pen ki jagah</td></tr>
+    <tr><td class="num">\(a_t\)</td><td>\((dx, dy)\) &mdash; pen ko kitna aur kis dishaa me sarkana hai. <b>Continuous</b>, isliye Gaussian policy</td></tr>
+    <tr><td class="num">\(\pi_\theta\)</td><td>CNN (SB3 ka <code>CnnPolicy</code>) jo image se \(\mu\) aur \(\sigma\) deta hai</td></tr>
+    <tr><td class="num">\(r_t\)</td><td>\(10 \cdot \Delta\text{IoU} + 0.4 \cdot \Delta\Phi - 0.02 \cdot \text{jerk}\)</td></tr>
+    <tr><td class="num">\(\tau\)</td><td>240 steps ki ek poori drawing</td></tr>
+    <tr><td class="num">\(V_\phi(s)\)</td><td>Wahi CNN ka doosra head &mdash; "is adhoore drawing se aage kitna reward milega"</td></tr>
+    <tr><td class="num">\(\gamma = 0.99\)</td><td>Horizon &asymp;100 steps &mdash; 240-step episode ke liye theek</td></tr>
+    <tr><td class="num">\(\lambda = 0.95,\ \epsilon = 0.2\)</td><td>SB3 defaults; badalne ki wajah abhi nahi mili</td></tr>
+    <tr><td class="num">\(c_2 = 0.02\)</td><td><b>Humne badhaya</b> (SB3 default 0) &mdash; wajah neeche</td></tr>
+    <tr><td class="num">\(N,\, K,\, \text{batch}\)</td><td>512 steps &times; 8 parallel envs = 4096 transitions; 6 epochs; batch 256</td></tr>
+  </table>
+  </div>
+
+  <div class="code">
+    <div class="code-top">rl/train.py &mdash; poora setup ek jagah</div>
+<pre><code class="py">model = PPO("CnnPolicy", venv, verbose=1, seed=args.seed,
+            n_steps=512, batch_size=256, n_epochs=6, gamma=0.99,
+            ent_coef=args.ent_coef, learning_rate=3e-4)
+model.learn(total_timesteps=args.timesteps)</code></pre>
+  </div>
+
+  <h3>Teen jagah jahan ye theory hamare kaam aayi</h3>
+
+  <div class="box us">
+    <span class="tag">1 &mdash; Entropy term ne project bachaya</span>
+    <p>Shuru me hamara agent ne seekha: <b>"kuch mat banao."</b> Kyunki pen ghumane se stray ink banti thi, IoU girta tha, reward negative aata tha &mdash; aur kuch na karne se 0 rehta tha. \(0 &gt; \text{negative}\), to "kuch na karo" hi optimal ban gaya.</p>
+    <p>Formula me iska ilaaj \(c_2 H[\pi_\theta]\) wala term hai. \(c_2\) ko 0 se <b>0.02</b> kiya &mdash; yaani policy ko "undecided" rehne ka inaam &mdash; taaki wo alag cheezein try karti rahe aur us local optimum se nikal aaye.</p>
+  </div>
+
+  <div class="box us">
+    <span class="tag">2 &mdash; Reward ko delta rakhna, taaki jod telescope ho</span>
+    <p>Hamara reward IoU nahi, <b>\(\Delta\)IoU</b> hai. Iska ek khoobsurat nateeja hai: poore episode me \(\Delta\)IoU jodne par sirf <b>final IoU</b> bachta hai. Yaani \(J(\theta)\) badhana aur "achhi drawing banana" <b>exactly ek hi cheez</b> ban jati hai &mdash; reward design ka sabse zaroori check.</p>
+  </div>
+
+  <div class="box us">
+    <span class="tag">3 &mdash; PPO hi kyu, ek line me</span>
+    <p><b>Action continuous hai</b> &mdash; \((dx, dy)\) real numbers. DQN aur Q-Learning \(\max_a Q(s,a)\) par khade hain, jo infinite actions par nikala hi nahi ja sakta. PPO ko max ki zaroorat hi nahi &mdash; wo seedhe Gaussian ka mean deta hai.</p>
+    <p><b>Development me reward function badalta raha</b> (coverage &rarr; \(\Delta\)IoU &rarr; shaping &rarr; truth/vision), isliye purana data buffer me rakhna galat hota. PPO har baar naya data leta hai.</p>
+    <p><b>Hamara simulator sasta hai</b>, to on-policy ki "zyada data chahiye" wali kami dikkat nahi banti &mdash; 8 environments parallel chalte hain. Aage <b>hardware</b> par ye samikaran badlega, aur tab <b>SAC</b> sahi choice hoga.</p>
+  </div>
+
+  <div class="box warn">
+    <span class="tag">Ek cheez jo abhi bhi khuli hai</span>
+    <p>PPO ka objective episode ke <b>ant</b> tak ka return maximize karta hai. Humne naapa ki hamara agent shape episode ke pehle ~15% me hi bana leta hai, phir usse <b>bigaad</b> deta hai &mdash; peak se final tak average <b>0.064 IoU</b> ka nuksaan. Yaani ganit theek chal raha hai, lekin humne use jo naapne ko kaha wo poori kahani nahi thi. Iska ablation abhi chal raha hai.</p>
+  </div>
+</section>
+
+<div class="foot">
+  RoboSketch-RL &mdash; PPO derivation notebook<br>
+  Reference: Schulman et al. (2017) <em>Proximal Policy Optimization Algorithms</em> &middot; Schulman et al. (2016) <em>High-Dimensional Continuous Control Using GAE</em><br>
+  Project files: rl/train.py, rl/draw_env.py, docs/RESEARCH_LOG.md
+</div>
+
+</div>
+
+<script>
+(function(){
+  var RX = /("[^"]*"|'[^']*')|\b(def|class|return|if|else|for|while|in|not|and|or|import|from|as|with|lambda|None|True|False|self|super)\b|\b(\d+\.?\d*(?:e-?\d+)?)\b/g;
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  document.querySelectorAll('code.py').forEach(function(el){
+    var out = el.textContent.split('\n').map(function(line){
+      var hash = -1, q = null;
+      for (var i = 0; i < line.length; i++){
+        var c = line[i];
+        if (q){ if (c === q) q = null; }
+        else if (c === '"' || c === "'") q = c;
+        else if (c === '#'){ hash = i; break; }
+      }
+      var code = hash === -1 ? line : line.slice(0, hash);
+      var cmt  = hash === -1 ? ''   : line.slice(hash);
+      code = esc(code).replace(RX, function(m, str, kw, num){
+        if (str) return '<span class="tok-s">' + str + '</span>';
+        if (kw)  return '<span class="tok-k">' + kw + '</span>';
+        return '<span class="tok-n">' + num + '</span>';
+      });
+      return code + (cmt ? '<span class="tok-c">' + esc(cmt) + '</span>' : '');
+    });
+    el.innerHTML = out.join('\n');
+  });
+})();
+</script>

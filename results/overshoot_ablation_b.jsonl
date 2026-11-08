@@ -1,0 +1,8 @@
+{"shape": "circle", "arm": "stop", "seed": 0, "mode": "truth", "iou": 0.3397, "peak_iou": 0.3397, "overshoot": 0.0, "steps_used": 17.0, "coverage": 0.4949, "path_ratio": 0.743, "timesteps": 200000, "max_steps": 240}
+{"shape": "square", "arm": "stop", "seed": 0, "mode": "truth", "iou": 0.3753, "peak_iou": 0.3753, "overshoot": 0.0, "steps_used": 28.0, "coverage": 0.5625, "path_ratio": 1.125, "timesteps": 200000, "max_steps": 240}
+{"shape": "circle", "arm": "baseline", "seed": 1, "mode": "truth", "iou": 0.3131, "peak_iou": 0.3463, "overshoot": 0.0332, "steps_used": 240.0, "coverage": 0.6646, "path_ratio": 6.906, "timesteps": 200000, "max_steps": 240}
+{"shape": "circle", "arm": "plateau", "seed": 1, "mode": "truth", "iou": 0.4489, "peak_iou": 0.4525, "overshoot": 0.0036, "steps_used": 47.0, "coverage": 0.6862, "path_ratio": 1.162, "timesteps": 200000, "max_steps": 240}
+{"shape": "circle", "arm": "stop", "seed": 1, "mode": "truth", "iou": 0.4072, "peak_iou": 0.4072, "overshoot": 0.0, "steps_used": 20.0, "coverage": 0.6368, "path_ratio": 0.918, "timesteps": 200000, "max_steps": 240}
+{"shape": "square", "arm": "baseline", "seed": 1, "mode": "truth", "iou": 0.4107, "peak_iou": 0.4452, "overshoot": 0.0345, "steps_used": 240.0, "coverage": 0.7625, "path_ratio": 1.921, "timesteps": 200000, "max_steps": 240}
+{"shape": "square", "arm": "plateau", "seed": 1, "mode": "truth", "iou": 0.4428, "peak_iou": 0.4428, "overshoot": 0.0, "steps_used": 69.0, "coverage": 0.6743, "path_ratio": 1.31, "timesteps": 200000, "max_steps": 240}
+{"shape": "square", "arm": "stop", "seed": 1, "mode": "truth", "iou": 0.3824, "peak_iou": 0.3824, "overshoot": 0.0, "steps_used": 33.0, "coverage": 0.598, "path_ratio": 1.294, "timesteps": 200000, "max_steps": 240}

@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoboSketch-RL — The Complete Learning Book</title>
+<style>
+/* ============================================================
+   RoboSketch-RL Learning Book — self-contained stylesheet
+   Theme-aware (light + dark), responsive, print-friendly.
+   ============================================================ */
+:root{
+  --bg:#f7f8fb; --bg-soft:#eef1f7; --card:#ffffff; --ink:#1b2130; --ink-soft:#48526b;
+  --muted:#6b7488; --line:#e2e6ef; --brand:#4f46e5; --brand-2:#0ea5e9; --brand-ink:#3730a3;
+  --accent:#f59e0b; --good:#16a34a; --bad:#dc2626; --info:#0284c7;
+  --tip-bg:#ecfdf5; --tip-br:#10b981; --warn-bg:#fff7ed; --warn-br:#f59e0b;
+  --key-bg:#eef2ff; --key-br:#6366f1; --note-bg:#eff6ff; --note-br:#3b82f6;
+  --code-bg:#0f172a; --code-ink:#e2e8f0; --shadow:0 1px 3px rgba(16,24,40,.08),0 8px 24px rgba(16,24,40,.06);
+  --sidebar-w:308px; --maxread:820px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0b0f1a; --bg-soft:#111726; --card:#141b2b; --ink:#e6e9f2; --ink-soft:#b8c0d4;
+    --muted:#8a93aa; --line:#242c40; --brand:#818cf8; --brand-2:#38bdf8; --brand-ink:#c7d2fe;
+    --accent:#fbbf24; --good:#4ade80; --bad:#f87171; --info:#38bdf8;
+    --tip-bg:#0b2a20; --tip-br:#10b981; --warn-bg:#2a1e0b; --warn-br:#f59e0b;
+    --key-bg:#171b34; --key-br:#818cf8; --note-bg:#0c2036; --note-br:#3b82f6;
+    --code-bg:#0a0f1c; --code-ink:#dbe4f5; --shadow:0 1px 3px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b0f1a; --bg-soft:#111726; --card:#141b2b; --ink:#e6e9f2; --ink-soft:#b8c0d4;
+  --muted:#8a93aa; --line:#242c40; --brand:#818cf8; --brand-2:#38bdf8; --brand-ink:#c7d2fe;
+  --accent:#fbbf24; --good:#4ade80; --bad:#f87171; --info:#38bdf8;
+  --tip-bg:#0b2a20; --tip-br:#10b981; --warn-bg:#2a1e0b; --warn-br:#f59e0b;
+  --key-bg:#171b34; --key-br:#818cf8; --note-bg:#0c2036; --note-br:#3b82f6;
+  --code-bg:#0a0f1c; --code-ink:#dbe4f5; --shadow:0 1px 3px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+}
+:root[data-theme="light"]{
+  --bg:#f7f8fb; --bg-soft:#eef1f7; --card:#ffffff; --ink:#1b2130; --ink-soft:#48526b;
+  --muted:#6b7488; --line:#e2e6ef; --brand:#4f46e5; --brand-2:#0ea5e9; --brand-ink:#3730a3;
+  --accent:#f59e0b; --good:#16a34a; --bad:#dc2626; --info:#0284c7;
+  --tip-bg:#ecfdf5; --tip-br:#10b981; --warn-bg:#fff7ed; --warn-br:#f59e0b;
+  --key-bg:#eef2ff; --key-br:#6366f1; --note-bg:#eff6ff; --note-br:#3b82f6;
+  --code-bg:#0f172a; --code-ink:#e2e8f0; --shadow:0 1px 3px rgba(16,24,40,.08),0 8px 24px rgba(16,24,40,.06);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size:17px; line-height:1.7; -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%}
+a{color:var(--brand)}
+code,kbd{font-family:"SF Mono",ui-monospace,"Cascadia Code",Consolas,monospace;font-size:.9em}
+p code,li code,td code{background:var(--bg-soft);padding:.1em .4em;border-radius:5px;color:var(--brand-ink)}
+
+/* ---- top progress bar ---- */
+#progress{position:fixed;top:0;left:0;height:4px;width:0;z-index:60;
+  background:linear-gradient(90deg,var(--brand),var(--brand-2));transition:width .08s linear}
+
+/* ---- layout ---- */
+.shell{display:flex;min-height:100vh}
+.sidebar{
+  width:var(--sidebar-w);flex:0 0 var(--sidebar-w);position:fixed;top:0;left:0;bottom:0;
+  background:var(--card);border-right:1px solid var(--line);overflow-y:auto;z-index:50;
+  transition:transform .25s ease;
+}
+.sidebar-head{padding:20px 20px 12px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--card);z-index:2}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.05rem;letter-spacing:-.02em}
+.logo .mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand-2));
+  display:grid;place-items:center;color:#fff;flex:0 0 34px}
+.logo small{display:block;font-weight:500;color:var(--muted);font-size:.72rem;letter-spacing:0}
+.searchbox{margin-top:12px;position:relative}
+.searchbox input{width:100%;padding:8px 10px 8px 30px;border:1px solid var(--line);border-radius:8px;
+  background:var(--bg);color:var(--ink);font-size:.85rem}
+.searchbox svg{position:absolute;left:9px;top:9px;opacity:.5}
+nav.toc{padding:10px 10px 40px}
+nav.toc .part{margin-top:14px;padding:4px 10px;font-size:.7rem;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted)}
+nav.toc a{display:block;padding:6px 10px;border-radius:7px;color:var(--ink-soft);text-decoration:none;
+  font-size:.86rem;line-height:1.4;border-left:2px solid transparent}
+nav.toc a:hover{background:var(--bg-soft);color:var(--ink)}
+nav.toc a.active{background:var(--key-bg);color:var(--brand-ink);border-left-color:var(--brand);font-weight:600}
+nav.toc a.hidden{display:none}
+
+.content{margin-left:var(--sidebar-w);flex:1;min-width:0;padding:0}
+.topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:12px;
+  padding:10px 22px;background:color-mix(in srgb,var(--bg) 82%,transparent);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar .crumb{color:var(--muted);font-size:.82rem;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.iconbtn{border:1px solid var(--line);background:var(--card);color:var(--ink);width:38px;height:38px;
+  border-radius:9px;cursor:pointer;display:grid;place-items:center;font-size:1rem}
+.iconbtn:hover{background:var(--bg-soft)}
+#menuBtn{display:none}
+
+.reading{max-width:var(--maxread);margin:0 auto;padding:24px 26px 120px}
+
+/* ---- hero ---- */
+.hero{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;border-radius:20px;
+  padding:44px 36px;box-shadow:var(--shadow);margin-bottom:10px;position:relative;overflow:hidden}
+.hero h1{font-size:2.15rem;margin:.1em 0 .3em;letter-spacing:-.02em;line-height:1.15}
+.hero p.sub{font-size:1.05rem;opacity:.95;margin:0 0 18px;max-width:60ch}
+.hero .pill{display:inline-block;background:rgba(255,255,255,.18);padding:5px 12px;border-radius:999px;
+  font-size:.78rem;font-weight:600;margin:3px 6px 3px 0}
+.hero .robot{position:absolute;right:-10px;bottom:-20px;opacity:.22;pointer-events:none}
+
+/* ---- chapters ---- */
+.chapter{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);
+  margin:22px 0;overflow:hidden;scroll-margin-top:70px}
+.chapter>summary{list-style:none;cursor:pointer;padding:22px 26px;display:flex;align-items:center;gap:16px;
+  user-select:none}
+.chapter>summary::-webkit-details-marker{display:none}
+.chapter>summary:hover{background:var(--bg-soft)}
+.chapter .num{flex:0 0 46px;width:46px;height:46px;border-radius:12px;display:grid;place-items:center;
+  font-weight:800;color:#fff;background:linear-gradient(135deg,var(--brand),var(--brand-2));font-size:1rem}
+.chapter .htext{flex:1;min-width:0}
+.chapter .htext h2{margin:0;font-size:1.28rem;letter-spacing:-.01em}
+.chapter .htext .kicker{color:var(--muted);font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.chapter .chev{transition:transform .2s;color:var(--muted)}
+.chapter[open]>summary .chev{transform:rotate(90deg)}
+.chapter .body{padding:6px 30px 30px;border-top:1px solid var(--line)}
+.chapter .body>*:first-child{margin-top:18px}
+
+h3{font-size:1.16rem;margin:1.7em 0 .5em;letter-spacing:-.01em}
+h4{font-size:1.02rem;margin:1.4em 0 .4em;color:var(--ink)}
+.chapter .body p,.chapter .body li{color:var(--ink-soft)}
+.lead{font-size:1.05rem;color:var(--ink)!important}
+ul,ol{padding-left:1.3em}
+li{margin:.28em 0}
+
+/* ---- callouts ---- */
+.callout{border-left:4px solid var(--note-br);background:var(--note-bg);border-radius:10px;
+  padding:14px 16px 14px 18px;margin:18px 0;display:flex;gap:12px}
+.callout .ic{flex:0 0 22px;font-size:1.15rem;line-height:1.5}
+.callout .ct{min-width:0}
+.callout .ct b{display:block;margin-bottom:2px;color:var(--ink)}
+.callout p{margin:.3em 0;color:var(--ink-soft)}
+.callout.tip{border-color:var(--tip-br);background:var(--tip-bg)}
+.callout.warn{border-color:var(--warn-br);background:var(--warn-bg)}
+.callout.key{border-color:var(--key-br);background:var(--key-bg)}
+.callout.analogy{border-color:var(--brand-2);background:var(--note-bg)}
+.callout.mistake{border-color:var(--bad);background:var(--warn-bg)}
+.callout.flex{border-color:var(--accent);background:var(--warn-bg)}
+
+/* takeaways */
+.takeaways{background:var(--bg-soft);border:1px dashed var(--line);border-radius:12px;padding:16px 20px;margin:22px 0}
+.takeaways b{color:var(--brand-ink)}
+.takeaways ul{margin:.4em 0 0}
+
+.summary-box{background:linear-gradient(135deg,color-mix(in srgb,var(--brand) 10%,var(--card)),var(--card));
+  border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:24px 0 6px}
+.summary-box b{color:var(--brand-ink)}
+
+/* tables */
+.tablewrap{overflow-x:auto;margin:18px 0;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:.9rem}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--bg-soft);color:var(--ink);font-weight:700;position:sticky;top:0}
+tr:last-child td{border-bottom:none}
+td.good{color:var(--good);font-weight:600}
+td.bad{color:var(--bad);font-weight:600}
+
+/* code */
+pre{background:var(--code-bg);color:var(--code-ink);padding:16px 18px;border-radius:12px;overflow-x:auto;
+  font-size:.85rem;line-height:1.55;margin:16px 0}
+pre code{color:inherit;background:none;padding:0}
+.cmt{color:#7c8aa5}
+
+/* svg figure */
+figure{margin:22px 0;text-align:center}
+figure svg{max-width:100%;height:auto;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px}
+figcaption{color:var(--muted);font-size:.82rem;margin-top:8px}
+.placeholder{border:2px dashed var(--line);border-radius:12px;padding:26px;text-align:center;color:var(--muted);
+  background:var(--bg-soft);margin:18px 0;font-size:.9rem}
+.placeholder b{color:var(--ink-soft)}
+
+/* grids */
+.grid{display:grid;gap:14px;margin:18px 0}
+.grid.two{grid-template-columns:1fr 1fr}
+.grid.three{grid-template-columns:1fr 1fr 1fr}
+.card-mini{background:var(--bg-soft);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.card-mini h4{margin:.1em 0 .3em}
+.card-mini .big{font-size:1.5rem;font-weight:800;color:var(--brand)}
+
+/* flow chips */
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:18px 0}
+.flow .step{background:var(--key-bg);border:1px solid var(--key-br);color:var(--brand-ink);
+  padding:8px 12px;border-radius:10px;font-weight:600;font-size:.85rem}
+.flow .arrow{color:var(--muted);font-weight:700}
+
+/* glossary */
+dl.glossary dt{font-weight:700;color:var(--brand-ink);margin-top:14px}
+dl.glossary dd{margin:2px 0 0;color:var(--ink-soft)}
+
+/* faq */
+details.faq{border:1px solid var(--line);border-radius:10px;margin:10px 0;background:var(--bg-soft)}
+details.faq summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style:none}
+details.faq summary::-webkit-details-marker{display:none}
+details.faq summary::before{content:"＋";color:var(--brand);margin-right:10px;font-weight:800}
+details.faq[open] summary::before{content:"－"}
+details.faq .fa{padding:0 16px 14px;color:var(--ink-soft)}
+
+/* expandable inline */
+details.more{border-left:3px solid var(--brand-2);background:var(--note-bg);border-radius:8px;margin:16px 0;padding:0 4px}
+details.more summary{cursor:pointer;padding:10px 14px;font-weight:600;color:var(--brand-ink);list-style:none}
+details.more summary::-webkit-details-marker{display:none}
+details.more summary::before{content:"▸ ";}
+details.more[open] summary::before{content:"▾ "}
+details.more .mc{padding:0 14px 14px}
+
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+.badge{display:inline-block;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:999px;vertical-align:middle;margin-left:6px}
+.badge.est{background:var(--warn-bg);color:var(--accent);border:1px solid var(--warn-br)}
+.badge.fixed{background:var(--tip-bg);color:var(--good);border:1px solid var(--tip-br)}
+
+.backtop{position:fixed;right:22px;bottom:22px;z-index:45;background:var(--brand);color:#fff;border:none;
+  width:46px;height:46px;border-radius:50%;cursor:pointer;font-size:1.2rem;box-shadow:var(--shadow);
+  opacity:0;pointer-events:none;transition:opacity .2s}
+.backtop.show{opacity:1;pointer-events:auto}
+
+.scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:49}
+
+footer.bookfoot{max-width:var(--maxread);margin:0 auto;padding:30px 26px 60px;color:var(--muted);font-size:.85rem;text-align:center}
+
+/* responsive */
+@media(max-width:980px){
+  .grid.three{grid-template-columns:1fr 1fr}
+}
+@media(max-width:820px){
+  #menuBtn{display:grid}
+  .content{margin-left:0}
+  .sidebar{transform:translateX(-100%);box-shadow:var(--shadow)}
+  .sidebar.open{transform:none}
+  .scrim.open{display:block}
+  .grid.two,.grid.three{grid-template-columns:1fr}
+  .hero h1{font-size:1.7rem}
+  .reading{padding:16px 14px 100px}
+  .chapter .body{padding:6px 18px 24px}
+  body{font-size:16px}
+}
+@media print{
+  .sidebar,.topbar,.backtop,#progress,.scrim{display:none!important}
+  .content{margin:0}
+  .chapter .body{display:block!important}
+  .chapter{break-inside:avoid;box-shadow:none}
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div class="scrim" id="scrim"></div>
+
+<div class="shell">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <div class="logo">
+        <span class="mark">✎</span>
+        <span>RoboSketch-RL<small>The Complete Learning Book</small></span>
+      </div>
+      <div class="searchbox">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>
+        <input id="tocSearch" type="text" placeholder="Search chapters…" aria-label="Search chapters">
+      </div>
+    </div>
+    <nav class="toc" id="toc"><!-- filled by JS --></nav>
+  </aside>
+
+  <!-- ============ CONTENT ============ -->
+  <main class="content">
+    <div class="topbar">
+      <button class="iconbtn" id="menuBtn" aria-label="Menu">☰</button>
+      <div class="crumb" id="crumb">RoboSketch-RL — Learning Book</div>
+      <button class="iconbtn" id="expandAll" title="Expand all chapters">⤢</button>
+      <button class="iconbtn" id="themeBtn" title="Toggle light/dark">🌓</button>
+    </div>
+
+    <div class="reading">
+
+      <!-- HERO -->
+      <section class="hero">
+        <svg class="robot" width="220" height="200" viewBox="0 0 220 200" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round">
+          <rect x="30" y="150" width="120" height="20" rx="6"/>
+          <circle cx="90" cy="150" r="10" fill="#fff" stroke="none"/>
+          <path d="M90 150 L140 90"/><circle cx="140" cy="90" r="9" fill="#fff" stroke="none"/>
+          <path d="M140 90 L185 120"/><circle cx="185" cy="120" r="7" fill="#fff" stroke="none"/>
+          <path d="M185 120 L200 150"/>
+          <path d="M40 175 q40 8 90 0 q30 -4 55 -2" stroke-width="4" stroke-dasharray="2 8"/>
+        </svg>
+        <span class="pill">Grade 10 friendly</span>
+        <span class="pill">No prior AI needed</span>
+        <span class="pill">Learn before you build</span>
+        <h1>Teaching a Robot to Draw — From Zero</h1>
+        <p class="sub">A complete, beginner-first guide to <b>RoboSketch-RL</b>: Vision-Guided Reinforcement Learning for Autonomous Robotic Drawing. By the last page you'll understand every idea, part, and tool the project uses — and feel ready to begin.</p>
+        <span class="pill">Robotics</span><span class="pill">Computer Vision</span><span class="pill">Reinforcement Learning</span><span class="pill">Simulation</span>
+      </section>
+
+      <div class="callout note">
+        <div class="ic">📖</div>
+        <div class="ct">
+          <b>How to read this book</b>
+          <p>Chapters are collapsible — click any chapter title to open or close it. Use the sidebar to jump around, the search box to find a topic, and the progress bar at the very top to see how far you've read. Read it in order the first time: each part is built on the ones before it.</p>
+        </div>
+      </div>
+
+      <div class="callout flex">
+        <div class="ic">⚗️</div>
+        <div class="ct">
+          <b>Two kinds of statements in this book</b>
+          <p>Some things are <b>established facts</b> <span class="badge fixed">FIXED</span> — true no matter what (how a servo works, what a pixel is). Others are <b>current design choices</b> <span class="badge est">MAY CHANGE</span> for <i>this</i> project (which reward to use, which arm to buy). This is a <b>research</b> project, so design choices are expected to evolve as we experiment. Watch for these two badges.</p>
+        </div>
+      </div>
+
+      <!-- =================================================================
+           PART 1 — INTRODUCTION
+      ================================================================== -->
+      <details class="chapter" id="ch1" open>
+        <summary>
+          <span class="num">1</span>
+          <span class="htext"><span class="kicker">Part 1 · Introduction</span><h2>About RoboSketch-RL</h2></span>
+          <span class="chev">▸</span>
+        </summary>
+        <div class="body">
+          <p class="lead">Imagine a robot arm holding a pen. You show it a picture of a circle. Nobody tells the robot <i>how</i> to move — it tries, looks at what it drew through a camera, notices "that's not a circle yet," and tries again. After many attempts it learns to draw a clean circle by itself. <b>That is RoboSketch-RL.</b></p>
+
+          <h3>1.1 What is the project, in one paragraph?</h3>
+          <p>RoboSketch-RL is a low-cost robotic arm that <b>learns to draw shapes</b> — a line, a circle, a square, a triangle, then handwritten digits and letters — using <b>Reinforcement Learning (RL)</b> and a <b>camera</b>. Instead of a human programming the exact motions, the robot discovers the motions on its own through trial and error, guided by how closely its drawing matches a target image.</p>
+
+          <div class="callout analogy">
+            <div class="ic">🧠</div>
+            <div class="ct"><b>Analogy: learning to ride a bicycle</b>
+            <p>Nobody hands you a formula for balancing a bicycle. You wobble, you fall, you feel what works, and your brain slowly tunes your muscles. RoboSketch-RL learns to draw the same way — by doing, failing, and improving — not by being handed a formula.</p></div>
+          </div>
+
+          <h3>1.2 The key idea: "learn to draw" vs "be told how to draw" <span class="badge fixed">CORE IDEA</span></h3>
+          <p>There are two ways to make a robot draw a circle:</p>
+          <div class="grid two">
+            <div class="card-mini"><h4>❌ The old way (pre-programmed)</h4><p>A human calculates the exact angle for every joint at every instant using geometry and <b>inverse kinematics</b>, and the robot blindly replays those numbers. If anything changes (the pen slips, the paper moves), it fails.</p></div>
+            <div class="card-mini"><h4>✅ RoboSketch-RL's way (learned)</h4><p>The robot is given a <b>goal</b> ("match this picture") and a way to <b>see</b> its own drawing. It figures out the motions itself and can adapt. We <i>teach it how to learn</i>, not how to draw.</p></div>
+          </div>
+          <p>This single shift — <b>teaching a robot how to learn to draw rather than programming how to draw</b> — is the heart of the project and the source of its research value.</p>
+
+          <h3>1.3 The vision of the project</h3>
+          <p>The long-term vision is a cheap, general drawing robot that can reproduce <i>any</i> shape you show it, having learned the skill of drawing rather than memorizing one drawing. It should be built for a small budget (around <b>₹10,000</b>) so that students and hobbyists — not just big labs — can explore learning-based robotics.</p>
+
+          <h3>1.4 The final goal</h3>
+          <p>The final goal has two layers:</p>
+          <ol>
+            <li><b>A working system:</b> a physical 6-joint arm that watches a target image and draws it accurately.</li>
+            <li><b>A research contribution:</b> a scientific paper — aimed at venues like IEEE / ICRA / IROS / RA-L — showing that vision-guided RL can teach a low-cost arm to draw, and measuring how well it works. <span class="badge fixed">GOAL</span></li>
+          </ol>
+          <div class="callout key">
+            <div class="ic">🎯</div>
+            <div class="ct"><b>The goal is knowledge, not just a gadget</b>
+            <p>We are not only building a robot — we are running an <b>experiment</b> to answer a question: <i>"Can a low-cost arm learn to draw from visual feedback, and does learning from vision beat learning from perfect internal numbers?"</i> That question is what makes it publishable.</p></div>
+          </div>
+
+          <h3>1.5 Expected outcomes</h3>
+          <ul>
+            <li>A trained RL "brain" (a <b>policy</b>) that draws basic shapes in <b>simulation</b>.</li>
+            <li>The same brain transferred to a real, physical arm (<b>sim-to-real</b>).</li>
+            <li>Numbers that prove how good it is: shape overlap (<b>IoU</b>), error (<b>MSE</b>), success rate, and training time — all defined later in the book.</li>
+            <li>A comparison of algorithms (<b>PPO</b> first, then <b>SAC</b>) against a traditional non-learning baseline.</li>
+            <li>A written thesis / research paper documenting the whole journey.</li>
+          </ul>
+
+          <h3>1.6 Why this project is genuinely interesting</h3>
+          <div class="grid three">
+            <div class="card-mini"><h4>It's visible</h4><p>Learning is abstract, but a robot slowly drawing a better and better circle lets you <i>watch</i> intelligence appear.</p></div>
+            <div class="card-mini"><h4>It's a full stack</h4><p>It touches robotics, vision, AI, simulation, and hardware — a complete engineering education in one project.</p></div>
+            <div class="card-mini"><h4>It's affordable</h4><p>Under ₹10,000, so the science isn't locked behind expensive lab equipment.</p></div>
+          </div>
+
+          <h3>1.7 Research possibilities</h3>
+          <p>Several honest research questions live inside this project (explored fully in Part 13):</p>
+          <ul>
+            <li>Does a <b>vision-based reward</b> (judging the drawing from a camera) work better than a <b>ground-truth reward</b> (using perfect internal coordinates)?</li>
+            <li>Is it better for the robot to think in <b>pen space</b> ("move the pen here") or <b>joint space</b> ("rotate this motor")? One transfers to new arms more easily.</li>
+            <li>How well does a policy trained in simulation survive the jump to real hardware (the <b>sim-to-real gap</b>)?</li>
+            <li>Which algorithm learns to draw faster and more reliably — PPO or SAC?</li>
+          </ul>
+
+          <h3>1.8 Real-world applications</h3>
+          <p>The skill "learn a precise, vision-guided motion" reaches far beyond drawing:</p>
+          <div class="tablewrap"><table>
+            <tr><th>Field</th><th>Same skill, different job</th></tr>
+            <tr><td>Manufacturing</td><td>Welding, gluing, or sealing along a line the robot <i>sees</i>, even if parts shift.</td></tr>
+            <tr><td>Electronics</td><td>Placing tiny components using camera feedback instead of perfect positioning.</td></tr>
+            <tr><td>Healthcare</td><td>Assistive and surgical robots that adjust to what they observe in real time.</td></tr>
+            <tr><td>Handwriting / signatures</td><td>Machines that reproduce writing styles or fill forms.</td></tr>
+            <tr><td>Education & art</td><td>Robots that teach motor skills or create physical artwork.</td></tr>
+          </table></div>
+
+          <div class="takeaways"><b>Key takeaways</b>
+          <ul>
+            <li>RoboSketch-RL = a cheap arm that <b>learns to draw</b> from camera feedback, not from pre-set instructions.</li>
+            <li>The novelty is teaching the robot <i>how to learn to draw</i>.</li>
+            <li>The end product is both a working robot <b>and</b> a research paper.</li>
+            <li>The same idea powers vision-guided manufacturing, medicine, and more.</li>
+          </ul></div>
+
+          <div class="callout mistake"><div class="ic">⚠️</div><div class="ct"><b>Common beginner mistake</b><p>Thinking the robot is "just drawing a circle." The circle is the <i>test</i>; the real product is a system that <i>learns</i>. A calculator can draw a circle — it can't learn to.</p></div></div>
+
+          <div class="summary-box"><b>Chapter summary.</b> RoboSketch-RL is a low-cost robotic arm that learns to draw shapes through trial, error, and camera feedback, powered by reinforcement learning. Its purpose is a real, measurable research contribution, not just a working gadget. The rest of the book teaches you every idea inside that one sentence.</div>
+        </div>
+      </details>
+
+      <!-- =================================================================
+           PART 2 — ROBOTICS BASICS
+      ================================================================== -->
+      <details class="chapter" id="ch2">
+        <summary>
+          <span class="num">2</span>
+          <span class="htext"><span class="kicker">Part 2 · Foundations</span><h2>Robotics Basics — From Absolute Zero</h2></span>
+          <span class="chev">▸</span>
+        </summary>
+        <div class="body">
+          <p class="lead">Before we can teach a robot arm to draw, we need to understand what a robot arm <i>is</i> and the words engineers use to describe it. This part builds that vocabulary from scratch.</p>
+
+          <h3>2.1 What is a robot?</h3>
+          <p>A <b>robot</b> is a machine that can <b>sense</b> its surroundings, <b>decide</b> what to do, and <b>act</b> on the physical world — often without a human controlling every move. Three abilities: sense → think → act. A washing machine only acts; a robot closes the loop by sensing and deciding too.</p>
+          <figure>
+            <svg width="560" height="120" viewBox="0 0 560 120" role="img" aria-label="Sense, Think, Act loop">
+              <g font-family="sans-serif" font-size="15" font-weight="700">
+              <rect x="20" y="35" width="130" height="50" rx="10" fill="#dbeafe" stroke="#3b82f6"/><text x="85" y="65" text-anchor="middle" fill="#1e3a8a">SENSE 👁️</text>
+              <rect x="215" y="35" width="130" height="50" rx="10" fill="#ede9fe" stroke="#8b5cf6"/><text x="280" y="65" text-anchor="middle" fill="#5b21b6">THINK 🧠</text>
+              <rect x="410" y="35" width="130" height="50" rx="10" fill="#dcfce7" stroke="#22c55e"/><text x="475" y="65" text-anchor="middle" fill="#166534">ACT 🦾</text>
+              <path d="M150 60 H215" stroke="#64748b" stroke-width="3" marker-end="url(#ar)"/>
+              <path d="M345 60 H410" stroke="#64748b" stroke-width="3" marker-end="url(#ar)"/>
+              <path d="M475 85 q0 25 -195 25 q-195 0 -195 -25" fill="none" stroke="#64748b" stroke-width="3" stroke-dasharray="5 5" marker-end="url(#ar)"/>
+              </g>
+              <defs><marker id="ar" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0 0 L7 3 L0 6 Z" fill="#64748b"/></marker></defs>
+            </svg>
+            <figcaption>Every robot repeats this loop. RoboSketch-RL senses with a camera, thinks with an RL policy, and acts with its arm.</figcaption>
+          </figure>
+
+          <h3>2.2 Types of robots</h3>
+          <div class="tablewrap"><table>
+            <tr><th>Type</th><th>What it is</th><th>Example</th></tr>
+            <tr><td>Mobile robots</td><td>Move around a space</td><td>Robot vacuum, delivery rover</td></tr>
+            <tr><td>Manipulators (arms)</td><td>Stay fixed, move a "hand" in space</td><td>Factory arm, <b>our project</b></td></tr>
+            <tr><td>Humanoids</td><td>Human-shaped, general purpose</td><td>Research humanoids</td></tr>
+            <tr><td>Drones</td><td>Fly</td><td>Quadcopters</td></tr>
+          </table></div>
+          <p>RoboSketch-RL uses a <b>manipulator</b> — a robotic <b>arm</b> bolted to a table.</p>
+
+          <h3>2.3 Robot arms, links, and joints</h3>
+          <p>A robot arm copies the design of your own arm. Your arm has <b>rigid bones</b> connected by <b>movable joints</b>. In robots:</p>
+          <ul>
+            <li><b>Link</b> = a rigid segment (like a bone). It does not bend.</li>
+            <li><b>Joint</b> = the movable connection between two links (like your shoulder, elbow, wrist). A motor lives here and rotates one link relative to the next.</li>
+            <li><b>Base</b> = the fixed end bolted to the table.</li>
+            <li><b>End effector</b> = the "hand" at the tip — the tool that does the actual job. <b>For us, the end effector is a pen holder.</b></li>
+          </ul>
+          <figure>
+            <svg width="440" height="230" viewBox="0 0 440 230" role="img" aria-label="Robot arm anatomy">
+              <rect x="60" y="190" width="120" height="24" rx="6" fill="#94a3b8"/><text x="120" y="207" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">BASE</text>
+              <line x1="120" y1="190" x2="200" y2="110" stroke="#4f46e5" stroke-width="14" stroke-linecap="round"/>
+              <line x1="200" y1="110" x2="320" y2="90" stroke="#0ea5e9" stroke-width="14" stroke-linecap="round"/>
+              <line x1="320" y1="90" x2="380" y2="140" stroke="#4f46e5" stroke-width="12" stroke-linecap="round"/>
+              <circle cx="120" cy="190" r="11" fill="#f59e0b"/><circle cx="200" cy="110" r="11" fill="#f59e0b"/><circle cx="320" cy="90" r="11" fill="#f59e0b"/>
+              <g font-size="11" font-weight="700" fill="#0f172a" font-family="sans-serif">
+              <text x="150" y="175">joint</text><text x="230" y="98">joint</text><text x="330" y="75">joint</text>
+              <text x="150" y="130" fill="#4f46e5">link</text><text x="255" y="90" fill="#0ea5e9">link</text>
+              </g>
+              <path d="M380 140 l14 14" stroke="#dc2626" stroke-width="4" stroke-linecap="round"/>
+              <text x="398" y="158" font-size="11" font-weight="700" fill="#dc2626" font-family="sans-serif">✎ pen (end effector)</text>
+            </svg>
+            <figcaption>Links (colored bars) are the bones; joints (orange dots) are the motorized connections; the pen at the tip is the end effector.</figcaption>
+          </figure>
+
+          <h3>2.4 Degrees of Freedom (DOF)</h3>
+          <p><b>Degrees of Freedom</b> = the number of independent ways the arm can move — usually the number of motorized joints. More DOF = more flexibility to reach a point from many angles.</p>
+          <div class="callout analogy"><div class="ic">🕺</div><div class="ct"><b>Analogy</b><p>Your arm has roughly 7 DOF (shoulder 3, elbow 1, wrist 3). That's why you can touch your nose with your elbow pointing up <i>or</i> down — same fingertip, different poses.</p></div></div>
+          <p>RoboSketch-RL uses a <b>6-DOF arm</b> <span class="badge est">DESIGN CHOICE</span>. Six is the classic number that lets an end effector reach any position <i>and</i> any orientation in 3D space — enough to place a pen flat on paper at any spot and angle.</p>
+
+          <h3>2.5 The end effector (our pen holder)</h3>
+          <p>The end effector is whatever tool sits at the arm's tip: a gripper, a suction cup, a welder, or — here — a <b>pen holder</b> that keeps a pen pointed down and pressed gently on the paper. Everything the arm does is really about putting <i>this one point</i> (the pen tip) in the right place.</p>
+
+          <h3>2.6 Motors — how joints move</h3>
+          <p>Joints move because <b>motors</b> turn them. Three important kinds:</p>
+          <div class="grid three">
+            <div class="card-mini"><h4>Servo motor</h4><p>A motor you command to a <b>specific angle</b> ("go to 45°") and it holds there. Simple, cheap, precise enough for hobby arms. <b>We use these (MG996R).</b></p></div>
+            <div class="card-mini"><h4>Stepper motor</h4><p>Moves in tiny fixed <b>steps</b>, good for precise repeatable motion (3D printers). Heavier and needs more control electronics.</p></div>
+            <div class="card-mini"><h4>Encoder</h4><p>Not a motor — a <b>sensor</b> that measures how far a shaft actually turned, so the robot knows its true angle (feedback).</p></div>
+          </div>
+          <div class="callout note"><div class="ic">🔧</div><div class="ct"><b>Why servos for this project</b> <span class="badge est">DESIGN CHOICE</span><p>Servos are the cheapest way to get "go to this angle" behavior, which is exactly what a small drawing arm needs. The planned <b>MG996R</b> servo is a popular, strong, inexpensive hobby servo. This may change if we need more precision.</p></div></div>
+
+          <h3>2.7 Workspace</h3>
+          <p>The <b>workspace</b> is every point the pen tip can physically reach — a 3D "bubble" around the arm. The paper must sit <i>inside</i> the workspace, or the robot literally cannot touch parts of it. Choosing where to place the paper is a real design step.</p>
+
+          <h3>2.8 Coordinate systems &amp; Cartesian coordinates</h3>
+          <p>To tell the robot <i>where</i>, we need numbers for locations. A <b>coordinate system</b> is an agreed way to turn a place into numbers. The most common is <b>Cartesian</b> coordinates: measure along three perpendicular axes.</p>
+          <ul>
+            <li><b>X</b> — left/right</li>
+            <li><b>Y</b> — forward/back</li>
+            <li><b>Z</b> — up/down (height)</li>
+          </ul>
+          <p>So "the pen is at (10, 5, 0)" means 10 units right, 5 forward, at table height. On flat paper, Z is basically fixed (pen touching paper) and drawing becomes a 2D problem in (X, Y).</p>
+          <figure>
+            <svg width="360" height="220" viewBox="0 0 360 220" role="img" aria-label="Cartesian axes">
+              <line x1="60" y1="180" x2="300" y2="180" stroke="#ef4444" stroke-width="3" marker-end="url(#a2)"/>
+              <line x1="60" y1="180" x2="60" y2="30" stroke="#22c55e" stroke-width="3" marker-end="url(#a2)"/>
+              <line x1="60" y1="180" x2="140" y2="120" stroke="#3b82f6" stroke-width="3" marker-end="url(#a2)"/>
+              <text x="305" y="185" font-size="14" font-weight="700" fill="#ef4444">X</text>
+              <text x="52" y="26" font-size="14" font-weight="700" fill="#22c55e">Z</text>
+              <text x="145" y="118" font-size="14" font-weight="700" fill="#3b82f6">Y</text>
+              <circle cx="200" cy="120" r="6" fill="#f59e0b"/><text x="210" y="118" font-size="12" font-weight="700" fill="#0f172a">pen (x,y,z)</text>
+              <defs><marker id="a2" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0 0 L7 3 L0 6 Z" fill="#334155"/></marker></defs>
+            </svg>
+            <figcaption>Cartesian coordinates give every point three numbers. Drawing on flat paper is mostly about X and Y.</figcaption>
+          </figure>
+
+          <h3>2.9 Forward Kinematics (FK) vs Inverse Kinematics (IK)</h3>
+          <p>These two words come up constantly. They are opposites.</p>
+          <div class="grid two">
+            <div class="card-mini"><h4>Forward Kinematics (FK)</h4><p><b>Angles → position.</b> "If each joint is at these angles, <i>where is the pen tip?</i>" Easy: plug angles into geometry, get one answer.</p></div>
+            <div class="card-mini"><h4>Inverse Kinematics (IK)</h4><p><b>Position → angles.</b> "I want the pen tip <i>here</i> — what angles do I need?" Harder: there may be many answers or none.</p></div>
+          </div>
+          <figure>
+            <svg width="520" height="120" viewBox="0 0 520 120" role="img" aria-label="FK vs IK">
+              <g font-family="sans-serif" font-size="13" font-weight="700">
+              <rect x="10" y="20" width="150" height="36" rx="8" fill="#ede9fe" stroke="#8b5cf6"/><text x="85" y="43" text-anchor="middle" fill="#5b21b6">Joint angles θ</text>
+              <rect x="360" y="20" width="150" height="36" rx="8" fill="#dcfce7" stroke="#22c55e"/><text x="435" y="43" text-anchor="middle" fill="#166534">Pen position (x,y)</text>
+              <path d="M160 30 H360" stroke="#4f46e5" stroke-width="3" marker-end="url(#a3)"/><text x="260" y="22" text-anchor="middle" fill="#4f46e5">Forward Kinematics →</text>
+              <path d="M360 48 H160" stroke="#0ea5e9" stroke-width="3" marker-end="url(#a3)"/><text x="260" y="70" text-anchor="middle" fill="#0ea5e9">← Inverse Kinematics</text>
+              </g>
+              <defs><marker id="a3" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0 0 L7 3 L0 6 Z" fill="#334155"/></marker></defs>
+            </svg>
+            <figcaption>FK and IK are two directions of the same relationship between joint angles and pen position.</figcaption>
+          </figure>
+
+          <h3>2.10 Why IK matters in <i>this</i> project</h3>
+          <p>The RL "brain" prefers to think in simple pen terms — "move the pen a little to the right." But motors only understand <b>angles</b>. <b>IK is the translator</b> that turns "put the pen at (x, y)" into "set joints to these angles." </p>
+          <div class="callout key"><div class="ic">🔑</div><div class="ct"><b>Why this makes the project portable</b> <span class="badge est">DESIGN CHOICE</span><p>If the agent decides in <b>pen space</b> and lets IK handle angles, then swapping to a different arm only means swapping the IK — the learned brain stays the same. If instead the agent learned raw angles for one specific arm, it couldn't move to a new arm. This "pen space vs joint space" choice is itself a research question (Part 13).</p></div></div>
+          <div class="callout tip"><div class="ic">💡</div><div class="ct"><b>Good news</b><p>You don't have to solve IK by hand. PyBullet (our simulator) has a built-in function, <code>calculateInverseKinematics</code>, that does the math for you.</p></div></div>
+
+          <h3>2.11 Sensors, cameras, and calibration</h3>
+          <p>A <b>sensor</b> turns something physical into numbers the robot can use. The main sensor here is a <b>camera</b>, which turns light into a grid of numbers (an image). But a camera by itself doesn't know where things are in the robot's world — it just sees pixels.</p>
+          <p><b>Calibration</b> is the one-time process of teaching the system how camera pixels line up with real-world positions: "the pixel at column 320, row 240 corresponds to this spot on the paper." Without calibration, the robot sees its drawing but can't relate it to where the pen actually is.</p>
+          <div class="callout analogy"><div class="ic">📐</div><div class="ct"><b>Analogy</b><p>Calibration is like taping a printed grid onto a table and telling a friend "square B3 is here." Afterward, any point they name on the grid, you know its real location.</p></div></div>
+
+          <h3>2.12 Accuracy vs precision</h3>
+          <p>These sound the same but aren't:</p>
+          <div class="grid two">
+            <div class="card-mini"><h4>Accuracy</h4><p>How close you get to the <b>true target</b>. Hitting the bullseye.</p></div>
+            <div class="card-mini"><h4>Precision (repeatability)</h4><p>How <b>consistent</b> you are. Hitting the same spot every time — even if it's the wrong spot.</p></div>
+          </div>
+          <p>A cheap arm might be <i>precise</i> (always ends up in the same place) but not <i>accurate</i> (that place is a bit off from the target). A big benefit of vision feedback is that the camera can <b>correct for inaccuracy</b> by watching where the pen actually went.</p>
+
+          <div class="takeaways"><b>Key takeaways</b>
+          <ul>
+            <li>A robot arm is <b>links</b> (bones) + <b>joints</b> (motors) + an <b>end effector</b> (our pen holder).</li>
+            <li><b>DOF</b> = number of independent moves; we use a <b>6-DOF</b> arm.</li>
+            <li><b>FK</b>: angles→position. <b>IK</b>: position→angles. IK lets the brain think in pen space and stay portable.</li>
+            <li>A <b>camera</b> sees pixels; <b>calibration</b> ties pixels to real positions.</li>
+            <li><b>Accuracy</b> = close to target; <b>precision</b> = consistent. Vision helps fix accuracy.</li>
+          </ul></div>
+          <div class="callout mistake"><div class="ic">⚠️</div><div class="ct"><b>Common beginner mistakes</b><p>(1) Confusing FK and IK — remember IK is the <i>hard</i> one we need. (2) Assuming a precise robot is automatically accurate. (3) Forgetting the paper must be inside the workspace bubble.</p></div></div>
+          <div class="summary-box"><b>Chapter summary.</b> You now speak "robot arm": links, joints, DOF, end effector, workspace, coordinates, FK/IK, sensors, calibration, and accuracy vs precision. IK is the bridge from the brain's decisions to real motor angles, and vision plus calibration is what lets a cheap arm draw accurately.</div>
+        </div>
+      </details>
+
+      <!-- =================================================================
+           PART 3 — PROGRAMMING BASICS
+      ================================================================== -->
+      <details class="chapter" id="ch3">
+        <summary>
+          <span class="num">3</span>
+          <span class="htext"><span class="kicker">Part 3 · Foundations</span><h2>Programming Basics You'll Actually Use</h2></span>
+          <span class="chev">▸</span>
+        </summary>
+        <div class="body">
+          <p class="lead">This part covers only the programming ideas RoboSketch-RL truly needs — nothing extra. If you know a little already, treat it as a checklist.</p>
+
+          <h3>3.1 Python — the language of this project</h3>
+          <p><b>Python</b> is a programming language famous for reading almost like English. It is the standard language for AI and robotics because it's easy to learn and has huge libraries for math, vision, and learning. The whole project (currently <b>Python 3.10</b>) is written in Python. <span class="badge fixed">FIXED</span></p>
+          <pre><code><span class="cmt"># Python reads like plain instructions</span>
+pen_x = 10
+pen_y = 5
+print("The pen is at", pen_x, pen_y)</code></pre>
+
+          <h3>3.2 Functions</h3>
+          <p>A <b>function</b> is a named, reusable block of instructions. You give it inputs, it does a job, maybe returns a result. It saves you from writing the same steps over and over.</p>
+          <pre><code>def distance(x1, y1, x2, y2):
+    <span class="cmt"># returns how far two points are apart</span>
+    return ((x2 - x1)**2 + (y2 - y1)**2) ** 0.5
+
+print(distance(0, 0, 3, 4))   <span class="cmt"># 5.0</span></code></pre>
+          <div class="callout analogy"><div class="ic">🍳</div><div class="ct"><b>Analogy</b><p>A function is a recipe. "make_tea(sugar)" — you hand it ingredients, it runs the steps, you get tea. You don't rewrite the recipe every morning.</p></div></div>
+
+          <h3>3.3 Classes and objects</h3>
+          <p>A <b>class</b> is a blueprint; an <b>object</b> is a real thing built from that blueprint. A class bundles related <b>data</b> (variables) and <b>actions</b> (functions, called methods) together.</p>
+          <pre><code>class Robot:
+    def __init__(self, name):
+        self.name = name        <span class="cmt"># data</span>
+        self.pen_down = False
+
+    def lower_pen(self):        <span class="cmt"># action (method)</span>
+        self.pen_down = True
+
+arm = Robot("Sketchy")          <span class="cmt"># 'arm' is an object</span>
+arm.lower_pen()</code></pre>
+          <div class="callout key"><div class="ic">🔑</div><div class="ct"><b>Why this matters here</b><p>Our RL training environment is written as a <b>class</b> (following the Gymnasium standard) with methods like <code>reset()</code> and <code>step(action)</code>. Understanding classes = understanding how the whole simulation is organized.</p></div></div>
+
+          <h3>3.4 Libraries</h3>
+          <p>A <b>library</b> is a bundle of pre-written code someone else made, so you don't reinvent it. Want to do computer vision? Import the OpenCV library. Want fast math? Import NumPy. Nearly all our power comes from combining good libraries (Part 9 lists them all).</p>
+          <pre><code>import numpy as np              <span class="cmt"># bring in the math library</span>
+angles = np.array([0.1, 0.5, 0.3])</code></pre>
+
+          <h3>3.5 Pip and virtual environments</h3>
+          <p><b>pip</b> is Python's installer — the command that downloads libraries. Typing <code>pip install opencv-python</code> fetches OpenCV from the internet and sets it up.</p>
+          <p>A <b>virtual environment</b> is a private, isolated "sandbox" of libraries for one project, so Project A's libraries don't clash with Project B's. You create one, "activate" it, and install everything inside it.</p>
+          <div class="callout analogy"><div class="ic">🧳</div><div class="ct"><b>Analogy</b><p>A virtual environment is a separate toolbox for each project. You don't dump every project's tools into one giant drawer where versions fight each other.</p></div></div>
+
+          <h3>3.6 Git and GitHub</h3>
+          <div class="grid two">
+            <div class="card-mini"><h4>Git</h4><p>A <b>version control</b> tool that saves snapshots ("commits") of your code over time, so you can undo mistakes and see history. It's a time machine for your project.</p></div>
+            <div class="card-mini"><h4>GitHub</h4><p>A website that stores your Git project <b>online</b>, as a backup and for sharing. For a research project, it's also how others reproduce your work.</p></div>
+          </div>
+          <div class="callout tip"><div class="ic">💡</div><div class="ct"><b>Why a researcher needs Git</b><p>Reproducibility is central to publishing. Git records <i>exactly</i> what code produced each result. When a reviewer asks "how did you get this graph?", your commit history is the answer.</p></div></div>
+
+          <h3>3.7 VS Code — where you write code</h3>
+          <p><b>VS Code</b> (Visual Studio Code) is a free, popular <b>code editor</b> — a smart text editor for programmers with autocomplete, error highlighting, and a built-in terminal. It's where you'll write and run everything. (You are reading this book inside its ecosystem right now.)</p>
+
+          <h3>3.8 Folder structure</h3>
+          <p>Keeping files organized in sensible folders keeps a growing project sane. A typical layout for RoboSketch-RL:</p>
+          <pre><code>RoboSketch-RL/
+├── sim/            <span class="cmt"># simulation code (PyBullet)</span>
+├── vision/         <span class="cmt"># camera + OpenCV code</span>
+├── rl/             <span class="cmt"># the learning agent & environment</span>
+├── docs/           <span class="cmt"># notes, this book, research log</span>
+├── requirements.txt <span class="cmt"># list of libraries to install</span>
+└── README.md       <span class="cmt"># project overview</span></code></pre>
+
+          <h3>3.9 Data formats: JSON, CSV, images, videos</h3>
+          <div class="tablewrap"><table>
+            <tr><th>Format</th><th>What it is</th><th>Used here for</th></tr>
+            <tr><td><b>JSON</b></td><td>Text that stores labeled data as <code>key: value</code> pairs</td><td>Settings / configuration (e.g. reward weights)</td></tr>
+            <tr><td><b>CSV</b></td><td>A spreadsheet as plain text — rows and commas</td><td>Logging training numbers (reward per episode) for graphs</td></tr>
+            <tr><td><b>Images</b></td><td>A grid of colored dots (pixels)</td><td>Target shapes and the robot's own drawings</td></tr>
+            <tr><td><b>Videos</b></td><td>Many images shown in sequence (frames)</td><td>Recording training runs to watch progress</td></tr>
+          </table></div>
+          <pre><code><span class="cmt"># JSON example — reward settings</span>
+{ "reward": { "overlap": 1.0, "off_paper_penalty": -0.5 } }</code></pre>
+
+          <div class="takeaways"><b>Key takeaways</b>
+          <ul>
+            <li><b>Python</b> is the project's language; <b>functions</b> and <b>classes</b> organize code.</li>
+            <li><b>Libraries</b> give superpowers; <b>pip</b> installs them into a <b>virtual environment</b> sandbox.</li>
+            <li><b>Git/GitHub</b> = time machine + online backup = reproducible research.</li>
+            <li><b>JSON/CSV/images/videos</b> are how we store settings, logs, and results.</li>
+          </ul></div>
+          <div class="callout mistake"><div class="ic">⚠️</div><div class="ct"><b>Common beginner mistake</b><p>Installing libraries globally and creating a "dependency mess." Always make a virtual environment first. Also: committing to Git rarely — commit small and often.</p></div></div>
+          <div class="summary-box"><b>Chapter summary.</b> You now have the exact programming toolkit RoboSketch-RL needs: Python with functions and classes, libraries installed via pip into a virtual environment, organized in folders, version-controlled with Git/GitHub, written in VS Code, using JSON/CSV/images/videos for data.</div>
+        </div>
+      </details>
+
+      <!-- =================================================================
+           PART 4 — COMPUTER VISION
+      ================================================================== -->
+      <details class="chapter" id="ch4">
+        <summary>
+          <span class="num">4</span>
+          <span class="htext"><span class="kicker">Part 4 · The "Eyes"</span><h2>Computer Vision — Giving the Robot Eyes</h2></span>
+          <span class="chev">▸</span>
+        </summary>
+        <div class="body">
+          <p class="lead">RoboSketch-RL judges its own drawing by <i>looking</i> at it. That looking is <b>Computer Vision</b> — teaching a computer to understand images. This part builds vision from a single pixel up to comparing two drawings.</p>
+
+          <h3>4.1 What is Computer Vision?</h3>
+          <p><b>Computer Vision (CV)</b> is the field of getting computers to extract meaning from images and video — to answer questions like "where is the line?", "is this a circle?", "how much of the target did I cover?". A camera captures light; CV turns that light into <i>understanding</i>.</p>
+
+          <h3>4.2 Pixels, images, RGB, grayscale</h3>
+          <p>A digital <b>image</b> is just a grid of tiny squares called <b>pixels</b> (picture elements). Each pixel stores a color as numbers.</p>
+          <ul>
+            <li><b>RGB:</b> each pixel = three numbers (Red, Green, Blue), each 0–255. (255,0,0) is pure red; (0,0,0) is black; (255,255,255) is white.</li>
+            <li><b>Grayscale:</b> each pixel = one number 0 (black) to 255 (white). No color, just brightness.</li>
+          </ul>
+          <figure>
+            <svg width="420" height="150" viewBox="0 0 420 150" role="img" aria-label="Pixels are numbers">
+              <g font-family="monospace" font-size="12">
+              <rect x="20" y="20" width="120" height="120" fill="#fff" stroke="#94a3b8"/>
+              <g fill="#0f172a">
+              <rect x="20" y="20" width="40" height="40" fill="#111827"/><text x="30" y="45" fill="#fff">30</text>
+              <rect x="60" y="20" width="40" height="40" fill="#6b7280"/><text x="70" y="45" fill="#fff">128</text>
+              <rect x="100" y="20" width="40" height="40" fill="#e5e7eb"/><text x="108" y="45">240</text>
+              <rect x="20" y="60" width="40" height="40" fill="#9ca3af"/><text x="30" y="85">160</text>
+              <rect x="60" y="60" width="40" height="40" fill="#374151"/><text x="70" y="85" fill="#fff">60</text>
+              <rect x="100" y="60" width="40" height="40" fill="#f9fafb"/><text x="108" y="85">255</text>
+              </g>
+              <text x="180" y="70" font-family="sans-serif" font-weight="700" fill="#334155">A grayscale image</text>
+              <text x="180" y="92" font-family="sans-serif" fill="#64748b">= a grid of brightness numbers</text>
+              <text x="180" y="112" font-family="sans-serif" fill="#64748b">(0 = black … 255 = white)</text>
+              </g>
+            </svg>
+            <figcaption>To a computer, an image is literally a table of numbers. That's why math can "understand" pictures.</figcaption>
+          </figure>
+          <div class="callout key"><div class="ic">🔑</div><div class="ct"><b>The big unlock</b><p>Because an image is just numbers, comparing two drawings becomes <i>comparing two grids of numbers</i> — which is exactly how we'll measure whether the robot's drawing matches the target.</p></div></div>
+
+          <h3>4.3 Turning an image into a clean shape</h3>
+          <p>A raw camera image is noisy. Vision uses a pipeline of simple operations to boil it down to the shape we care about:</p>
+
+          <h4>Grayscale &amp; Thresholding</h4>
+          <p>First convert to grayscale (color doesn't matter for a pen line). Then <b>threshold</b>: pick a cutoff brightness and turn every pixel into pure black or pure white — "is this pixel part of the line, yes or no?". This gives a clean <b>binary image</b>.</p>
+
+          <h4>Edge detection</h4>
+          <p><b>Edges</b> are places where brightness changes sharply — the borders of shapes. <b>Edge detection</b> (e.g. the Canny method) finds these outlines, throwing away flat areas.</p>
+
+          <h4>Contours</h4>
+          <p>A <b>contour</b> is a connected curve tracing the boundary of a shape — like tracing a cookie's outline with your finger. Finding contours turns a blob of pixels into an actual <i>shape</i> you can measure (length, area, is-it-closed?).</p>
+
+          <figure>
+            <svg width="560" height="120" viewBox="0 0 560 120" role="img" aria-label="Vision pipeline">
+              <g font-family="sans-serif" font-size="12" font-weight="700">
+              <rect x="8" y="35" width="96" height="46" rx="8" fill="#dbeafe" stroke="#3b82f6"/><text x="56" y="55" text-anchor="middle" fill="#1e3a8a">Camera</text><text x="56" y="72" text-anchor="middle" fill="#1e3a8a" font-weight="400">image (RGB)</text>
+              <rect x="128" y="35" width="96" height="46" rx="8" fill="#e0f2fe" stroke="#0284c7"/><text x="176" y="55" text-anchor="middle" fill="#075985">Grayscale</text><text x="176" y="72" text-anchor="middle" fill="#075985" font-weight="400">+ threshold</text>
+              <rect x="248" y="35" width="96" height="46" rx="8" fill="#ede9fe" stroke="#8b5cf6"/><text x="296" y="55" text-anchor="middle" fill="#5b21b6">Edges</text><text x="296" y="72" text-anchor="middle" fill="#5b21b6" font-weight="400">outlines</text>
+              <rect x="368" y="35" width="96" height="46" rx="8" fill="#fef3c7" stroke="#f59e0b"/><text x="416" y="55" text-anchor="middle" fill="#92400e">Contours</text><text x="416" y="72" text-anchor="middle" fill="#92400e" font-weight="400">the shape</text>
+              <rect x="480" y="35" width="72" height="46" rx="8" fill="#dcfce7" stroke="#22c55e"/><text x="516" y="60" text-anchor="middle" fill="#166534">Compare</text>
+              <path d="M104 58 H128 M224 58 H248 M344 58 H368 M464 58 H480" stroke="#64748b" stroke-width="2.5" marker-end="url(#a4)"/>
+              </g>
+              <defs><marker id="a4" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#64748b"/></marker></defs>
+            </svg>
+            <figcaption>The vision pipeline: from a raw photo to a clean shape we can score.</figcaption>
+          </figure>
+
+          <h3>4.4 Camera calibration &amp; perspective transformation</h3>
+          <p>A camera looking at paper from an angle sees a <b>skewed</b> shape (a rectangle looks like a trapezoid). <b>Perspective transformation</b> is a math trick that "un-skews" the image, as if you were looking straight down. Combined with <b>calibration</b> (Part 2.11), this lets the robot map any point in the photo to a real spot on the paper.</p>
+          <div class="callout analogy"><div class="ic">🖼️</div><div class="ct"><b>Analogy</b><p>Perspective transform is like taking a photo of a slanted poster and digitally straightening it into a perfect flat rectangle.</p></div></div>
+
+          <h3>4.5 Shape detection &amp; image comparison</h3>
+          <p><b>Shape detection</b> asks "is this contour a circle, square, or triangle?" by measuring corners and curves. <b>Image comparison</b> asks "how similar are these two images?" — the core of scoring a drawing. Two common measures (defined fully in Part 10):</p>
+          <ul>
+            <li><b>Pixel overlap / IoU</b> — of all the pixels that <i>should</i> be dark, how many actually are? How much do the two shapes overlap?</li>
+            <li><b>MSE (Mean Squared Error)</b> — on average, how different is each pixel from the target?</li>
+          </ul>
+
+          <h3>4.6 OpenCV — the vision toolbox</h3>
+          <p><b>OpenCV</b> (Open Source Computer Vision Library) is the world's most popular free library for computer vision. Every operation above — grayscale, threshold, edges, contours, perspective transform, comparison — is a ready-made OpenCV function. <span class="badge fixed">FIXED TOOL</span></p>
+          <div class="tablewrap"><table>
+            <tr><th>Job</th><th>OpenCV function (example)</th></tr>
+            <tr><td>Read/capture an image</td><td><code>cv2.imread</code>, <code>cv2.VideoCapture</code></td></tr>
+            <tr><td>To grayscale</td><td><code>cv2.cvtColor</code></td></tr>
+            <tr><td>Threshold</td><td><code>cv2.threshold</code></td></tr>
+            <tr><td>Edge detection</td><td><code>cv2.Canny</code></td></tr>
+            <tr><td>Find contours</td><td><code>cv2.findContours</code></td></tr>
+            <tr><td>Un-skew (perspective)</td><td><code>cv2.warpPerspective</code></td></tr>
+          </table></div>
+
+          <h4>What OpenCV does in RoboSketch-RL</h4>
+          <div class="flow">
+            <span class="step">Camera frame</span><span class="arrow">→</span>
+            <span class="step">OpenCV cleans it</span><span class="arrow">→</span>
+            <span class="step">Extract the drawn strokes</span><span class="arrow">→</span>
+            <span class="step">Compare to target</span><span class="arrow">→</span>
+            <span class="step">Produce a similarity number</span>
+          </div>
+          <p>That final similarity number becomes the <b>reward</b> the RL agent learns from. So OpenCV is quite literally the robot's judge of its own work.</p>
+
+          <div class="takeaways"><b>Key takeaways</b>
+          <ul>
+            <li>An image is a grid of number-valued <b>pixels</b>; that's why math can "see."</li>
+            <li>The vision pipeline: grayscale → threshold → edges → contours → compare.</li>
+            <li><b>Calibration</b> + <b>perspective transform</b> map camera pixels to real paper positions.</li>
+            <li><b>OpenCV</b> provides every one of these as a ready function; its output becomes the reward.</li>
+          </ul></div>
+          <div class="callout mistake"><div class="ic">⚠️</div><div class="ct"><b>Common beginner mistake</b><p>Skipping calibration and wondering why the robot "sees" the drawing but can't tell where it is. Also: bad lighting ruins thresholding — vision needs steady, even light.</p></div></div>
+          <div class="summary-box"><b>Chapter summary.</b> Computer vision turns pictures into numbers and numbers into understanding. Using OpenCV, RoboSketch-RL converts a camera frame into a clean shape, maps it to real paper coordinates, and compares it to the target — producing the similarity score that drives learning.</div>
+        </div>
+      </details>
+
+      <!-- =================================================================
+           PART 5 — REINFORCEMENT LEARNING
+      ================================================================== -->
+      <details class="chapter" id="ch5">
+        <summary>
+          <span class="num">5</span>
+          <span class="htext"><span class="kicker">Part 5 · The "Brain"</span><h2>Reinforcement Learning — From Zero</h2></span>
+          <span class="chev">▸</span>
+        </summary>
+        <div class="body">
+          <p class="lead">This is the heart of the project. We'll go from "what is AI?" all the way to PPO — the algorithm the robot will likely use — with simple examples first, then connect every idea back to drawing.</p>
+
+          <h3>5.1 AI, Machine Learning, Deep Learning, RL — how they nest</h3>
+          <p>These four words are often mixed up. They fit inside each other like nested boxes:</p>
+          <figure>
+            <svg width="420" height="260" viewBox="0 0 420 260" role="img" aria-label="AI ML DL RL nesting">
+              <rect x="10" y="10" width="400" height="240" rx="14" fill="#eef2ff" stroke="#6366f1"/>
+              <rect x="40" y="45" width="340" height="195" rx="12" fill="#e0f2fe" stroke="#0284c7"/>
+              <rect x="75" y="85" width="270" height="150" rx="10" fill="#ede9fe" stroke="#8b5cf6"/>
+              <rect x="115" y="130" width="190" height="95" rx="8" fill="#dcfce7" stroke="#22c55e"/>
+              <g font-family="sans-serif" font-weight="700" text-anchor="middle">
+              <text x="210" y="32" fill="#3730a3" font-size="14">Artificial Intelligence (AI)</text>
+              <text x="210" y="68" fill="#075985" font-size="13">Machine Learning (ML)</text>
+              <text x="210" y="110" fill="#5b21b6" font-size="13">Deep Learning (DL)</text>
+              <text x="210" y="175" fill="#166534" font-size="13">Reinforcement</text>
+              <text x="210" y="193" fill="#166534" font-size="13">Learning (RL)</text>
+              </g>
+            </svg>
+            <figcaption>RL is a kind of ML; when RL uses deep neural networks it overlaps with Deep Learning; all of it lives under AI.</figcaption>
+          </figure>
+          <ul>
+            <li><b>AI (Artificial Intelligence):</b> any machine that does something "smart."</li>
+            <li><b>ML (Machine Learning):</b> AI that <i>learns from data/experience</i> instead of being fully hand-coded.</li>
+            <li><b>DL (Deep Learning):</b> ML using <b>neural networks</b> — math models loosely inspired by the brain, great at patterns in images and signals.</li>
+            <li><b>RL (Reinforcement Learning):</b> ML that learns from <b>trial and error and rewards</b> — learning by <i>doing</i>, not from a fixed answer sheet.</li>
+          </ul>
+
+          <h3>5.2 The one idea behind RL: learn from reward</h3>
+          <p>In Reinforcement Learning, a learner tries actions, receives a <b>reward</b> (a score) for how good the outcome was, and gradually shifts toward actions that earn more reward. Over thousands of tries it discovers a strategy — <b>no one ever tells it the correct action</b>, only how good its result was.</p>
+          <div class="callout analogy"><div class="ic">🐶</div><div class="ct"><b>Analogy: training a dog</b><p>You don't explain "sit" in words. When the dog happens to sit, it gets a treat (reward). More treats for sitting → the dog sits more. RL is training software the same way, with points instead of treats.</p></div></div>
+
+          <h3>5.3 The RL vocabulary (the words you must know)</h3>
+          <p>Every RL problem is described with the same handful of words. Learn these once and they apply everywhere.</p>
+          <div class="tablewrap"><table>
+            <tr><th>Term</th><th>Plain meaning</th><th>In RoboSketch-RL</th></tr>
+            <tr><td><b>Agent</b></td><td>The learner / decision-maker</td><td>The "brain" controlling the arm</td></tr>
+            <tr><td><b>Environment</b></td><td>The world the agent acts in</td><td>The arm + paper + camera (the simulation)</td></tr>
+            <tr><td><b>State</b> (observation)</td><td>What the agent currently knows/sees</td><td>Pen position, target image, current drawing</td></tr>
+            <tr><td><b>Action</b></td><td>A move the agent can make</td><td>Nudge the pen (dx,dy), or pen up/down</td></tr>
+            <tr><td><b>Reward</b></td><td>A number scoring the outcome</td><td>+ for matching the target, − for going off-paper</td></tr>
+            <tr><td><b>Episode</b></td><td>One full attempt, start to finish</td><td>One try at drawing the shape</td></tr>
+            <tr><td><b>Policy</b></td><td>The agent's strategy: state → action</td><td>The trained brain we keep at the end</td></tr>
+          </table></div>
+
+          <figure>
+            <svg width="500" height="200" viewBox="0 0 500 200" role="img" aria-label="Agent environment loop">
+              <g font-family="sans-serif" font-size="14" font-weight="700">
+              <rect x="60" y="70" width="150" height="60" rx="12" fill="#dcfce7" stroke="#22c55e"/><text x="135" y="105" text-anchor="middle" fill="#166534">AGENT 🧠</text>
+              <rect x="290" y="70" width="150" height="60" rx="12" fill="#dbeafe" stroke="#3b82f6"/><text x="365" y="105" text-anchor="middle" fill="#1e3a8a">ENVIRONMENT</text>
+              <path d="M210 88 H290" stroke="#4f46e5" stroke-width="3" marker-end="url(#a5)"/><text x="250" y="80" text-anchor="middle" fill="#4f46e5" font-size="12">action</text>
+              <path d="M290 118 H210" stroke="#0ea5e9" stroke-width="3" marker-end="url(#a5)"/><text x="250" y="145" text-anchor="middle" fill="#0ea5e9" font-size="12">new state + reward</text>
+              </g>
+              <defs><marker id="a5" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0 0 L7 3 L0 6 Z" fill="#334155"/></marker></defs>
+            </svg>
+            <figcaption>The RL loop: the agent acts, the environment responds with a new state and a reward. Repeat millions of times.</figcaption>
+          </figure>
+
+          <h3>5.4 Exploration vs Exploitation</h3>
+          <p>A learner faces a dilemma every step:</p>
+          <div class="grid two">
+            <div class="card-mini"><h4>Exploitation</h4><p>Do the move you already <i>know</i> is good. Safe, but you might miss something better.</p></div>
+            <div class="card-mini"><h4>Exploration</h4><p>Try something <i>new and unknown</i>. Risky, but it's the only way to discover better moves.</p></div>
+          </div>
+          <div class="callout analogy"><div class="ic">🍕</div><div class="ct"><b>Analogy</b><p>Ordering your favorite pizza every time (exploit) vs trying a new dish (explore). Too much exploiting = you never find a better favorite. Too much exploring = you keep eating bad meals. Good RL balances both.</p></div></div>
+
+          <h3>5.5 Value and Q-value</h3>
+          <p>Some situations are worth more than others because they lead to more future reward.</p>
+          <ul>
+            <li><b>Value</b> of a state = "how much total reward do I expect from here on?" A pen near the target line has high value.</li>
+            <li><b>Q-value</b> = value of taking a <i>specific action</i> in a <i>specific state</i>: "how good is moving right, from here?"</li>
+          </ul>
+          <p>Learning good Q-values basically means learning "which move is best in each situation" — which <i>is</i> the policy.</p>
+
+          <h3>5.6 The algorithms: DQN, PPO, SAC</h3>
+          <p>An <b>RL algorithm</b> is a specific recipe for learning the policy from experience. Three important ones:</p>
+          <div class="tablewrap"><table>
+            <tr><th>Algorithm</th><th>Short for</th><th>Best when actions are…</th><th>One-line idea</th></tr>
+            <tr><td><b>DQN</b></td><td>Deep Q-Network</td><td>Discrete (up/down/left/right)</td><td>Learn a Q-value for each possible action.</td></tr>
+            <tr><td><b>PPO</b></td><td>Proximal Policy Optimization</td><td>Continuous (smooth amounts)</td><td>Improve the policy in small, safe steps so training stays stable.</td></tr>
+            <tr><td><b>SAC</b></td><td>Soft Actor-Critic</td><td>Continuous</td><td>Learn efficiently while staying curious (rewards exploration).</td></tr>
+          </table></div>
+
+          <h3>5.7 Why PPO is likely first for RoboSketch-RL <span class="badge est">DESIGN CHOICE</span></h3>
+          <p>Drawing needs <b>continuous</b> actions — the pen can move a little or a lot in any direction, not just fixed grid steps. That rules out plain DQN (built for discrete choices) and points to PPO or SAC.</p>
+          <p><b>PPO is planned first</b> because it is famously <b>stable and forgiving</b> — it's the default "reliable workhorse" of modern RL, hard to break, and well-supported by our library (Stable-Baselines3). Once PPO works, we'll try <b>SAC</b> and compare which learns to draw faster and better. This comparison is part of the research. <b>This ordering can change if experiments say otherwise.</b></p>
+          <div class="callout key"><div class="ic">🔑</div><div class="ct"><b>Why compare algorithms at all?</b><p>A paper claiming "RL can teach drawing" is stronger if it shows the result isn't a fluke of one algorithm. Comparing PPO vs SAC (and vs a non-learning baseline) is what turns a demo into science.</p></div></div>
+
+          <h3>5.8 Trial-and-error learning, tied to drawing</h3>
+          <p>Let's connect <i>everything</i> with the concrete example of drawing a line:</p>
+          <div class="tablewrap"><table>
+            <tr><th>RL concept</th><th>Drawing a line</th></tr>
+            <tr><td>Agent</td><td>The policy controlling the arm</td></tr>
+            <tr><td>State</td><td>Where the pen is now + the target line + what's drawn so far</td></tr>
+            <tr><td>Action</td><td>Move the pen a small step in some direction</td></tr>
+            <tr><td>Reward</td><td>+ when the pen stays on the target line and covers new parts of it; − when it wanders off the paper or off the line</td></tr>
+            <tr><td>Episode</td><td>One full attempt to draw the line (ends when done, or after ~300 steps)</td></tr>
+            <tr><td>Policy (result)</td><td>After many episodes: "given the pen here and the target there, move like <i>this</i>" — a robot that draws lines</td></tr>
+          </table></div>
+          <div class="callout note"><div class="ic">🔁</div><div class="ct"><b>Learning happens by repetition</b><p>A single episode teaches almost nothing. The magic comes from running <i>millions</i> of episodes — which is only affordable in <b>simulation</b> (Part 6), where attempts are free and instant, not in the real world where each try wastes paper and time.</p></div></div>
+
+          <div class="takeaways"><b>Key takeaways</b>
+          <ul>
+            <li>RL is learning by <b>trial, error, and reward</b> — no answer sheet.</li>
+            <li>Master the 7 words: agent, environment, state, action, reward, episode, policy.</li>
+            <li>Balance <b>exploration</b> (try new) and <b>exploitation</b> (use what works).</li>
+            <li>Drawing needs continuous actions → <b>PPO first, then SAC</b> (a design choice we'll test).</li>
+            <li>Learning needs millions of tries → we train in <b>simulation</b>.</li>
+          </ul></div>
+          <div class="callout mistake"><div class="ic">⚠️</div><div class="ct"><b>Common beginner mistakes</b><p>(1) Expecting fast results — RL needs huge numbers of tries. (2) Designing a reward that accidentally encourages the wrong behavior (Part 10 is all about avoiding this). (3) Confusing the <i>policy</i> (the final brain) with the <i>algorithm</i> (the recipe that trains it).</p></div></div>
+          <div class="summary-box"><b>Chapter summary.</b> Reinforcement Learning teaches an agent to act well by rewarding good outcomes over countless trials. With the seven core terms and the explore/exploit balance in hand, you understand how RoboSketch-RL's brain learns to draw — using PPO first, likely SAC next, trained in simulation where practice is unlimited.</div>
+        </div>
+      </details>
+
+      <!-- =================================================================
+           PART 6 — SIMULATION
+      ================================================================== -->
+      <details class="chapter" id="ch6">
+        <summary>
+          <span class="num">6</span>
+          <span class="htext"><span class="kicker">Part 6 · The Practice World</span><h2>Simulation — Practicing Before Building</h2></span>
+          <span class="chev">▸</span>
+        </summary>
+        <div class="body">
+          <p class="lead">RoboSketch-RL learns inside a computer <i>before</i> any real robot exists. This part explains why, and introduces PyBullet — the physics playground where the robot practices.</p>
+
+          <h3>6.1 Why simulation comes before hardware <span class="badge fixed">STRATEGY</span></h3>
+          <p>RL needs millions of attempts. Doing that on a real arm would be a disaster:</p>
+          <div class="tablewrap"><table>
+            <tr><th></th><th>Real robot</th><th>Simulation</th></tr>
+            <tr><td>Speed</td><td class="bad">Real-time, slow</td><td class="good">Faster than real-time</td></tr>
+            <tr><td>Cost per try</td><td class="bad">Paper, ink, wear, time</td><td class="good">Free</td></tr>
+            <tr><td>Mistakes</td><td class="bad">Can break the arm</td><td class="good">Harmless — just reset</td></tr>
+            <tr><td>Availability</td><td class="bad">Must buy it first</td><td class="good">Start today, no hardware</td></tr>
+          </table></div>
+          <div class="callout key"><div class="ic">🔑</div><div class="ct"><b>Golden rule of this project</b><p><b>Do not buy hardware until the simulation and learning work.</b> Almost all debugging happens in sim. Hardware comes only when the brain already knows how to draw.</p></div></div>
+
+          <h3>6.2 Digital Twin</h3>
+          <p>A <b>digital twin</b> is a virtual copy of a real object that behaves like the real thing. Our simulated arm is a digital twin of the physical arm we'll build later: same joints, same lengths, same limits. Train the twin, then copy the learned brain onto the real one.</p>
+
+          <h3>6.3 Physics engine</h3>
+          <p>For a simulation to be useful, virtual objects must obey real physics — gravity, collisions, the pen pressing on paper. A <b>physics engine</b> is software that calculates these forces and motions many times per second, so the virtual world behaves believably.</p>
+          <div class="callout analogy"><div class="ic">🎮</div><div class="ct"><b>Analogy</b><p>It's the same technology that makes objects in video games fall, bounce, and collide realistically — but here we use it for serious engineering practice.</p></div></div>
+
+          <h3>6.4 PyBullet — our simulator <span class="badge fixed">TOOL</span></h3>
+          <p><b>PyBullet</b> is a free Python physics-simulation library built for robotics and RL research. It's popular because it's lightweight, controllable from Python, and comes with sample robot arms ready to use.</p>
+          <div class="grid two">
+            <div class="card-mini"><h4>Why we chose it</h4><p>Free, Python-native, robotics-focused, has built-in <b>inverse kinematics</b>, and ships with tested arms (like the KUKA iiwa) so we can start building the drawing engine immediately.</p></div>
+            <div class="card-mini"><h4>Current sim arm</h4><p>The project starts with the bundled <b>KUKA iiwa</b> arm <span class="badge est">DESIGN CHOICE</span> — zero download, well-tested IK — then swaps to a hardware-matched low-cost arm at the sim-to-real stage.</p></div>
+          </div>
+
+          <h3>6.5 What we simulate</h3>
+          <div class="grid three">
+            <div class="card-mini"><h4>🦾 The robot</h4><p>Load the arm from a description file (URDF) — its joints, links, and limits — and command its motors.</p></div>
+            <div class="card-mini"><h4>📷 A virtual camera</h4><p>PyBullet can render what a camera <i>would</i> see, so we can run the exact vision pipeline in sim, camera and all.</p></div>
+            <div class="card-mini"><h4>✏️ The drawing</h4><p>Track where the pen tip touches the paper and record each stroke, building up the drawn image.</p></div>
+          </div>
+          <div class="callout note"><div class="ic">📄</div><div class="ct"><b>What's a URDF?</b><p><b>URDF</b> (Unified Robot Description Format) is a text file that describes a robot's body: how many joints, how long each link is, how far each joint can rotate. Loading a different URDF = simulating a different arm. Swapping arms later mainly means swapping this file.</p></div></div>
+
+          <h3>6.6 Collision detection</h3>
+          <p><b>Collision detection</b> is the engine noticing when two things touch — e.g. the pen tip meeting the paper, or the arm bumping itself. It's how the sim knows "the pen is now drawing" (pen touching paper) versus "the pen is in the air."</p>
+
+          <h3>6.7 Training inside simulation</h3>
+          <p>Put it together: the RL agent (Part 5) acts inside the PyBullet world, the virtual camera + OpenCV judge the drawing, a reward is computed, and the agent improves — all at computer speed, for free, safely, millions of times. When it draws well in sim, we move to real hardware.</p>
+          <div class="flow">
+            <span class="step">PyBullet world</span><span class="arrow">→</span>
+            <span class="step">Agent acts</span><span class="arrow">→</span>
+            <span class="step">Virtual camera + OpenCV</span><span class="arrow">→</span>
+            <span class="step">Reward</span><span class="arrow">→</span>
+            <span class="step">Agent improves</span><span class="arrow">↺</span>
+          </div>
+
+          <h3>6.8 The sim-to-real gap <span class="badge fixed">CONCEPT</span></h3>
+          <p>Simulation is never <i>perfectly</i> real — the real pen might drag, the real motors might lag, the real paper might shift. The difference between "works in sim" and "works in reality" is the <b>sim-to-real gap</b>. Shrinking this gap (e.g. by adding realistic randomness during training) is a whole research topic and a key challenge when we move to hardware in Part 8.</p>
+
+          <div class="takeaways"><b>Key takeaways</b>
+          <ul>
+            <li>RL needs millions of tries → practice in <b>simulation</b> first (free, fast, safe).</li>
+            <li>A <b>digital twin</b> in a <b>physics engine</b> (PyBullet) mimics the real arm.</li>
+            <li>We simulate the arm (from a URDF), a virtual camera, the drawing, and collisions.</li>
+            <li>Don't buy hardware until the sim works. Beware the <b>sim-to-real gap</b>.</li>
+          </ul></div>
+          <div class="callout mistake"><div class="ic">⚠️</div><div class="ct"><b>Common beginner mistake</b><p>Rushing to buy hardware first. Also: trusting a policy that works in a <i>too-perfect</i> sim — if the sim ignores real-world messiness, the robot fails in reality. Add realistic noise during training.</p></div></div>
+          <div class="summary-box"><b>Chapter summary.</b> Simulation lets the robot practice millions of times for free before it physically exists. Using PyBullet as a physics engine, we build a digital twin of the arm — plus a virtual camera and drawing tracking — train the RL brain there, and only later cross the sim-to-real gap to hardware.</div>
+        </div>
+      </details>
+
+      <!-- =================================================================
+           PART 7 — SYSTEM ARCHITECTURE
+      ================================================================== -->
+      <details class="chapter" id="ch7">
+        <summary>
+          <span class="num">7</span>
+          <span class="htext"><span class="kicker">Part 7 · The Big Picture</span><h2>Complete System Architecture</h2></span>
+          <span class="chev">▸</span>
+        </summary>
+        <div class="body">
+          <p class="lead">Now we assemble every part you've learned into the full RoboSketch-RL pipeline — the closed loop that lets the robot draw and improve. Follow the arrows: this <i>is</i> the project.</p>
+
+          <h3>7.1 The full loop, at a glance</h3>
+          <figure>
+            <svg width="640" height="430" viewBox="0 0 640 430" role="img" aria-label="Full system loop">
+              <defs><marker id="a7" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0 0 L7 3 L0 6 Z" fill="#64748b"/></marker>
+              <style>.b{rx:10;} .t{font-family:sans-serif;font-size:12px;font-weight:700;text-anchor:middle}</style></defs>
+              <g>
+              <rect x="240" y="10" width="160" height="44" rx="10" fill="#fef3c7" stroke="#f59e0b"/><text x="320" y="37" class="t" fill="#92400e">🎯 Target Shape (image)</text>
+              <rect x="240" y="78" width="160" height="44" rx="10" fill="#dbeafe" stroke="#3b82f6"/><text x="320" y="105" class="t" fill="#1e3a8a">📷 Camera</text>
+              <rect x="240" y="146" width="160" height="44" rx="10" fill="#e0f2fe" stroke="#0284c7"/><text x="320" y="173" class="t" fill="#075985">🔍 OpenCV (vision)</text>
+              <rect x="240" y="214" width="160" height="44" rx="10" fill="#ede9fe" stroke="#8b5cf6"/><text x="320" y="235" class="t" fill="#5b21b6">🧾 State</text><text x="320" y="250" class="t" fill="#5b21b6" font-weight="400">generation</text>
+              <rect x="240" y="282" width="160" height="44" rx="10" fill="#dcfce7" stroke="#22c55e"/><text x="320" y="303" class="t" fill="#166534">🧠 RL Agent</text><text x="320" y="318" class="t" fill="#166534" font-weight="400">→ action</text>
+              <rect x="240" y="350" width="160" height="44" rx="10" fill="#fee2e2" stroke="#ef4444"/><text x="320" y="371" class="t" fill="#991b1b">🦾 Robot Arm</text><text x="320" y="386" class="t" fill="#991b1b" font-weight="400">draws (IK→motors)</text>
+              <!-- arrows down -->
+              <path d="M320 54 V78 M320 122 V146 M320 190 V214 M320 258 V282 M320 326 V350" stroke="#64748b" stroke-width="2.5" marker-end="url(#a7)"/>
+              <!-- reward box on right -->
+              <rect x="470" y="180" width="150" height="50" rx="10" fill="#fef9c3" stroke="#eab308"/><text x="545" y="200" class="t" fill="#854d0e">🏆 Reward</text><text x="545" y="216" class="t" fill="#854d0e" font-weight="400">(similarity)</text>
+              <!-- feedback loop: arm -> camera (left) -->
+              <path d="M240 372 H70 Q40 372 40 342 V130 Q40 100 70 100 H240" fill="none" stroke="#0ea5e9" stroke-width="2.5" marker-end="url(#a7)"/>
+              <text x="46" y="240" class="t" fill="#0ea5e9" transform="rotate(-90 46 240)">camera sees new drawing</text>
+              <!-- opencv -> reward -> agent -->
+              <path d="M400 168 H445 Q470 168 470 190 V205" fill="none" stroke="#eab308" stroke-width="2.5" marker-end="url(#a7)"/>
+              <path d="M545 230 V300 Q545 304 405 304" fill="none" stroke="#eab308" stroke-width="2.5" marker-end="url(#a7)"/>
+              <text x="560" y="270" class="t" fill="#854d0e" transform="rotate(90 560 270)">reward → learn</text>
+              </g>
+            </svg>
+            <figcaption>The complete closed loop. The robot draws, the camera sees the result, vision scores it, and the agent learns — around and around.</figcaption>
+          </figure>
+
+          <h3>7.2 Every box, explained</h3>
+          <div class="tablewrap"><table>
+            <tr><th>Box</th><th>What it does</th><th>Covered in</th></tr>
+            <tr><td><b>🎯 Target Shape</b></td><td>The image the robot must reproduce (a line, circle, digit…). The goal.</td><td>Part 4</td></tr>
+            <tr><td><b>📷 Camera</b></td><td>Captures what's currently on the paper — the robot's eyes.</td><td>Part 2, 4</td></tr>
+            <tr><td><b>🔍 OpenCV</b></td><td>Cleans the camera image and extracts the drawn strokes as a shape.</td><td>Part 4</td></tr>
+            <tr><td><b>🧾 State generation</b></td><td>Packs everything the agent needs to decide (pen position, target, current drawing) into a tidy "state."</td><td>Part 5</td></tr>
+            <tr><td><b>🧠 RL Agent</b></td><td>Looks at the state and predicts the next action (how to move the pen).</td><td>Part 5</td></tr>
+            <tr><td><b>🦾 Robot Arm</b></td><td>Carries out the action: IK converts the pen target to joint angles, motors move, pen draws.</td><td>Part 2, 6</td></tr>
+            <tr><td><b>🏆 Reward</b></td><td>Vision compares drawing to target → a score. Higher = better match.</td><td>Part 10</td></tr>
+            <tr><td><b>🔁 Learning</b></td><td>The agent uses the reward to adjust its policy, then the loop repeats.</td><td>Part 5</td></tr>
+          </table></div>
+
+          <h3>7.3 Two versions of the reward loop <span class="badge est">RESEARCH DESIGN</span></h3>
+          <p>An important design detail: the "drawing image" feeding the reward can come from two sources, and comparing them is part of the research.</p>
+          <div class="grid two">
+            <div class="card-mini"><h4>① Ground-truth reward (baseline first)</h4><p>Use the simulator's <i>perfect</i> knowledge of the pen tip's position — no camera needed. Simple, exact. Built <b>first</b> as the control/baseline.</p></div>
+            <div class="card-mini"><h4>② Vision reward (proposed method)</h4><p>Use a <b>virtual camera + OpenCV</b> to judge the drawing, exactly like the real robot will. More realistic, and the star of the research hypothesis.</p></div>
+          </div>
+          <div class="callout key"><div class="ic">🔬</div><div class="ct"><b>Why build both?</b><p>One research question is "does learning from vision work as well as learning from perfect internal numbers?" To answer it scientifically you need <i>both</i> versions to compare. Building the ground-truth version first also follows the rule "change one thing at a time": get a known-working system, then swap only the reward to vision.</p></div></div>
+
+          <h3>7.4 Reading the loop as a story</h3>
+          <ol>
+            <li>You show the robot a <b>target</b> shape.</li>
+            <li>The <b>camera</b> photographs the (currently blank) paper.</li>
+            <li><b>OpenCV</b> extracts what's drawn so far.</li>
+            <li>The system builds a <b>state</b> from that plus the pen position and target.</li>
+            <li>The <b>RL agent</b> picks an <b>action</b> — where to move the pen next.</li>
+            <li>IK turns that into <b>joint angles</b>; the <b>arm</b> moves and draws.</li>
+            <li>The camera sees the <b>new</b> drawing; vision computes a <b>reward</b>.</li>
+            <li>The agent <b>learns</b> from the reward, and the loop repeats — getting a little better each time.</li>
+          </ol>
+
+          <div class="takeaways"><b>Key takeaways</b>
+          <ul>
+            <li>RoboSketch-RL is a <b>closed loop</b>: draw → see → score → learn → repeat.</li>
+            <li>Each box maps to a part you've already studied — vision, RL, IK, hardware.</li>
+            <li>The reward can come from <b>ground truth</b> (baseline) or <b>vision</b> (method); comparing them is research.</li>
+          </ul></div>
+          <div class="callout mistake"><div class="ic">⚠️</div><div class="ct"><b>Common beginner mistake</b><p>Thinking of it as a one-way pipeline. The <b>feedback arrow</b> (camera sees the result → reward → learning) is what makes it intelligent. Remove the loop and it's just a printer.</p></div></div>
+          <div class="summary-box"><b>Chapter summary.</b> The whole project is one closed feedback loop: target → camera → OpenCV → state → RL agent → arm → drawing → reward → learning → repeat. Every box is a concept from earlier parts, and the reward can be computed two ways (ground-truth vs vision) — a comparison that is itself a research result.</div>
+        </div>
+      </details>
+
+      <!-- =================================================================
+           PART 8 — HARDWARE
+      ================================================================== -->
+      <details class="chapter" id="ch8">
+        <summary>
+          <span class="num">8</span>
+          <span class="htext"><span class="kicker">Part 8 · The Physical Robot</span><h2>Hardware — What to Buy and Why</h2></span>
+          <span class="chev">▸</span>
+        </summary>
+        <div class="body">
+          <p class="lead">Once the simulation works, we build the real thing. This part explains every physical component: what it is, why we need it, roughly what it costs, alternatives, and why we picked what we picked. Total target budget: <b>~₹10,000</b>.</p>
+
+          <div class="callout warn"><div class="ic">🛒</div><div class="ct"><b>Buy last, not first</b> <span class="badge fixed">RULE</span><p>This whole part is <i>planning</i>. Do not purchase anything until the RL agent draws well in simulation. Prices are approximate (India, 2026) and every component is a <b>current design choice</b> that may change. <span class="badge est">MAY CHANGE</span></p></div></div>
+
+          <h3>8.1 The shopping list at a glance</h3>
+          <div class="tablewrap"><table>
+            <tr><th>Component</th><th>Role</th><th>Approx cost (₹)</th></tr>
+            <tr><td>6-DOF robot arm kit</td><td>The body that moves the pen</td><td>2,500 – 5,000</td></tr>
+            <tr><td>Servo motors (MG996R ×6)</td><td>Move the joints</td><td>Often included / 1,500</td></tr>
+            <tr><td>Arduino Uno</td><td>Controller (translates commands to signals)</td><td>500 – 900</td></tr>
+            <tr><td>PCA9685 servo driver</td><td>Drives many servos precisely</td><td>150 – 300</td></tr>
+            <tr><td>USB webcam</td><td>The robot's eye</td><td>700 – 1,500</td></tr>
+            <tr><td>Power supply (5–6V, ≥5A)</td><td>Feeds the hungry servos</td><td>400 – 800</td></tr>
+            <tr><td>Pen holder + pen</td><td>The end effector</td><td>100 – 300 (or 3D-printed)</td></tr>
+            <tr><td>Drawing board / clipboard</td><td>Flat paper surface</td><td>100 – 300</td></tr>
+            <tr><td>Wires, bearings, screws, mounts</td><td>Assembly bits</td><td>300 – 600</td></tr>
+          </table></div>
+          <p><i>These add up to roughly ₹8,000–₹12,000 depending on the kit — hence the ~₹10,000 target.</i></p>
+
+          <h3>8.2 Each component in detail</h3>
+
+          <h4>🦾 6-DOF robot arm</h4>
+          <p><b>What:</b> the mechanical arm — six motorized joints, links, and a base — that carries the pen. <b>Why:</b> it's the body; without it there's no drawing. <b>Alternatives:</b> 4-DOF arm (cheaper, less flexible), or a 2-axis pen plotter (much simpler but not really a "learning arm"). <b>Why 6-DOF:</b> enough freedom to place the pen at any point <i>and</i> angle, matching what we simulate. <span class="badge est">DESIGN CHOICE</span></p>
+
+          <h4>⚙️ Servo motors (MG996R)</h4>
+          <p><b>What:</b> "go-to-this-angle" motors that live in the joints. <b>Why:</b> they physically move the arm. <b>Alternatives:</b> smaller SG90 servos (cheaper, weaker — fine for tiny arms), or stepper motors (more precise, more complex/expensive). <b>Why MG996R:</b> a popular, strong, inexpensive hobby servo with enough torque to hold the arm steady while drawing.</p>
+
+          <h4>🎛️ Arduino Uno (controller)</h4>
+          <p><b>What:</b> a small, beginner-friendly microcontroller board — a tiny computer that reads commands and outputs electrical signals to motors. <b>Why:</b> the laptop (running Python/RL) can't drive motors directly; the Arduino is the middle-man that turns "set joint 3 to 40°" into real servo signals. <b>Alternatives:</b> ESP32 (adds Wi-Fi/Bluetooth, more power), Raspberry Pi (a full Linux computer — overkill unless you want the vision/RL running on-board). <b>Why Arduino Uno:</b> cheapest, simplest, best-documented for beginners driving servos.</p>
+          <div class="callout note"><div class="ic">🔌</div><div class="ct"><b>Arduino vs ESP32 vs Raspberry Pi</b>
+          <p><b>Arduino Uno</b> = simple motor controller (no OS). <b>ESP32</b> = like Arduino but with wireless and more speed. <b>Raspberry Pi</b> = a real computer that could run Python, OpenCV, even the RL policy by itself. For this project the laptop does the thinking and the Arduino does the moving, so Arduino is enough. A Pi becomes attractive only if you later want a standalone robot with no laptop attached.</p></div></div>
+
+          <h4>🔀 PCA9685 servo driver</h4>
+          <p><b>What:</b> a small board that can precisely control up to 16 servos over just two control wires. <b>Why:</b> six servos need six clean, steady signals; the Arduino alone struggles to drive that many precisely, and the driver offloads that job. <b>Alternatives:</b> drive servos directly from Arduino pins (works for a couple of servos, gets jittery with six). <b>Why PCA9685:</b> cheap, reliable, made exactly for driving many servos smoothly.</p>
+
+          <h4>📷 USB webcam</h4>
+          <p><b>What:</b> an ordinary camera that plugs into the laptop. <b>Why:</b> it's the robot's eye — it photographs the paper so OpenCV can score the drawing (closing the vision loop). <b>Alternatives:</b> a Raspberry Pi camera (if using a Pi), or a phone camera. <b>Why a USB webcam:</b> plug-and-play with OpenCV on a laptop, cheap, and "good enough" resolution for line drawings.</p>
+
+          <h4>🔋 Power supply</h4>
+          <p><b>What:</b> a dedicated 5–6V power source rated for several amps (≥5A). <b>Why:</b> servos draw a lot of current, especially six moving at once — far more than a USB port can give. A weak supply causes brownouts, jitter, and resets. <b>Alternatives:</b> a battery pack (portable but needs monitoring). <b>Why a wall adapter:</b> steady, cheap, no recharging.</p>
+          <div class="callout warn"><div class="ic">⚡</div><div class="ct"><b>Safety &amp; power</b><p>Never power six servos from the Arduino/USB alone — use the separate supply, and connect all grounds together. Under-powering is the #1 cause of a jittery, misbehaving hobby arm.</p></div></div>
+
+          <h4>✏️ Pen holder (end effector) &amp; drawing board</h4>
+          <p><b>What:</b> a mount at the arm's tip that grips a pen and keeps it pointing down; plus a flat, clamped board holding the paper. <b>Why:</b> the pen must press with steady, consistent pressure and the paper must not shift, or the vision feedback becomes unreliable. <b>Alternatives:</b> a spring-loaded holder (keeps constant pressure — often better), 3D-printed custom holder. <b>Why:</b> simple, cheap, and pen pressure strongly affects drawing quality.</p>
+
+          <h4>🔩 Wires, bearings, screws, mounts</h4>
+          <p><b>What:</b> the small mechanical and electrical parts that hold everything together and let joints turn smoothly (bearings reduce friction). <b>Why:</b> a wobbly, loose arm draws badly no matter how smart the brain is. Often included in an arm kit.</p>
+
+          <h3>8.3 How the hardware maps to the system loop</h3>
+          <div class="tablewrap"><table>
+            <tr><th>System box (Part 7)</th><th>Physical part</th></tr>
+            <tr><td>Camera</td><td>USB webcam</td></tr>
+            <tr><td>RL Agent / OpenCV / State</td><td>Your laptop (runs Python)</td></tr>
+            <tr><td>Robot Arm + Action</td><td>6-DOF arm, servos, Arduino, PCA9685, power supply</td></tr>
+            <tr><td>Drawing</td><td>Pen holder + pen + board + paper</td></tr>
+          </table></div>
+
+          <div class="takeaways"><b>Key takeaways</b>
+          <ul>
+            <li>Target budget ~₹10,000; buy only <b>after</b> simulation works.</li>
+            <li>The arm + servos are the body; Arduino + PCA9685 + power move it; the webcam is the eye.</li>
+            <li>The <b>laptop</b> does the thinking (RL + OpenCV); the Arduino only does the moving.</li>
+            <li>Every choice is a <b>design choice</b> that can change; power and pen pressure matter more than beginners expect.</li>
+          </ul></div>
+          <div class="callout mistake"><div class="ic">⚠️</div><div class="ct"><b>Common beginner mistakes</b><p>(1) Under-powering the servos. (2) Not clamping the paper. (3) Buying hardware before the sim works. (4) Expecting a cheap arm to be perfectly accurate — that's exactly why we use vision feedback.</p></div></div>
+          <div class="summary-box"><b>Chapter summary.</b> The physical robot is an affordable stack: a 6-DOF arm driven by MG996R servos through an Arduino and PCA9685 driver, powered by a dedicated supply, watched by a USB webcam, drawing with a pen holder on a clamped board — all thinking done on a laptop. Every part maps to a box in the system loop, and everything is a design choice to revisit after simulation succeeds.</div>
+        </div>
+      </details>
+
+      <!-- =================================================================
+           PART 9 — SOFTWARE STACK
+      ================================================================== -->
+      <details class="chapter" id="ch9">
+        <summary>
+          <span class="num">9</span>
+          <span class="htext"><span class="kicker">Part 9 · The Toolbox</span><h2>Software Stack — Every Tool, and Why</h2></span>
+          <span class="chev">▸</span>
+        </summary>
+        <div class="body">
+          <p class="lead">Here is every piece of software RoboSketch-RL uses, what each one does, and where it plugs into the project. Together they form the "stack" — the layered set of tools that make the robot work.</p>
+
+          <h3>9.1 The stack at a glance</h3>
+          <div class="tablewrap"><table>
+            <tr><th>Tool</th><th>What it is</th><th>Its job in RoboSketch-RL</th></tr>
+            <tr><td><b>Python 3.10</b></td><td>Programming language</td><td>The language everything is written in</td></tr>
+            <tr><td><b>PyBullet</b></td><td>Physics simulator</td><td>The virtual world where the arm practices</td></tr>
+            <tr><td><b>Gymnasium</b></td><td>RL environment standard</td><td>The common "shape" (reset/step) our environment follows</td></tr>
+            <tr><td><b>Stable-Baselines3</b></td><td>RL algorithm library</td><td>Ready-made PPO &amp; SAC that train the agent</td></tr>
+            <tr><td><b>OpenCV</b></td><td>Computer vision library</td><td>Turns camera images into a reward</td></tr>
+            <tr><td><b>NumPy</b></td><td>Fast math on arrays</td><td>Handles all the number-crunching (states, images)</td></tr>
+            <tr><td><b>Matplotlib</b></td><td>Plotting library</td><td>Draws graphs of training progress &amp; results</td></tr>
+            <tr><td><b>PyTorch</b></td><td>Deep learning engine</td><td>Runs the neural networks inside PPO/SAC (comes with SB3)</td></tr>
+            <tr><td><b>Arduino IDE / firmware</b></td><td>Microcontroller programming</td><td>Runs on the Arduino to move real servos</td></tr>
+            <tr><td><b>VS Code, Git, GitHub</b></td><td>Editor + version control</td><td>Write, track, and share the code (Part 3)</td></tr>
+          </table></div>
+
+          <h3>9.2 How the software layers fit together</h3>
+          <figure>
+            <svg width="560" height="260" viewBox="0 0 560 260" role="img" aria-label="Software layers">
+              <g font-family="sans-serif" font-size="12" font-weight="700" text-anchor="middle">
+              <rect x="30" y="15" width="500" height="40" rx="8" fill="#dcfce7" stroke="#22c55e"/><text x="280" y="40" fill="#166534">Your training script (Python) — ties everything together</text>
+              <rect x="30" y="70" width="155" height="44" rx="8" fill="#ede9fe" stroke="#8b5cf6"/><text x="107" y="90" fill="#5b21b6">Stable-Baselines3</text><text x="107" y="106" fill="#5b21b6" font-weight="400">PPO / SAC</text>
+              <rect x="200" y="70" width="155" height="44" rx="8" fill="#e0f2fe" stroke="#0284c7"/><text x="277" y="90" fill="#075985">Gymnasium</text><text x="277" y="106" fill="#075985" font-weight="400">env interface</text>
+              <rect x="370" y="70" width="160" height="44" rx="8" fill="#dbeafe" stroke="#3b82f6"/><text x="450" y="90" fill="#1e3a8a">OpenCV</text><text x="450" y="106" fill="#1e3a8a" font-weight="400">vision / reward</text>
+              <rect x="30" y="128" width="245" height="44" rx="8" fill="#fef3c7" stroke="#f59e0b"/><text x="152" y="148" fill="#92400e">PyBullet</text><text x="152" y="164" fill="#92400e" font-weight="400">physics + arm + virtual camera</text>
+              <rect x="290" y="128" width="240" height="44" rx="8" fill="#fde68a" stroke="#d97706"/><text x="410" y="148" fill="#78350f">PyTorch</text><text x="410" y="164" fill="#78350f" font-weight="400">neural networks (under SB3)</text>
+              <rect x="30" y="186" width="500" height="40" rx="8" fill="#e2e8f0" stroke="#64748b"/><text x="280" y="211" fill="#0f172a">NumPy — fast arrays &amp; math beneath everything</text>
+              <rect x="30" y="234" width="500" height="20" rx="6" fill="#cbd5e1" stroke="#94a3b8"/><text x="280" y="248" fill="#0f172a" font-size="11">Python 3.9 runtime</text>
+              </g>
+            </svg>
+            <figcaption>The stack: NumPy and Python at the base, PyBullet and PyTorch doing heavy lifting, Gymnasium/SB3/OpenCV in the middle, your script on top.</figcaption>
+          </figure>
+
+          <h3>9.3 Why each tool, a little deeper</h3>
+          <h4>Gymnasium — the universal RL "socket"</h4>
+          <p><b>Gymnasium</b> defines a standard shape for RL environments: every environment has <code>reset()</code> (start a new episode) and <code>step(action)</code> (take an action, return next state + reward). Because our drawing environment follows this standard, <i>any</i> Gymnasium-compatible algorithm (like those in Stable-Baselines3) can train on it with almost no glue code.</p>
+          <div class="callout analogy"><div class="ic">🔌</div><div class="ct"><b>Analogy</b><p>Gymnasium is like a standard electrical socket. Build your environment to fit the socket, and you can plug in any compatible "appliance" (algorithm) without rewiring.</p></div></div>
+
+          <h4>Stable-Baselines3 — algorithms you don't have to write</h4>
+          <p><b>Stable-Baselines3 (SB3)</b> is a trusted library of well-tested RL algorithms (PPO, SAC, and more) in a few lines of code. Writing PPO correctly from scratch is hard and error-prone; SB3 gives you a reliable version so you focus on the <i>drawing problem</i>, not on debugging the algorithm.</p>
+
+          <h4>NumPy &amp; PyTorch — the number engines</h4>
+          <p><b>NumPy</b> makes math on big grids of numbers (like images and states) fast and easy. <b>PyTorch</b> runs the <b>neural networks</b> that are the actual "brain" inside PPO/SAC; it comes along with SB3, so you rarely touch it directly at first.</p>
+
+          <h4>Matplotlib — seeing progress</h4>
+          <p><b>Matplotlib</b> turns your training logs (CSV of reward per episode) into graphs. Watching a reward curve climb is how you <i>know</i> learning is happening — and those graphs go straight into the research paper.</p>
+
+          <h3>9.4 Installing the stack</h3>
+          <p>All the Python tools are listed in a <code>requirements.txt</code> file and installed together with pip inside a virtual environment:</p>
+          <pre><code><span class="cmt"># requirements.txt</span>
+pybullet
+gymnasium
+stable-baselines3
+numpy
+opencv-python
+matplotlib</code></pre>
+          <pre><code>pip install -r requirements.txt</code></pre>
+          <div class="callout warn"><div class="ic">🪟</div><div class="ct"><b>Real note for Windows users</b><p>Installing PyBullet on Windows can fail if a C++ compiler is missing (it needs to build from source). Two fixes: install "Microsoft C++ Build Tools," or use a conda-based Python (Miniforge) that provides a ready-built PyBullet. This is a known setup hurdle — expect it and plan for it.</p></div></div>
+
+          <div class="takeaways"><b>Key takeaways</b>
+          <ul>
+            <li><b>Python</b> ties it together; <b>NumPy</b> and <b>PyTorch</b> do the math; <b>PyBullet</b> is the world.</li>
+            <li><b>Gymnasium</b> is the socket; <b>Stable-Baselines3</b> is the plug-in algorithm (PPO/SAC).</li>
+            <li><b>OpenCV</b> makes the reward; <b>Matplotlib</b> shows the progress.</li>
+            <li>Everything installs via <code>pip install -r requirements.txt</code> — mind the Windows PyBullet hurdle.</li>
+          </ul></div>
+          <div class="callout mistake"><div class="ic">⚠️</div><div class="ct"><b>Common beginner mistake</b><p>Trying to hand-code PPO instead of using SB3, or mismatching library versions. Use the requirements file, a virtual environment, and pinned versions for reproducibility.</p></div></div>
+          <div class="summary-box"><b>Chapter summary.</b> The software stack is a layered team: PyBullet simulates, Gymnasium standardizes the environment, Stable-Baselines3 supplies PPO/SAC (running on PyTorch), OpenCV computes the reward, NumPy crunches numbers, and Matplotlib visualizes results — all in Python, tracked in Git. Each tool exists so you don't reinvent it.</div>
+        </div>
+      </details>
+
+      <!-- =================================================================
+           PART 10 — REWARD DESIGN
+      ================================================================== -->
+      <details class="chapter" id="ch10">
+        <summary>
+          <span class="num">10</span>
+          <span class="htext"><span class="kicker">Part 10 · The Secret Sauce</span><h2>Reward Design — Teaching Through Points</h2></span>
+          <span class="chev">▸</span>
+        </summary>
+        <div class="body">
+          <p class="lead">The reward is how we tell the robot "good job" or "no, worse." It is arguably the <b>most important and most delicate</b> design decision in the whole project — get it wrong and the robot learns the wrong thing.</p>
+
+          <h3>10.1 Why reward design is everything</h3>
+          <p>In RL, the agent will do <i>whatever</i> earns the most reward — even if that's not what you meant. The reward function is the only channel through which you communicate the goal. So designing it well is like writing very careful instructions to a genie who takes you <i>literally</i>.</p>
+          <div class="callout analogy"><div class="ic">🧞</div><div class="ct"><b>Analogy: the literal genie</b><p>Ask for "the most ink on the paper" and the robot might scribble a solid black rectangle — technically lots of ink, totally wrong. The reward must capture what you <i>actually</i> want: a drawing that <b>matches the target</b>.</p></div></div>
+
+          <h3>10.2 The building blocks of the reward <span class="badge est">PROPOSED DESIGN</span></h3>
+          <p>The final reward is usually a <b>sum of several smaller rewards and penalties</b>, each nudging a specific behavior. Here are the pieces under consideration — remember these are <i>proposed</i> and will be tuned through experiments.</p>
+          <div class="tablewrap"><table>
+            <tr><th>Reward piece</th><th>+ or −</th><th>What it encourages / discourages</th><th>Why include it</th></tr>
+            <tr><td><b>Shape similarity / pixel overlap (IoU)</b></td><td>+</td><td>Making the drawing match the target</td><td>The main goal — this is what "good drawing" means</td></tr>
+            <tr><td><b>Distance reduction</b></td><td>+</td><td>Moving the pen closer to where it should be</td><td>Gives helpful hints early, before any shape exists</td></tr>
+            <tr><td><b>Smooth movement</b></td><td>+</td><td>Gentle, steady motions</td><td>Jerky motion draws messy lines and stresses real servos</td></tr>
+            <tr><td><b>Pen stability</b></td><td>+</td><td>Keeping consistent pen pressure/contact</td><td>Steady pressure = clean, even lines</td></tr>
+            <tr><td><b>Completion bonus</b></td><td>+ (big)</td><td>Finishing the whole shape</td><td>A clear "you did it!" signal to aim for</td></tr>
+            <tr><td><b>Off-paper / off-line penalty</b></td><td>−</td><td>Leaving the paper or straying from the target</td><td>Stops wandering and scribbling</td></tr>
+            <tr><td><b>Time / step penalty</b></td><td>− (small)</td><td>Taking too long</td><td>Encourages efficient, direct drawing</td></tr>
+            <tr><td><b>Mistake penalty</b></td><td>−</td><td>Drawing where it shouldn't</td><td>Discourages extra, wrong strokes</td></tr>
+          </table></div>
+
+          <h3>10.3 The two headline metrics: IoU and MSE <span class="badge fixed">METRICS</span></h3>
+          <p>Two ways to measure "how close is the drawing to the target" — used both inside the reward and to report results in the paper.</p>
+          <div class="grid two">
+            <div class="card-mini"><h4>IoU — Intersection over Union</h4><p>Of the area covered by drawing <i>and</i> target combined, how much do they <b>overlap</b>? Range 0 (no overlap) to 1 (perfect). Higher = better. Great for "did the shapes line up?"</p></div>
+            <div class="card-mini"><h4>MSE — Mean Squared Error</h4><p>On average, how <b>different</b> is each pixel from the target? Lower = better (0 = identical). Punishes big differences strongly.</p></div>
+          </div>
+          <figure>
+            <svg width="420" height="150" viewBox="0 0 420 150" role="img" aria-label="IoU illustration">
+              <circle cx="150" cy="75" r="55" fill="#3b82f6" fill-opacity="0.35" stroke="#3b82f6"/>
+              <circle cx="210" cy="75" r="55" fill="#22c55e" fill-opacity="0.35" stroke="#22c55e"/>
+              <text x="120" y="80" font-size="12" font-weight="700" fill="#1e3a8a" text-anchor="middle">target</text>
+              <text x="245" y="80" font-size="12" font-weight="700" fill="#166534" text-anchor="middle">drawing</text>
+              <text x="330" y="55" font-size="13" font-weight="700" fill="#0f172a" font-family="sans-serif">IoU =</text>
+              <text x="330" y="78" font-size="11" fill="#334155" font-family="sans-serif">overlap ÷</text>
+              <text x="330" y="94" font-size="11" fill="#334155" font-family="sans-serif">total area</text>
+            </svg>
+            <figcaption>IoU rewards overlap between the target and the drawing. More overlap → higher score.</figcaption>
+          </figure>
+
+          <h3>10.4 Sparse vs dense rewards</h3>
+          <p>A key design tension:</p>
+          <div class="grid two">
+            <div class="card-mini"><h4>Sparse reward</h4><p>Only reward at the very end ("+100 if the final drawing matches"). Honest, but the robot gets almost no guidance along the way — like studying a whole year for one final grade with no feedback. Learning is slow.</p></div>
+            <div class="card-mini"><h4>Dense reward</h4><p>Reward small progress every step (closer, on the line, smooth). Learns much faster because feedback is constant — but you must design it carefully so the pieces don't reward the wrong thing.</p></div>
+          </div>
+          <p>RoboSketch-RL leans toward a <b>dense</b> reward (progress + overlap + penalties) for faster learning, with a completion bonus at the end. <span class="badge est">DESIGN CHOICE</span></p>
+
+          <h3>10.5 Reward hacking — the classic trap</h3>
+          <div class="callout mistake"><div class="ic">🎭</div><div class="ct"><b>Reward hacking</b><p>When the agent finds a loophole that scores high without doing the real task. E.g. if "ink on paper" is rewarded, it scribbles. If "time" is over-penalized, it rushes and draws nothing. Every reward piece must be checked: <i>"could the robot cheat this?"</i> Designing, testing, and fixing the reward is an experimental cycle, not a one-time guess.</p></div></div>
+
+          <h3>10.6 How reward design becomes research</h3>
+          <p>Because the reward strongly shapes behavior, <b>comparing different reward designs is itself a scientific result</b>: ground-truth vs vision-based reward, sparse vs dense, with vs without a smoothness term. Each comparison can be a figure in the paper showing what makes learning-to-draw work.</p>
+
+          <div class="takeaways"><b>Key takeaways</b>
+          <ul>
+            <li>The reward is the <b>only</b> way you tell the robot what "good" means — design it like instructions to a literal genie.</li>
+            <li>It's usually a <b>sum</b> of pieces: overlap (IoU), progress, smoothness, stability, completion bonus, minus penalties.</li>
+            <li><b>IoU</b> (overlap, higher better) and <b>MSE</b> (error, lower better) measure drawing quality.</li>
+            <li><b>Dense</b> rewards learn faster than <b>sparse</b>; beware <b>reward hacking</b>.</li>
+            <li>Comparing reward designs is a real research contribution.</li>
+          </ul></div>
+          <div class="callout mistake"><div class="ic">⚠️</div><div class="ct"><b>Common beginner mistake</b><p>Assuming the first reward you write is correct. It almost never is — expect to run, watch what the robot actually optimizes, and fix the reward several times. That loop <i>is</i> the work.</p></div></div>
+          <div class="summary-box"><b>Chapter summary.</b> The reward function is the project's most influential and most easily mis-designed piece. RoboSketch-RL combines a shape-overlap reward (IoU) with progress, smoothness, stability, and completion bonuses, minus penalties for wandering and wasting time — a dense reward that must be repeatedly tested against reward hacking. Comparing reward designs is part of the science.</div>
+        </div>
+      </details>
+
+      <!-- =================================================================
+           PART 11 — LEARNING ROADMAP
+      ================================================================== -->
+      <details class="chapter" id="ch11">
+        <summary>
+          <span class="num">11</span>
+          <span class="htext"><span class="kicker">Part 11 · Your Study Plan</span><h2>Learning Roadmap — What to Study, In Order</h2></span>
+          <span class="chev">▸</span>
+        </summary>
+        <div class="body">
+          <p class="lead">This is <i>your</i> personal study sequence to go from "read this book" to "ready to build." Each step builds on the last, so the order matters. Take your time — this is a marathon.</p>
+
+          <h3>11.1 The learning sequence</h3>
+          <div class="tablewrap"><table>
+            <tr><th>#</th><th>Learn</th><th>Why now (depends on…)</th></tr>
+            <tr><td>1</td><td><b>Python basics</b></td><td>Everything is written in Python — the foundation of all later steps.</td></tr>
+            <tr><td>2</td><td><b>Git &amp; GitHub</b></td><td>Save your work from day one; you'll regret it if you don't.</td></tr>
+            <tr><td>3</td><td><b>Robotics basics</b> (Part 2)</td><td>Understand arms, joints, DOF before controlling one.</td></tr>
+            <tr><td>4</td><td><b>Kinematics (FK/IK)</b></td><td>Needed to connect the agent's decisions to motor angles.</td></tr>
+            <tr><td>5</td><td><b>OpenCV / computer vision</b></td><td>Needed to build the "eyes" and the reward.</td></tr>
+            <tr><td>6</td><td><b>PyBullet</b></td><td>The world where you'll build and test — needs Python + robotics first.</td></tr>
+            <tr><td>7</td><td><b>Reinforcement Learning</b></td><td>The brain — makes sense only after you have a world to act in.</td></tr>
+            <tr><td>8</td><td><b>Robot simulation</b> (put it together)</td><td>Combine PyBullet + RL + vision into the drawing environment.</td></tr>
+            <tr><td>9</td><td><b>Reward engineering</b></td><td>Tune what the robot learns — needs a working environment to experiment on.</td></tr>
+            <tr><td>10</td><td><b>Hardware</b></td><td>Build the real arm only once the sim brain works.</td></tr>
+            <tr><td>11</td><td><b>Real robot &amp; sim-to-real</b></td><td>Transfer the learned policy to the physical arm.</td></tr>
+            <tr><td>12</td><td><b>Research paper writing</b></td><td>Document, measure, and publish the results.</td></tr>
+          </table></div>
+
+          <h3>11.2 Why this order?</h3>
+          <p>The rule is <b>"never learn a topic before its prerequisites."</b> You can't use PyBullet without Python. RL only makes sense once you have an environment to act in. Hardware only matters after the sim works. Following the order means every new topic lands on ground you've already prepared — no confusing leaps.</p>
+          <figure>
+            <svg width="600" height="120" viewBox="0 0 600 120" role="img" aria-label="Learning path">
+              <g font-family="sans-serif" font-size="11" font-weight="700" text-anchor="middle">
+              <rect x="8" y="45" width="80" height="34" rx="8" fill="#dbeafe" stroke="#3b82f6"/><text x="48" y="66" fill="#1e3a8a">Python</text>
+              <rect x="102" y="45" width="80" height="34" rx="8" fill="#e0f2fe" stroke="#0284c7"/><text x="142" y="66" fill="#075985">Robotics</text>
+              <rect x="196" y="45" width="80" height="34" rx="8" fill="#ede9fe" stroke="#8b5cf6"/><text x="236" y="66" fill="#5b21b6">Vision</text>
+              <rect x="290" y="45" width="80" height="34" rx="8" fill="#fef3c7" stroke="#f59e0b"/><text x="330" y="66" fill="#92400e">PyBullet</text>
+              <rect x="384" y="45" width="80" height="34" rx="8" fill="#dcfce7" stroke="#22c55e"/><text x="424" y="66" fill="#166534">RL</text>
+              <rect x="478" y="45" width="110" height="34" rx="8" fill="#fee2e2" stroke="#ef4444"/><text x="533" y="66" fill="#991b1b">Hardware+Paper</text>
+              <path d="M88 62 H102 M182 62 H196 M276 62 H290 M370 62 H384 M464 62 H478" stroke="#64748b" stroke-width="2" marker-end="url(#a11)"/>
+              </g>
+              <defs><marker id="a11" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#64748b"/></marker></defs>
+            </svg>
+            <figcaption>Each block rests on the one before it. Skip ahead and you'll hit walls; go in order and it flows.</figcaption>
+          </figure>
+
+          <div class="callout tip"><div class="ic">💡</div><div class="ct"><b>Learn by doing, not just reading</b><p>After each topic, write a tiny program that uses it — print pen coordinates, threshold one image, run one PPO example. Small wins keep you motivated and cement the idea far better than passive reading.</p></div></div>
+
+          <div class="takeaways"><b>Key takeaways</b>
+          <ul>
+            <li>Study in dependency order: Python → Git → robotics → kinematics → vision → PyBullet → RL → simulation → reward → hardware → sim-to-real → paper.</li>
+            <li>Never learn a topic before its prerequisites.</li>
+            <li>Reinforce every topic with a tiny hands-on program.</li>
+          </ul></div>
+          <div class="summary-box"><b>Chapter summary.</b> Your path from beginner to builder follows a strict dependency order — foundations first (Python, robotics), then tools (vision, PyBullet), then the brain (RL), then integration (simulation, reward), and finally hardware and writing. Learn each with a small hands-on exercise.</div>
+        </div>
+      </details>
+
+      <!-- =================================================================
+           PART 12 — DEVELOPMENT ROADMAP
+      ================================================================== -->
+      <details class="chapter" id="ch12">
+        <summary>
+          <span class="num">12</span>
+          <span class="htext"><span class="kicker">Part 12 · Building It</span><h2>Development Roadmap — The Phases of the Project</h2></span>
+          <span class="chev">▸</span>
+        </summary>
+        <div class="body">
+          <p class="lead">Part 11 was about <i>learning</i>. This part is about <i>building</i> — the phases the actual project moves through, from first line of code to published paper.</p>
+
+          <div class="callout flex"><div class="ic">🧭</div><div class="ct"><b>These phases are a flexible guide</b> <span class="badge est">MAY CHANGE</span><p>Only the research <b>problem and purpose</b> are fixed. The ordering, algorithms, arm, and reward can all shift as experiments teach us more. Treat this as a map, not a contract.</p></div></div>
+
+          <h3>12.1 The eight phases</h3>
+          <figure>
+            <svg width="240" height="470" viewBox="0 0 240 470" role="img" aria-label="Phase timeline">
+              <line x1="30" y1="20" x2="30" y2="450" stroke="#cbd5e1" stroke-width="4"/>
+              <g font-family="sans-serif" font-size="12" font-weight="700">
+              <circle cx="30" cy="35" r="10" fill="#4f46e5"/><text x="52" y="40" fill="#0f172a">Phase 1 · Learning</text>
+              <circle cx="30" cy="90" r="10" fill="#4f46e5"/><text x="52" y="95" fill="#0f172a">Phase 2 · Simulation</text>
+              <circle cx="30" cy="145" r="10" fill="#4f46e5"/><text x="52" y="150" fill="#0f172a">Phase 3 · Basic Robot</text>
+              <circle cx="30" cy="200" r="10" fill="#0ea5e9"/><text x="52" y="205" fill="#0f172a">Phase 4 · Vision</text>
+              <circle cx="30" cy="255" r="10" fill="#0ea5e9"/><text x="52" y="260" fill="#0f172a">Phase 5 · RL Training</text>
+              <circle cx="30" cy="310" r="10" fill="#f59e0b"/><text x="52" y="315" fill="#0f172a">Phase 6 · Real Hardware</text>
+              <circle cx="30" cy="365" r="10" fill="#f59e0b"/><text x="52" y="370" fill="#0f172a">Phase 7 · Optimization</text>
+              <circle cx="30" cy="420" r="10" fill="#22c55e"/><text x="52" y="425" fill="#0f172a">Phase 8 · Research Paper</text>
+              </g>
+            </svg>
+            <figcaption>Eight phases from learning to publishing. Blue = foundations, cyan = intelligence, orange = physical, green = science output.</figcaption>
+          </figure>
+
+          <h3>12.2 What happens in each phase</h3>
+          <div class="tablewrap"><table>
+            <tr><th>Phase</th><th>What you do</th><th>Done when…</th></tr>
+            <tr><td><b>1 · Learning</b></td><td>Study everything in this book; do small exercises.</td><td>You understand the whole system (this book!).</td></tr>
+            <tr><td><b>2 · Simulation</b></td><td>Build the PyBullet world: load the arm + paper, move joints, read the pen tip, use IK to reach a point, draw a line.</td><td>The simulated arm can draw a straight line on command.</td></tr>
+            <tr><td><b>3 · Basic Robot (in sim)</b></td><td>Wrap the sim as a Gymnasium environment (state, action, episode) — the arm the agent can control.</td><td>You can call <code>reset()</code>/<code>step()</code> and see the pen move.</td></tr>
+            <tr><td><b>4 · Vision</b></td><td>Add a virtual camera + OpenCV to extract the drawing and compute similarity.</td><td>You can score a drawing against a target automatically.</td></tr>
+            <tr><td><b>5 · RL Training</b></td><td>Plug in PPO (then SAC); design the reward; train for shapes: line → circle → square → triangle → digits → letters.</td><td>The agent reliably draws the target shapes in sim.</td></tr>
+            <tr><td><b>6 · Real Hardware</b></td><td>Build the physical arm; swap to a hardware-matched arm model; transfer the policy (sim-to-real).</td><td>The real arm draws the shapes reasonably.</td></tr>
+            <tr><td><b>7 · Optimization</b></td><td>Reduce the sim-to-real gap, tune rewards, improve accuracy and robustness; compare algorithms/rewards.</td><td>Results are solid and repeatable.</td></tr>
+            <tr><td><b>8 · Research Paper</b></td><td>Measure everything (IoU, MSE, success rate, training time), make figures, write and submit.</td><td>The paper is written and submitted.</td></tr>
+          </table></div>
+
+          <h3>12.3 The task ladder (what shapes, in what order) <span class="badge fixed">SCOPE</span></h3>
+          <p>Inside Phase 5, the drawing tasks grow in difficulty — a curriculum from easiest to hardest:</p>
+          <div class="flow">
+            <span class="step">Line</span><span class="arrow">→</span>
+            <span class="step">Circle</span><span class="arrow">→</span>
+            <span class="step">Square</span><span class="arrow">→</span>
+            <span class="step">Triangle</span><span class="arrow">→</span>
+            <span class="step">Handwritten digits</span><span class="arrow">→</span>
+            <span class="step">Alphabet letters</span>
+          </div>
+          <p>Starting simple lets you debug the whole pipeline on an easy target before tackling hard ones. (Deliberately excluded at first: painting, multiple colors, high-speed drawing, and artistic sketching — to keep the research focused.)</p>
+
+          <div class="callout note"><div class="ic">📍</div><div class="ct"><b>Where the project is now</b><p>As of this book, the project is in early <b>Phase 2</b> — building the PyBullet simulation with a bundled KUKA arm — after resolving software setup. The learning brain and hardware come later, exactly as this roadmap describes.</p></div></div>
+
+          <div class="takeaways"><b>Key takeaways</b>
+          <ul>
+            <li>Eight phases: Learning → Simulation → Basic Robot → Vision → RL Training → Real Hardware → Optimization → Paper.</li>
+            <li>Simulation and learning come <b>before</b> any hardware.</li>
+            <li>Shapes grow in difficulty: line → circle → square → triangle → digits → letters.</li>
+            <li>The phases are a flexible research guide, not a fixed contract.</li>
+          </ul></div>
+          <div class="summary-box"><b>Chapter summary.</b> Development moves through eight flexible phases from learning to publishing, always simulating and training before building hardware, and tackling shapes from a simple line up to letters. Right now the project is early in the simulation phase.</div>
+        </div>
+      </details>
+
+      <!-- =================================================================
+           PART 13 — RESEARCH PERSPECTIVE
+      ================================================================== -->
+      <details class="chapter" id="ch13">
+        <summary>
+          <span class="num">13</span>
+          <span class="htext"><span class="kicker">Part 13 · Why It's Science</span><h2>Research Perspective — What Could Be Novel</h2></span>
+          <span class="chev">▸</span>
+        </summary>
+        <div class="body">
+          <p class="lead">RoboSketch-RL isn't just a cool build — it's aimed at a <b>publication</b>. This part explains what "research contribution" means, what's already known, and where the new ideas might live.</p>
+
+          <h3>13.1 What makes something a research contribution?</h3>
+          <p>A research contribution answers a question nobody has clearly answered before, and does it carefully enough that others can trust and reproduce the result. It's not "I built a robot" — it's "I <i>learned something new</i> about how to build robots, and here's the evidence."</p>
+
+          <h3>13.2 What's already known (not novel)</h3>
+          <ul>
+            <li>Robot arms and inverse kinematics — decades old.</li>
+            <li>Reinforcement Learning, PPO, SAC — well-established methods.</li>
+            <li>OpenCV image processing — standard.</li>
+            <li>Robots that draw using <i>pre-programmed</i> paths — done many times.</li>
+          </ul>
+          <p>Using these isn't new. The contribution has to be in <i>how</i> we combine and study them.</p>
+
+          <h3>13.3 What might be novel here</h3>
+          <div class="grid two">
+            <div class="card-mini"><h4>Learning to draw, not programming to draw</h4><p>Teaching a <b>low-cost</b> arm to draw via <b>vision-guided RL</b> instead of hand-coded trajectories — and showing it works on a small budget.</p></div>
+            <div class="card-mini"><h4>Vision reward vs ground-truth reward</h4><p>Directly testing whether learning from a <b>camera</b> (like the real world) matches learning from perfect internal coordinates.</p></div>
+            <div class="card-mini"><h4>Pen-space vs joint-space actions</h4><p>Measuring which representation transfers better across arms and survives sim-to-real.</p></div>
+            <div class="card-mini"><h4>Low-cost sim-to-real for drawing</h4><p>How well a policy trained in sim performs on a ~₹10,000 arm — a practical, reproducible benchmark.</p></div>
+          </div>
+          <div class="callout flex"><div class="ic">⚗️</div><div class="ct"><b>Honesty note</b><p>Whether these are truly "novel" depends on what already exists in the literature — that's what a <b>literature review</b> checks. The value may lie less in a brand-new method and more in a careful, reproducible, low-cost <i>study</i> of these questions. Both are legitimate contributions.</p></div></div>
+
+          <h3>13.4 Hypotheses to test</h3>
+          <div class="tablewrap"><table>
+            <tr><th>Label</th><th>Hypothesis</th><th>How to test</th></tr>
+            <tr><td>H1</td><td>A low-cost arm <i>can</i> learn to draw basic shapes with vision-guided RL.</td><td>Train &amp; measure IoU/MSE/success rate.</td></tr>
+            <tr><td>H2</td><td>A vision-based reward works as well as (or better than) a ground-truth reward.</td><td>Train both versions, compare results.</td></tr>
+            <tr><td>H3</td><td>Pen-space actions transfer to hardware better than joint-space actions.</td><td>Train both, test sim-to-real gap.</td></tr>
+            <tr><td>H4</td><td>One algorithm (PPO vs SAC) learns faster/more reliably for this task.</td><td>Train both, compare curves &amp; final scores.</td></tr>
+          </table></div>
+
+          <h3>13.5 Measuring results (the evidence)</h3>
+          <p>Claims need numbers. The planned metrics:</p>
+          <ul>
+            <li><b>IoU</b> — shape overlap with the target (higher better).</li>
+            <li><b>MSE</b> — average pixel error (lower better).</li>
+            <li><b>Success rate</b> — fraction of attempts that reach a "good enough" drawing.</li>
+            <li><b>Training time / sample efficiency</b> — how many tries to learn.</li>
+          </ul>
+          <p>And a <b>baseline</b> for comparison: a traditional IK + trajectory-planning drawer (no learning). Beating or matching it — while being more adaptable — is the story.</p>
+
+          <h3>13.6 Future improvements &amp; publication venues</h3>
+          <p>Beyond the first paper, extensions could include multi-color drawing, more complex artwork, faster drawing, or transfer to different arms. Suitable venues for robotics + learning work include <b>IEEE</b> journals/conferences such as <b>ICRA, IROS, RA-L, and CoRL</b>. <span class="badge est">TARGET</span></p>
+
+          <div class="takeaways"><b>Key takeaways</b>
+          <ul>
+            <li>A contribution = a new, carefully-evidenced answer to a question — not just a working build.</li>
+            <li>The tools (RL, IK, OpenCV) are known; the novelty is in the <b>learning-to-draw approach</b> and the <b>comparisons</b>.</li>
+            <li>Test clear hypotheses (H1–H4) with real metrics (IoU, MSE, success rate, training time) against a non-learning baseline.</li>
+            <li>A rigorous, reproducible, low-cost study is itself a valid contribution.</li>
+          </ul></div>
+          <div class="summary-box"><b>Chapter summary.</b> The research value of RoboSketch-RL lies not in inventing RL or IK, but in rigorously studying whether a low-cost arm can <i>learn</i> to draw from vision — comparing reward types, action spaces, and algorithms against a traditional baseline, measured with clear metrics, and aimed at IEEE robotics venues.</div>
+        </div>
+      </details>
+
+      <!-- =================================================================
+           PART 14 — APPENDIX
+      ================================================================== -->
+      <details class="chapter" id="ch14">
+        <summary>
+          <span class="num">14</span>
+          <span class="htext"><span class="kicker">Part 14 · Reference</span><h2>Appendix — Glossary, Resources &amp; FAQ</h2></span>
+          <span class="chev">▸</span>
+        </summary>
+        <div class="body">
+          <p class="lead">Your quick-reference shelf: every technical term defined, acronyms spelled out, places to learn more, and answers to common questions.</p>
+
+          <h3>14.1 Glossary of terms</h3>
+          <dl class="glossary">
+            <dt>Accuracy</dt><dd>How close a result is to the true target.</dd>
+            <dt>Action</dt><dd>A move the RL agent can make (e.g. nudge the pen).</dd>
+            <dt>Agent</dt><dd>The learner/decision-maker in RL — here, the drawing "brain."</dd>
+            <dt>Calibration</dt><dd>Teaching the system how camera pixels map to real-world positions.</dd>
+            <dt>Cartesian coordinates</dt><dd>Locating a point by distances along X, Y, Z axes.</dd>
+            <dt>Collision detection</dt><dd>The simulator noticing when two objects touch (e.g. pen meets paper).</dd>
+            <dt>Contour</dt><dd>A connected curve tracing the outline of a shape in an image.</dd>
+            <dt>Degrees of Freedom (DOF)</dt><dd>The number of independent ways a robot can move; usually its joint count.</dd>
+            <dt>Dense reward</dt><dd>Reward given for small progress every step (vs only at the end).</dd>
+            <dt>Digital twin</dt><dd>A virtual copy of a real object that behaves like it.</dd>
+            <dt>Edge detection</dt><dd>Finding where brightness changes sharply — the borders of shapes.</dd>
+            <dt>End effector</dt><dd>The tool at the arm's tip; here, the pen holder.</dd>
+            <dt>Environment</dt><dd>The world the RL agent acts in (arm + paper + camera).</dd>
+            <dt>Episode</dt><dd>One complete attempt, from start to finish.</dd>
+            <dt>Exploration / Exploitation</dt><dd>Trying new actions vs using known-good ones.</dd>
+            <dt>Forward Kinematics (FK)</dt><dd>Computing pen position from joint angles.</dd>
+            <dt>Grayscale</dt><dd>An image using only brightness (0–255), no color.</dd>
+            <dt>Inverse Kinematics (IK)</dt><dd>Computing joint angles needed to place the pen at a target position.</dd>
+            <dt>IoU (Intersection over Union)</dt><dd>Overlap between two shapes ÷ their combined area; 0–1, higher better.</dd>
+            <dt>Joint</dt><dd>A motorized movable connection between two links.</dd>
+            <dt>Link</dt><dd>A rigid segment of the arm (like a bone).</dd>
+            <dt>Machine Learning (ML)</dt><dd>AI that learns from data/experience rather than being fully hand-coded.</dd>
+            <dt>MSE (Mean Squared Error)</dt><dd>Average squared difference between drawing and target pixels; lower better.</dd>
+            <dt>Neural network</dt><dd>A brain-inspired math model good at learning patterns.</dd>
+            <dt>Physics engine</dt><dd>Software that computes realistic forces, motion, and collisions.</dd>
+            <dt>Pixel</dt><dd>One tiny colored square of an image, stored as numbers.</dd>
+            <dt>Policy</dt><dd>The agent's strategy mapping states to actions — the trained brain.</dd>
+            <dt>PPO (Proximal Policy Optimization)</dt><dd>A stable RL algorithm for continuous actions; the project's first choice.</dd>
+            <dt>Precision (repeatability)</dt><dd>How consistently a result is reproduced, right or wrong.</dd>
+            <dt>Reward</dt><dd>A number scoring how good an outcome was.</dd>
+            <dt>Reward hacking</dt><dd>The agent exploiting a loophole to score high without doing the real task.</dd>
+            <dt>RGB</dt><dd>Color as Red, Green, Blue values (0–255 each).</dd>
+            <dt>SAC (Soft Actor-Critic)</dt><dd>A sample-efficient RL algorithm that rewards exploration; the second choice.</dd>
+            <dt>Servo motor</dt><dd>A motor commanded to a specific angle and holds it.</dd>
+            <dt>Sim-to-real gap</dt><dd>The performance difference between simulation and the real world.</dd>
+            <dt>Sparse reward</dt><dd>Reward given only at the end of an episode.</dd>
+            <dt>State (observation)</dt><dd>What the agent currently knows/sees.</dd>
+            <dt>Stepper motor</dt><dd>A motor that moves in fixed steps for precise positioning.</dd>
+            <dt>Threshold(ing)</dt><dd>Turning a grayscale image into pure black/white by a cutoff.</dd>
+            <dt>URDF</dt><dd>A text file describing a robot's body (joints, links, limits).</dd>
+            <dt>Value / Q-value</dt><dd>Expected future reward from a state / from a state-action pair.</dd>
+            <dt>Workspace</dt><dd>Every point the end effector can physically reach.</dd>
+          </dl>
+
+          <h3>14.2 Acronyms</h3>
+          <div class="tablewrap"><table>
+            <tr><th>Acronym</th><th>Meaning</th></tr>
+            <tr><td>AI / ML / DL / RL</td><td>Artificial Intelligence / Machine Learning / Deep Learning / Reinforcement Learning</td></tr>
+            <tr><td>DOF</td><td>Degrees of Freedom</td></tr>
+            <tr><td>FK / IK</td><td>Forward / Inverse Kinematics</td></tr>
+            <tr><td>CV</td><td>Computer Vision</td></tr>
+            <tr><td>PPO / SAC / DQN</td><td>Proximal Policy Optimization / Soft Actor-Critic / Deep Q-Network</td></tr>
+            <tr><td>IoU / MSE</td><td>Intersection over Union / Mean Squared Error</td></tr>
+            <tr><td>URDF</td><td>Unified Robot Description Format</td></tr>
+            <tr><td>SB3</td><td>Stable-Baselines3</td></tr>
+            <tr><td>ICRA / IROS / RA-L / CoRL</td><td>Major robotics research venues (IEEE &amp; conferences)</td></tr>
+          </table></div>
+
+          <h3>14.3 Recommended resources <span class="badge est">SUGGESTIONS</span></h3>
+          <div class="grid two">
+            <div class="card-mini"><h4>📚 Books &amp; docs</h4>
+              <ul>
+                <li>Official <b>PyBullet Quickstart Guide</b> (the PDF from the maintainers)</li>
+                <li><b>Stable-Baselines3</b> documentation &amp; tutorials</li>
+                <li><b>Gymnasium</b> documentation (env basics)</li>
+                <li><b>OpenCV-Python</b> official tutorials</li>
+                <li>"Reinforcement Learning: An Introduction" (Sutton &amp; Barto) — the classic, free online (advanced but authoritative)</li>
+              </ul>
+            </div>
+            <div class="card-mini"><h4>🎥 Learning channels / sites</h4>
+              <ul>
+                <li>Free Python courses (freeCodeCamp, official python.org tutorial)</li>
+                <li>OpenCV &amp; robotics tutorials on YouTube</li>
+                <li>Hugging Face <b>Deep RL Course</b> (free, hands-on)</li>
+                <li>Spinning Up in Deep RL (OpenAI) — clear RL explanations</li>
+                <li>Papers with Code — find related robot-drawing/RL papers</li>
+              </ul>
+            </div>
+          </div>
+          <div class="callout note"><div class="ic">🔎</div><div class="ct"><b>How to find related papers</b><p>Search Google Scholar / arXiv for terms like "robot drawing reinforcement learning," "vision-guided manipulation RL," and "sim-to-real drawing." Reading 5–10 related papers early shapes a stronger, better-positioned project.</p></div></div>
+
+          <h3>14.4 Frequently Asked Questions</h3>
+          <details class="faq"><summary>Do I need to be good at math?</summary><div class="fa">You need school-level math to start. The hard math (kinematics, RL updates) is handled by libraries — you use them, you don't derive them. Understanding <i>concepts</i> matters more than doing the calculus by hand.</div></details>
+          <details class="faq"><summary>Do I need to buy the robot to begin?</summary><div class="fa">No — and you shouldn't yet. Everything up to trained behavior happens in <b>simulation</b> on your laptop. Hardware comes only after the sim works.</div></details>
+          <details class="faq"><summary>How long will this take?</summary><div class="fa">It's a serious, months-long project — that's normal for research. Progress in small phases (Part 12), and celebrate each milestone.</div></details>
+          <details class="faq"><summary>What computer do I need?</summary><div class="fa">A regular laptop (Windows works) runs PyBullet and light RL fine for basic shapes. Training is faster with a GPU, but not required to start.</div></details>
+          <details class="faq"><summary>Why does the robot need a camera if the simulator already knows where the pen is?</summary><div class="fa">The <i>real</i> robot won't have perfect internal knowledge — it must judge its drawing by looking, like a person. Training with vision prepares it for reality, and comparing vision vs perfect-knowledge is a research question (H2).</div></details>
+          <details class="faq"><summary>What if my reward makes the robot do something weird?</summary><div class="fa">That's <b>reward hacking</b>, and it's expected. Watch what it actually optimizes, then fix the reward. Iterating on the reward is a core part of the work (Part 10).</div></details>
+          <details class="faq"><summary>Will the choices in this book definitely be the final ones?</summary><div class="fa">No. Only the research <b>problem and purpose</b> are fixed. Algorithm, arm, reward, and ordering are design choices that will evolve through experiments — that's how research works.</div></details>
+          <details class="faq"><summary>Is PPO or SAC better?</summary><div class="fa">We start with PPO because it's stable and reliable, then try SAC and compare. Which is "better" for drawing is literally one of the things this project measures (H4).</div></details>
+
+          <div class="summary-box"><b>Chapter summary.</b> This appendix is your reference shelf — a full glossary, acronym list, curated free resources, and answers to the questions beginners ask most. Return here whenever a term or doubt comes up.</div>
+        </div>
+      </details>
+
+      <!-- CLOSING -->
+      <section class="hero" style="margin-top:26px">
+        <h1 style="font-size:1.6rem">🎉 You made it to the end</h1>
+        <p class="sub">If these fourteen parts now feel connected — a cheap arm, a camera, a physics playground, a reward, and a brain that learns to draw — then the book did its job. You're ready to begin Phase 1 → 2 with real understanding.</p>
+        <p class="sub" style="opacity:.9">Remember the golden rules: <b>simulate before you buy</b>, <b>design the reward carefully</b>, <b>learn in dependency order</b>, and <b>keep the science honest</b>. Good luck — go teach a robot to draw.</p>
+        <span class="pill">Next up → build the PyBullet simulation</span>
+      </section>
+
+      <footer class="bookfoot">
+        <p><b>RoboSketch-RL — The Complete Learning Book.</b> A conceptual foundation, not an implementation guide. Design choices marked <span class="badge est">MAY CHANGE</span> will evolve as the research progresses. Diagrams are simple SVGs and can be replaced with richer illustrations later.</p>
+        <p>Built for a curious Grade 10 mind. Reread any chapter anytime — that's what learning looks like.</p>
+      </footer>
+
+    </div>
+  </main>
+</div>
+
+<button class="backtop" id="backtop" aria-label="Back to top">↑</button>
+
+<script>
+/* ---------- data for sidebar ---------- */
+const CHAPTERS = [
+  {part:"Part 1 · Introduction", items:[["ch1","1. About RoboSketch-RL"]]},
+  {part:"Part 2 · Foundations", items:[["ch2","2. Robotics Basics"],["ch3","3. Programming Basics"]]},
+  {part:"Part 4 · The Eyes", items:[["ch4","4. Computer Vision"]]},
+  {part:"Part 5 · The Brain", items:[["ch5","5. Reinforcement Learning"]]},
+  {part:"Part 6 · Practice World", items:[["ch6","6. Simulation"]]},
+  {part:"Part 7 · Big Picture", items:[["ch7","7. System Architecture"]]},
+  {part:"Part 8 · Physical Robot", items:[["ch8","8. Hardware"]]},
+  {part:"Part 9 · Toolbox", items:[["ch9","9. Software Stack"]]},
+  {part:"Part 10 · Secret Sauce", items:[["ch10","10. Reward Design"]]},
+  {part:"Part 11 · Study Plan", items:[["ch11","11. Learning Roadmap"]]},
+  {part:"Part 12 · Building It", items:[["ch12","12. Development Roadmap"]]},
+  {part:"Part 13 · The Science", items:[["ch13","13. Research Perspective"]]},
+  {part:"Part 14 · Reference", items:[["ch14","14. Appendix"]]},
+];
+const toc = document.getElementById('toc');
+CHAPTERS.forEach(g=>{
+  const p=document.createElement('div');p.className='part';p.textContent=g.part;toc.appendChild(p);
+  g.items.forEach(([id,label])=>{
+    const a=document.createElement('a');a.href='#'+id;a.dataset.id=id;a.textContent=label;
+    a.addEventListener('click',()=>{const c=document.getElementById(id);if(c&&!c.open)c.open=true;closeSidebar();});
+    toc.appendChild(a);
+  });
+});
+
+/* ---------- progress bar ---------- */
+const prog=document.getElementById('progress');
+function onScroll(){
+  const h=document.documentElement;
+  const max=h.scrollHeight-h.clientHeight;
+  const pct=max>0?(h.scrollTop/max)*100:0;
+  prog.style.width=pct+'%';
+  document.getElementById('backtop').classList.toggle('show',h.scrollTop>500);
+}
+window.addEventListener('scroll',onScroll,{passive:true});onScroll();
+
+/* ---------- active section highlight ---------- */
+const links=[...document.querySelectorAll('nav.toc a')];
+const chapters=[...document.querySelectorAll('.chapter')];
+const io=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const id=e.target.id;
+      links.forEach(l=>l.classList.toggle('active',l.dataset.id===id));
+      const active=links.find(l=>l.dataset.id===id);
+      if(active)document.getElementById('crumb').textContent=active.textContent;
+    }
+  });
+},{rootMargin:'-40% 0px -55% 0px'});
+chapters.forEach(c=>io.observe(c));
+
+/* ---------- search ---------- */
+document.getElementById('tocSearch').addEventListener('input',e=>{
+  const q=e.target.value.toLowerCase().trim();
+  links.forEach(l=>{
+    const hit=l.textContent.toLowerCase().includes(q);
+    l.classList.toggle('hidden',q&&!hit);
+  });
+  document.querySelectorAll('nav.toc .part').forEach(p=>{p.style.display=q?'none':'';});
+});
+
+/* ---------- expand / collapse all ---------- */
+let allOpen=false;
+document.getElementById('expandAll').addEventListener('click',()=>{
+  allOpen=!allOpen;chapters.forEach(c=>c.open=allOpen);
+});
+
+/* ---------- theme toggle ---------- */
+const root=document.documentElement;
+document.getElementById('themeBtn').addEventListener('click',()=>{
+  const cur=root.getAttribute('data-theme');
+  const isDark=cur? cur==='dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  root.setAttribute('data-theme',isDark?'light':'dark');
+});
+
+/* ---------- mobile sidebar ---------- */
+const sb=document.getElementById('sidebar'),scrim=document.getElementById('scrim');
+function closeSidebar(){sb.classList.remove('open');scrim.classList.remove('open');}
+document.getElementById('menuBtn').addEventListener('click',()=>{sb.classList.toggle('open');scrim.classList.toggle('open');});
+scrim.addEventListener('click',closeSidebar);
+
+/* ---------- back to top ---------- */
+document.getElementById('backtop').addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+</script>
+</body>
+</html>

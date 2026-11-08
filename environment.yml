@@ -1,0 +1,18 @@
+# RoboSketch-RL conda environment (reproducible setup)
+# Create with:   conda env create -f environment.yml
+# Activate with: conda activate robosketch
+#
+# PyBullet is installed from conda-forge as a prebuilt binary (no C++ compiler
+# needed on Windows). The RL/vision packages are installed via pip.
+name: robosketch
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pybullet
+  - numpy
+  - pip
+  - pip:
+      - gymnasium
+      - stable-baselines3
+      - opencv-python

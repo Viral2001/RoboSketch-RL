@@ -1,0 +1,14 @@
+continue
+
+UNATTENDED RUN: the user is away and cannot answer. This is an automatic session started by tools/agent_run.ps1.
+Follow AGENTS.md section 0 exactly, with these additions:
+- Never ask the user a question. If HANDOFF.md "Next" says "ask the user", or the next step is unclear, or it needs a decision
+  AGENTS.md says to ask about (deleting anything, changing an environment default, a sweep longer than ~6 hours, changing what a
+  hypothesis claims, buying hardware) -> do NOT do it. Write one line "WAITING FOR USER: <question>" at the top of the
+  "Next" section in docs/HANDOFF.md and stop.
+- Do not launch python sweeps yourself. To start a new sweep, ADD it to tools/jobs.json (name + script_args, same format as the
+  existing entries); the watchdog launches it with OMP/MKL=1. Do not edit code a running sweep uses.
+- Do not delete or overwrite any results/*.jsonl, .zip model or figure. No web search/fetch. No git. No publishing of anything.
+- Only do ONE piece of work (the "Next" item), finish it properly (AGENTS.md section 7: verify, log, update HANDOFF.md), then stop.
+  If the sweep it depends on is still running, do useful non-conflicting work (docs, analysis scripts that only read results) or stop.
+- Start your final message with the line "AUTO-RUN SUMMARY:" and keep it to 3-5 lines.

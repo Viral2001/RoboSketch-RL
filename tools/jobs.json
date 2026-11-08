@@ -1,0 +1,58 @@
+[
+  {
+    "name": "c5_short50_a",
+    "script_args": "rl/short_arm.py --seeds 0 1 --shapes line circle --shard a"
+  },
+  {
+    "name": "c5_short50_b",
+    "script_args": "rl/short_arm.py --seeds 0 1 --shapes square triangle --shard b"
+  },
+  {
+    "name": "a1_chunk5_a",
+    "script_args": "rl/chunk_experiment.py --seeds 0 100 --shapes line circle --shard a"
+  },
+  {
+    "name": "a1_chunk5_b",
+    "script_args": "rl/chunk_experiment.py --seeds 0 100 --shapes square triangle --shard b"
+  },
+  {
+    "name": "t1_bc200_a",
+    "script_args": "rl/bc_experiment.py --seeds 0 100 --shapes line circle --shard a"
+  },
+  {
+    "name": "t1_bc200_b",
+    "script_args": "rl/bc_experiment.py --seeds 0 100 --shapes square triangle --shard b"
+  },
+  {
+    "name": "rq4_curr_a",
+    "script_args": "rl/curriculum_experiment.py --seeds 0 100 --shapes circle square --shard a"
+  },
+  {
+    "name": "rq4_curr_b",
+    "script_args": "rl/curriculum_experiment.py --seeds 0 100 --shapes triangle --shard b"
+  },
+  {
+    "name": "a2_penfree_a",
+    "script_args": "rl/penfree_experiment.py --seeds 0 100 --shapes circle square --shard a"
+  },
+  {
+    "name": "a2_penfree_b",
+    "script_args": "rl/penfree_experiment.py --seeds 0 100 --shapes triangle --shard b"
+  },
+  {
+    "name": "s6_digits_a",
+    "script_args": "rl/digit_experiment.py --seeds 0 100 --shapes 1 4 --shard a"
+  },
+  {
+    "name": "s6_digits_b",
+    "script_args": "rl/digit_experiment.py --seeds 0 100 --shapes 7 8 --shard b"
+  },
+  {
+    "name": "h4_confirm_c",
+    "script_args": "rl/h4_confirm.py --shapes line circle --shard c"
+  },
+  {
+    "name": "h4_confirm_d",
+    "script_args": "rl/h4_confirm.py --shapes square triangle --shard d"
+  }
+]

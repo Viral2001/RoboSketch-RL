@@ -1,0 +1,6 @@
+4 runs done, 2 to go (seeds=[0, 100])
+
+[1/2] line     coord seed=100 ...
+        -> default 0.328  train 0.310  heldout 0.174  heldout_scale 0.312  heldout_rot 0.151
+[2/2] circle   coord seed=100 ...
+        -> default 0.349  train 0.357  heldout 0.118  heldout_scale 0.118  heldout_rot 0.357
