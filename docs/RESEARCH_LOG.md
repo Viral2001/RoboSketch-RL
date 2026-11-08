@@ -3362,3 +3362,11 @@ Every decimal carries a `% src:` log reference. `check_paper.py`: one rule chang
 - main.tex Related Work: "originates with e-David" (an unchecked priority claim) replaced by "go back at least to the e-David machine \cite{A09}". Description limited to what the abstract says.
 - Recompiled: 5 pages, 0 undefined refs; check_paper 0 errors / 3 TODOs (authors, acknowledgment + AI-use disclosure, TODO macro).
 - Honest limits: only the abstract was read; earlier e-David papers (~2009-2011) may exist and were not searched.
+
+## 2026-11-08 - Project published on GitHub (user decision)
+- User clarified the purpose: an **individual portfolio project** by Viral Kanani (GitHub + resume + learning RL/robotics), not a university thesis. Formal thesis dropped; paper draft + README take its place.
+- Public repo: https://github.com/Viral2001/RoboSketch-RL (created with GitHub CLI, installed via winget; user authorised the login).
+- Excluded via .gitignore: `research_papers/**/*.pdf` (third-party copyright), `models/` (~64 MB), videos, `.bak*`, LaTeX build files and `main.pdf` (draft still has TODO markers), agent logs/state. Secret scan before commit: none found. 387 files, ~17.6 MB.
+- README rewritten for a public reader: the question, results table (numbers copied from earlier sourced entries), limits, layout, quick start, AI-assistance disclosure. The old detailed README is kept as `docs/README_full_status.md` (it contained an old overclaim "the novelty is teaching the robot how to learn to draw", now removed from the front page).
+- AGENTS.md s2 rewritten: push only to the user's own repo and only when asked; still nothing account-side.
+- Paper author line set to "Viral Kanani, Independent researcher" (email TODO).
