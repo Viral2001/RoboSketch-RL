@@ -1,6 +1,6 @@
 # HANDOFF - current state (update at the end of EVERY session)
 
-_Last updated: 2026-11-11 (RQ3 SAC result logged and propagated) by Claude Code._
+_Last updated: 2026-11-11 (RQ3 propagated and pushed to GitHub) by Claude Code._
 
 ## Running
 - **RQ3 PPO vs SAC DONE 2026-11-11** (log `### RQ3 PPO vs SAC RESULT`): SAC 0.051 vs PPO 0.292 train-family IoU (-0.241, 0/8 up, t=-9.71), behind on all 5 eval sets; one untuned SAC config at update-to-data 0.25, so wording = "far behind at this budget", NOT "PPO is better"; the "SAC loses less to held-out" row is a floor effect. In PAPER_PLAN C12, main.tex, README, learning deck. Nothing is running now.
@@ -37,7 +37,7 @@ _Last updated: 2026-11-11 (RQ3 SAC result logged and propagated) by Claude Code.
 - (10-28..31: H2 spaced EQUIVALENT, TOST p=0.008; H4 v3/v4, oracle, H4-short, H5 - see RESEARCH_LOG. H4 v4 unreplicated.)
 
 ## Next
-WAITING FOR USER: (a) email + acknowledgment for the paper; (b) OK to commit/push the paper recompile, RQ3 result and learning deck (nothing pushed since the first upload); (c) confirm item 2 (thesis) is dropped; (d) say "samjhao" to start teaching.
+PUSHED 2026-11-11 (commit 39d6968): RQ3 result, paper recompile, README, learning deck v2. WAITING FOR USER: (a) email + acknowledgment for the paper; (b) confirm item 2 (thesis) is dropped; (c) say "samjhao" to start teaching.
 PUBLIC REPO: https://github.com/Viral2001/RoboSketch-RL (2026-11-08). Individual portfolio project, NO thesis. After any work: commit + push only if the user asks. WAITING FOR USER: email for the paper; says "samjhao" to start teaching from scratch (use learning/project_deck/ 148-slide deck, 2026-11-09). Hardware notes: personal/research_notes/01_hardware.md (camera first, then SO-101; no purchase without user).
 1. **Paper draft v2 DONE 2026-11-08** (`docs/paper/main.tex`, check_paper 0 errors / 5 TODOs; log `## 2026-11-08 - Paper draft v2`). Quotes VERIFIED vs PDFs 2026-11-08 (all 3 exact; D01 sync wording corrected: it uses the *reached* pen position, not the commanded stroke - log `### Paper: intro quotes checked`); check_paper 0 errors / 4 TODOs. Related Work paraphrases CHECKED vs PDFs 2026-11-08 (all match except CalliRewrite wording, now fixed - log `### Paper: Related Work paraphrases checked`). COMPILED locally 2026-11-08: main.pdf 4 pages, 0 undefined refs, no overfull boxes. H4 replication FIGURE MADE 2026-11-08: `output/h4_confirm_recovery_seeds200_300.png` (`rl/h4_confirm.py --aggregate --figure`; log `### Paper: H4 replication figure made`), PLACED in main.tex as Fig. fig:h4 (attended, 2026-11-08); main.pdf now 5 pages, 0 errors. e-David CITED (library A09, 2026-11-08). **Auto-session 18:00: a `\ref` eaten by a Python escape (stray CR byte in HEAD, line 161) FIXED in main.tex; check_paper.py check 7 now catches this; clean compile in `tools/tmp_check/` (5 pages, 0 undefined, 0 overfull) - log `### Paper: a \ref eaten`. `docs/paper/main.pdf` NOT rebuilt (still old text): recompile when attended. Not committed (needs user OK).** Next: user to give authors/title + acknowledgment; then thesis chapters (item 2). `tools/tmp_check/` = scratch helpers (compile_check.py, test copies), deletable.
 2. Then: thesis chapters from the same claims map; hardware planning (Stage 7; no purchase suggestions).
