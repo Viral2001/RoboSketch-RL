@@ -36,6 +36,7 @@ with paired multi-seed statistics.
 | **H5** Does open-loop error grow? | Yes; a closed-loop controller stays flat (n = 80 pairs). Shows feedback matters, not specifically a camera |
 | Does it draw or memorise? | Partly memorises: loses IoU on resized/rotated versions of its training shape |
 | Line-first curriculum | Hurts: 0.246 vs 0.418, t = −2.99 |
+| PPO vs SAC (same task, 200k steps) | SAC far behind at this budget: 0.051 vs 0.292 train-family IoU, 0/8 pairs, t = −9.71. One untuned SAC setting, so this does not say PPO is better in general |
 
 ![H2: ground-truth vs camera reward](output/results_h2_spaced.png)
 ![H4 replication](output/h4_confirm_recovery_seeds200_300.png)

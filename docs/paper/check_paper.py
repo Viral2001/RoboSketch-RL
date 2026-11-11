@@ -12,6 +12,8 @@ that AI-written papers are known for:
   4. wording PAPER_PLAN.md forbids (overclaims, "no difference", "equivalent", ...)
   5. leftover \\TODO markers
   6. \\includegraphics pointing at a file that does not exist
+  7. a LaTeX command eaten by a Python string escape: "\\ref" written from a non-raw
+     string becomes a carriage return + "ef" (seen 2026-11-08); likewise \\t \\b \\f \\v \\a \\n
 """
 import os
 import re
@@ -49,6 +51,15 @@ def main():
     bib = open(BIB, encoding="utf-8").read() if os.path.exists(BIB) else ""
     keys = set(re.findall(r"^@\w+\{(\w+),", bib, re.M))
     flagged = set(re.findall(r"^@\w+\{(\w+),(?:(?!^@).)*?x_verify", bib, re.M | re.S))
+
+    # 7. escape accidents: control characters left in a line, or a line that starts with
+    #    the tail of a command whose backslash+letter became a line break
+    lines_raw = open(TEX, encoding="utf-8", newline="").read().replace("\r\n", "\n").split("\n")
+    for n, raw in enumerate(lines_raw, 1):
+        if re.search(r"[\x00-\x09\x0b-\x1f]", raw):
+            errors.append(f"L{n}: control character (tab/CR/...) in the text - a Python escape ate a LaTeX command? -> {raw.strip()[:70]!r}")
+        if re.match(r"(ef|ewcommand|oindent|ewline|ewpage)\b", raw):
+            errors.append(f"L{n}: line starts with '{raw[:12]}' - a '\\r'/'\\n' escape ate a LaTeX command?")
 
     for n, raw in enumerate(tex, 1):
         body = strip_comment(raw)

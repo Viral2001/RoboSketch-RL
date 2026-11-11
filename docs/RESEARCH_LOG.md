@@ -3370,3 +3370,71 @@ Every decimal carries a `% src:` log reference. `check_paper.py`: one rule chang
 - README rewritten for a public reader: the question, results table (numbers copied from earlier sourced entries), limits, layout, quick start, AI-assistance disclosure. The old detailed README is kept as `docs/README_full_status.md` (it contained an old overclaim "the novelty is teaching the robot how to learn to draw", now removed from the front page).
 - AGENTS.md s2 rewritten: push only to the user's own repo and only when asked; still nothing account-side.
 - Paper author line set to "Viral Kanani, Independent researcher" (email TODO).
+
+### Paper: a `\ref` eaten by a Python string escape, repaired; check_paper.py now catches it (2026-11-08; unattended auto-session)
+- **Why this and not the HANDOFF "Next" item:** Next is blocked on the user (email, acknowledgment). While checking for unlogged work, found `docs/paper/main.tex`
+  changed at 17:32, after the 17:10 commit, outside any Claude session (the interactive transcript last wrote at 17:11; no other agent process running).
+- **What was wrong:** in the committed file (HEAD 69fca0b) Setup / "Learning and scoring" read `(Sec.~<carriage return>ef{sec:overrun})`: the `\r` of `\ref` had been
+  turned into a carriage-return byte, most likely from writing LaTeX through a non-raw Python string (cause not confirmed). The PDF would print "Sec. efsec:overrun" instead of a section number.
+  The 17:32 change only converted the file's line endings CRLF -> LF, which turned that stray byte into a line break (`Sec.~` / `ef{sec:overrun}`). No other content changed
+  (`diff --strip-trailing-cr` HEAD vs working copy = that one line). When the escape accident happened is not known; check_paper.py could not see it (it splits lines on `\n` only).
+- **Fix:** restored `(Sec.~\ref{sec:overrun})`. No number or wording changed. Scanned the whole file for other escape damage (control characters; lines starting with
+  `ef`/`ewcommand`/`oindent`/...; `extbf{`, `egin{`, `rac{`, ... missing their backslash): none.
+- **Guard (check 7 in `docs/paper/check_paper.py`):** errors on control characters in a line, or a line starting with the tail of an eaten `\r`/`\n` command.
+- **Verified:** check_paper on the fixed file: 0 errors, 3 TODOs (unchanged). The new check flags both broken versions (HEAD copy: control character at L161; LF-normalised copy:
+  line starting `ef{sec:overr` at L162). Full compile (pdflatex, bibtex, pdflatex x2) into `tools/tmp_check/` with `tools/tmp_check/compile_check.py`, so `docs/paper/main.pdf` was not
+  overwritten: 5 pages, 0 undefined references/citations, 0 overfull boxes, bibtex 0 warnings; page 2 now reads "(Sec. IV-E) predates this".
+### Honest limits
+- `docs/paper/main.pdf` (16:46 build) still has the old text; recompile in place at the next attended session. The pushed GitHub copy (HEAD) still has the stray byte until the user commits.
+- Because HEAD stored CRLF (git skips line-ending normalisation for files that contain a lone CR), the next `git diff` / commit of main.tex will show the whole file changed;
+  the real content change is one line.
+- The check only knows the common `\r`/`\n` victims; an eaten `\t`/`\b`/`\f`/`\v`/`\a` leaves a control character and is caught, but a rarer `\n...` command could slip through.
+
+## 2026-11-09 - Learning deck built (learning/project_deck/); personal research done (private)
+- User asked for a from-scratch learning deck of the whole project with proper equations and the "why" of every choice, in a separate folder. Built by a subagent: `learning/project_deck/RoboSketch-RL_Learn_From_Scratch.pptx`, **148 slides**, 41 labelled equations rendered as images (matplotlib mathtext, 400 dpi), Hinglish speaker notes on every slide, "Source:" line in the notes of all 130 slides that carry numbers (sources: main.tex % src lines, PAPER_PLAN, README, named RESEARCH_LOG RESULT entries). Rebuild: `.venv_docs\Scripts\python.exe learning\project_deck\build.py [--preview]`.
+- QA: bounds + notes check passed; all slides exported via PowerPoint and inspected by the subagent; I spot-checked slides 64 (PPO ratio) and 116 (generalisation): equations sharp, numbers match the log.
+- Toy numbers on teaching slides (2-link arm, toy return, PPO bookkeeping) are computed by `teach_figs.py` and labelled "toy / computed". SB3 defaults were read (read-only) from the installed stable-baselines3 source.
+- Interpretive points not in the log (flagged on the slides): PyBullet IK = damped least squares (from PyBullet docs); our potential shaping omits the gamma factor (reading of the code).
+- Doc tooling: a separate venv `.venv_docs` (python-pptx, matplotlib, python-docx, schemdraw), git-ignored, so the `robosketch` experiment env is untouched.
+- Also done (private, git-ignored `personal/`, not project results): Arduino teaching deck, hardware research (recommendation: camera first, then an SO-101 arm with angle-reporting bus servos; not MG996R for research), startup/income and business/investment notes, combined in `personal/Viral_Answers_and_Research.docx`. No hardware purchased.
+
+## 2026-11-09 - RQ3 PPO vs SAC launched after all (user approved ~40 h; pre-registered)
+- **Why now:** on 2026-11-05 RQ3 was left NOT run because one SAC run takes ~10 h on this CPU (~40 h for 8 runs). The user saw "Not run" in the learning deck and asked for it to be completed; when asked, the user chose the full run (~40 h) over a 4-run half run or not running it.
+- **Protocol (unchanged `rl/sac_experiment.py`, written 2026-11-05):** SB3 SAC CnnPolicy, the gen2 `param200` protocol exactly (size/rotation training family, vision reward, max_steps 240, step 0.014, 8 envs, 200k env steps, 16 eval episodes per set), buffer 40k, learning_starts 5k, batch 256, lr 3e-4, gamma 0.99, tau 0.005, train_freq 1 vec-step, gradient_steps 2 (update-to-data 0.25, a declared compute choice, NOT tuned), ent_coef auto. Seeds 0 and 100 x 4 shapes = 8 runs, OMP/MKL=1, two workers (shard a: line circle; shard b: square triangle). Results: `results/sac_a.jsonl`, `results/sac_b.jsonl`.
+- **Smoke test before launch** (scratchpad script, nothing written to results/): 800 env steps with learning_starts forced to 400 trained and evaluated on all 5 eval sets without error (~51 s). The pipeline had never run end-to-end before this.
+- **Pre-registered analysis** (`--aggregate`, paired by (shape, seed) with the 8 PPO `param200` rows in `results/gen2_*.jsonl`):
+  - PRIMARY: train-family TRUE IoU, sac200 - ppo, two-sided paired t, n=8, critical |t| = 2.37. Report mean +/- sd, paired diff, k/8 up, t; "no detectable difference" if |t| < 2.37.
+  - SECONDARY: default / heldout / heldout_scale / heldout_rot sets; loss train->heldout; peak IoU alongside final.
+  - DESCRIPTIVE only: SAC wall clock per run (PPO wall clock was never recorded, so no paired wall-clock comparison).
+- **Fairness limits stated in advance:** one fixed SAC configuration (no tuning for either algorithm); update-to-data 0.25 is lower than SAC's usual 1 and may handicap SAC; the PPO rows were produced earlier (same protocol; `warn_config_drift` checks the config). A SAC loss would therefore NOT show "PPO is better than SAC" in general - only for this budget and configuration.
+
+### RQ3 PPO vs SAC RESULT (2026-11-11; pre-registered 2026-11-09)
+Run: `rl/sac_experiment.py`, 4 shapes x seeds {0,100} = 8 cells, 200k env steps, `warn_config_drift` printed nothing, all 8 runs reached 200000 env steps (checked `env_steps_done`), mean wall clock 455 min per run (OMP/MKL=1, two workers). Output of `conda run -n robosketch python rl/sac_experiment.py --aggregate`:
+
+```
+=== RQ3 SAC vs PPO (param200), equal ENV steps (200k): TRUE IoU, n=8 cells, 16 targets/set ===
+arm                    default               train             heldout       heldout_scale         heldout_rot
+ppo              0.279 +/-0.066       0.292 +/-0.039       0.118 +/-0.036       0.160 +/-0.073       0.192 +/-0.087
+sac200           0.067 +/-0.075       0.051 +/-0.048       0.024 +/-0.016       0.053 +/-0.040       0.028 +/-0.020
+peak IoU:  ppo 0.300/0.312/0.140/0.180/0.211   sac200 0.096/0.083/0.039/0.097/0.040
+PRIMARY    train-family IoU, sac200 - ppo   -0.241  0/8 up  t=-9.71   (crit |t|=2.37)
+  default -0.212 1/8 t=-4.80 | heldout -0.094 0/8 t=-7.77 | heldout_scale -0.108 0/8 t=-6.76 | heldout_rot -0.164 0/8 t=-5.14
+LOSS train->heldout: ppo +0.174, sac200 +0.027; ppo - sac200 = +0.147, 7/8 up, t=+4.12
+```
+Recomputed by hand from the table: train 0.051 - 0.292 = -0.241; PPO loss 0.292 - 0.118 = 0.174; SAC loss 0.051 - 0.024 = 0.027; difference 0.147. All match.
+
+**Reading (pre-registered primary):** at 200k env steps, with SAC at update-to-data ratio 0.25, SAC reached 0.051 train-family IoU against PPO's 0.292: SAC is behind by 0.241 in every one of 8 cells, t=-9.71. One cell (square, seed 100) is exactly 0.000, so SAC learned nothing there.
+**The loss row is a floor effect, not better generalisation:** SAC "loses less" going to held-out (+0.147, 7/8, t=+4.12) only because it starts at 0.051, so there is almost nothing to lose. Do NOT quote it as SAC generalising better.
+
+### Honest limits
+- n = 8 cells (4 shapes x 2 seeds); one SAC configuration, not tuned (nor was PPO's).
+- Update-to-data 0.25 is a declared compute choice, lower than SAC's usual 1. SAC may be starved: the result is "SAC at this budget and configuration is far behind PPO", NOT "PPO is a better algorithm than SAC".
+- Equal env steps only. PPO's wall clock was never recorded, so no paired wall-clock comparison; SAC took ~455 min per run on 1 thread.
+- The PPO rows come from an earlier run of the same protocol (gen2 `param200`), not run side by side.
+- SAC has no learning curve logged, so we cannot say whether more steps or more updates would close the gap.
+- Absolute IoU here (param200, size/rotation family task) is not comparable with H2's ~0.45.
+- This replaces the 2026-11-05 "NOT run" entry: that entry stays as history; no SAC number was ever quoted before this one.
+
+### Follow-up edits after the RQ3 result (2026-11-11)
+- Timing correction: the launch entry estimated ~40 h. Measured from `train_seconds` (script output): 7.59 h mean per run, 30.4 h and 30.3 h per worker, 60.7 h total compute, so ~30 h wall clock on two workers (launched 2026-11-09 15:52, last worker finished 2026-11-10 22:20). The 2026-11-05 "~10 h per run" extrapolation was therefore too high by ~30%.
+- Updated: PAPER_PLAN (new claim C12, item 5), `docs/paper/main.tex` (one paragraph in the Extensions subsection; recompiled with pdflatex+bibtex: 5 pages, no undefined references; check_paper 0 errors), README results table, and the learning deck (scoreboard row RQ3, SAC slide, extensions table, negative-results slide, glossary, algorithm map, design-choice table). The deck was rebuilt to `learning/project_deck/RoboSketch-RL_Learn_From_Scratch_v2_SAC.pptx` (148 slides, QA PASS) because the original file was open in WPS Office and could not be overwritten; `build.py` now accepts `DECK_OUT` for this.

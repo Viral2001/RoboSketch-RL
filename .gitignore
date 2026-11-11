@@ -57,3 +57,12 @@ tools/agent.last
 tools/agent.lock
 tools/NOAGENT
 tools/_*.py
+
+# Personal (not part of the public project) and local doc-building env
+personal/
+.venv_docs/
+learning/project_deck/preview/
+
+# old copy of the learning deck (superseded by the _v2_SAC file)
+learning/project_deck/RoboSketch-RL_Learn_From_Scratch.pptx
+learning/project_deck/~$*

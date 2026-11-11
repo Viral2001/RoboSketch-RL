@@ -54,5 +54,13 @@
   {
     "name": "h4_confirm_d",
     "script_args": "rl/h4_confirm.py --shapes square triangle --shard d"
+  },
+  {
+    "name": "rq3_sac_a",
+    "script_args": "rl/sac_experiment.py --seeds 0 100 --shapes line circle --shard a"
+  },
+  {
+    "name": "rq3_sac_b",
+    "script_args": "rl/sac_experiment.py --seeds 0 100 --shapes square triangle --shard b"
   }
 ]

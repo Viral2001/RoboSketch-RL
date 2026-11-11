@@ -158,7 +158,7 @@ Comparisons are paired within (shape, seed); we report the mean difference, the 
 of pairs favouring each arm, and a one-sample $t$ statistic ($n=8$ pairs: critical
 $|t| = 2.37$ at $p<0.05$, two-sided). Because PPO seeds its parallel environments % src: RESEARCH_LOG fix F6; t(7) critical value used by every --aggregate
 consecutively, we use spaced seeds (0, 100, 200, 300); the overshoot ablation
-(Sec.~ef{sec:overrun}) predates this and used adjacent seeds 0 and 1. Main analyses were fixed in the research
+(Sec.~\ref{sec:overrun}) predates this and used adjacent seeds 0 and 1. Main analyses were fixed in the research
 log before the runs.
 
 % ============================================================================
@@ -327,6 +327,13 @@ change in final IoU (0.329 vs 0.418, $t=-2.29$, $n=6$). On digits, an explorator
 found similar IoU for one- and two-stroke digits (0.309 vs 0.293) while an in-house % src: RESEARCH_LOG "Stage 6 digits RESULT"
 recogniser read 3 of 4 one-stroke and 0 of 4 two-stroke drawings as the right digit
 ($n=4$ per group, no test), a reason to report legibility next to IoU for glyphs.
+
+We also ran SAC in place of PPO on the size-and-rotation task, with the same vision reward, 200k
+environment steps and eight (shape, seed) cells. With one untuned configuration and a
+deliberately low update-to-data ratio of 0.25 (a compute choice, not tuned), SAC reached 0.051
+true IoU on the training family against 0.292 for PPO ($-0.241$, 0/8 pairs up, $t=-9.71$). % src: RESEARCH_LOG "RQ3 PPO vs SAC RESULT"
+This says SAC at this budget is far behind PPO; it does not say PPO is the better algorithm. SAC
+appears to lose less on held-out targets only because it starts near zero.
 
 % ============================================================================
 \section{Discussion and Limitations}
